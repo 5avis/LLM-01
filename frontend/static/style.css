@@ -1,0 +1,217 @@
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  background: #0b0c0e;
+  color: #e3e3e3;
+  font-family: 'Google Sans', 'Segoe UI', Roboto, Arial, sans-serif;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.app {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  max-width: 820px;
+  margin: 0 auto;
+}
+
+.topbar {
+  padding: 18px 24px;
+  display: flex;
+  align-items: center;
+}
+.logo { display: flex; align-items: center; gap: 10px; }
+.logo-icon { font-size: 1.4rem; }
+.logo-text {
+  font-size: 1.3rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.chat-area {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px;
+  display: flex;
+  flex-direction: column;
+}
+
+.welcome {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  transition: opacity 0.3s;
+}
+.gradient-text {
+  font-size: 2.3rem;
+  font-weight: 600;
+  background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  margin-bottom: 10px;
+}
+.subtitle { color: #9aa0a6; font-size: 1rem; }
+
+.messages {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  padding-bottom: 20px;
+}
+
+.msg {
+  max-width: 78%;
+  padding: 12px 18px;
+  border-radius: 20px;
+  line-height: 1.55;
+  font-size: 0.98rem;
+  white-space: pre-wrap;
+  animation: fadeIn 0.25s ease;
+}
+@keyframes fadeIn { from {opacity: 0; transform: translateY(6px);} to {opacity: 1; transform: translateY(0);} }
+
+.msg.user {
+  align-self: flex-end;
+  background: #2b2d31;
+  color: #f1f1f1;
+  border-bottom-right-radius: 6px;
+}
+.msg.bot {
+  align-self: flex-start;
+  background: #1a1b1e;
+  border: 1px solid #26272b;
+  color: #e3e3e3;
+  border-bottom-left-radius: 6px;
+}
+.msg.bot.typing { color: #8a8d91; font-style: italic; }
+
+.input-area {
+  padding: 10px 24px 22px;
+}
+
+.input-wrapper {
+  background: #1a1b1e;
+  border: 1px solid #303136;
+  border-radius: 24px;
+  padding: 10px 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.35);
+}
+
+#filePreview {
+  padding: 0 6px 10px;
+}
+
+.thumb-wrap {
+  position: relative;
+  width: 64px;
+  height: 64px;
+  display: inline-block;
+}
+
+.thumb-img {
+  width: 64px;
+  height: 64px;
+  object-fit: cover;
+  border-radius: 12px;
+  border: 1px solid #303136;
+}
+
+.thumb-file {
+  width: 64px;
+  height: 64px;
+  border-radius: 12px;
+  background: #26272b;
+  border: 1px solid #303136;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+}
+
+.thumb-remove {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: #26272b;
+  border: 1px solid #3c3d3f;
+  color: #e3e3e3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+.thumb-remove:hover { background: #34353a; }
+
+.input-bar {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 0 4px;
+}
+
+.input-bar textarea {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  resize: none;
+  color: #e3e3e3;
+  font-size: 1rem;
+  font-family: inherit;
+  max-height: 140px;
+  padding: 8px 4px;
+}
+.input-bar textarea::placeholder { color: #7d8085; }
+
+.icon-btn {
+  background: #26272b;
+  border: none;
+  color: #cfd0d2;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.icon-btn:hover { background: #34353a; }
+
+.send-btn {
+  background: #4285f4;
+  border: none;
+  color: white;
+  width: 42px;
+  height: 42px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+.send-btn:hover { background: #5a95f5; }
+.send-btn:disabled { background: #3a3b3f; cursor: not-allowed; }
+
+.disclaimer {
+  text-align: center;
+  color: #6a6d71;
+  font-size: 0.78rem;
+  margin-top: 10px;
+}
+
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-thumb { background: #2c2d31; border-radius: 4px; }

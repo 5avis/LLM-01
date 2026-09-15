@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>MedHub</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="logo">
+        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12 2L4 6V12C4 16.5 7.4 20.7 12 22C16.6 20.7 20 16.5 20 12V6L12 2Z" stroke="url(#grad)" stroke-width="1.6" stroke-linejoin="round"/>
+          <path d="M12 8V16M8 12H16" stroke="url(#grad)" stroke-width="1.6" stroke-linecap="round"/>
+          <defs>
+            <linearGradient id="grad" x1="4" y1="2" x2="20" y2="22">
+              <stop offset="0%" stop-color="#4285f4"/>
+              <stop offset="50%" stop-color="#9b72cb"/>
+              <stop offset="100%" stop-color="#d96570"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <span class="logo-text">MedHub</span>
+      </div>
+    </header>
+
+    <main class="chat-area" id="chatArea">
+      <div class="welcome" id="welcome">
+        <h1 class="gradient-text">Hello, how can I help?</h1>
+        <p class="subtitle">Ask me anything about your health, symptoms, or medications.</p>
+      </div>
+      <div class="messages" id="messages"></div>
+    </main>
+
+    <footer class="input-area">
+      <div class="input-wrapper">
+        <div class="input-bar">
+          <button class="icon-btn" id="uploadBtn" title="Upload image">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+          </button>
+          <input type="file" id="fileInput" accept="image/*,.pdf" hidden>
+          <textarea id="userInput" placeholder="Ask MedHub anything..." rows="1"></textarea>
+          <button class="send-btn" id="sendBtn" title="Send">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M2 21l21-9L2 3v7l15 2-15 2v7z"/></svg>
+          </button>
+        </div>
+      </div>
+      <p class="disclaimer">MedHub can make mistakes. Consider checking important information with a doctor.</p>
+    </footer>
+  </div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>

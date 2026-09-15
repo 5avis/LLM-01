@@ -1,0 +1,8 @@
+medical_assistant_model/
+medical_assistant_checkpoints/
+models/
+uncleaned_datasets/
+*.json
+logs/
+__pycache__/
+*.pyc
