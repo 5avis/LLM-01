@@ -20,6 +20,7 @@ from fda_lookup import find_drug_in_text
 base_model = "Qwen/Qwen2.5-14B-Instruct"
 lora_path = "../medical_assistant_model"
 
+
 print("Loading model...")
 safe_util = get_safe_gpu_utilization(gpu_id=0)
 llm = LLM(
