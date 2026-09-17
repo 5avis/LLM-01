@@ -20,7 +20,6 @@ from fda_lookup import find_drug_in_text
 base_model = "Qwen/Qwen2.5-14B-Instruct"
 lora_path = "../medical_assistant_model"
 
-
 print("Loading model...")
 safe_util = get_safe_gpu_utilization(gpu_id=0)
 llm = LLM(
@@ -35,7 +34,7 @@ lora_request = LoRARequest("medical_assistant", 1, lora_path)
 sampling_params = SamplingParams(max_tokens=300, temperature=0.3)
 print("Model loaded!")
 
-OCR_SPACE_API_KEY = "K82648358988957"  # paste your free OCR.space key
+OCR_SPACE_API_KEY = "K82648358988957"
 
 EMOTIONAL_KEYWORDS = ["terminal", "dying", "died", "death", "grief", "loss",
     "diagnosed with cancer", "given months to live", "passed away", "hospice",
