@@ -1,5 +1,5 @@
-from vllm import LLM, SamplingParams
 from gpu_utils import get_safe_gpu_utilization
+from vllm import LLM, SamplingParams
 import json
 from datetime import datetime
 
@@ -7,7 +7,7 @@ base_model = "Qwen/Qwen2.5-14B-Instruct"
 
 print("Loading model with vLLM...")
 safe_util = get_safe_gpu_utilization(gpu_id=0)
-llm = LLM(model=base_model, dtype="bfloat16", gpu_memory_utilization=safe_util)
+llm = LLM(model=base_model, dtype="bfloat16", gpu_memory_utilization=safe_util, max_model_len=4096)
 sampling_params = SamplingParams(max_tokens=200, temperature=0.7)
 
 def log_conversation(user_input, response):

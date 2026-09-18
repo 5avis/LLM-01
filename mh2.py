@@ -1,6 +1,6 @@
+from gpu_utils import get_safe_gpu_utilization
 from vllm import LLM, SamplingParams
 from vllm.lora.request import LoRARequest
-from gpu_utils import get_safe_gpu_utilization
 import json
 from datetime import datetime
 
@@ -14,7 +14,8 @@ llm = LLM(
     dtype="bfloat16",
     gpu_memory_utilization=safe_util,
     enable_lora=True,
-    max_lora_rank=8
+    max_lora_rank=8,
+    max_model_len=4096
 )
 
 lora_request = LoRARequest("medical_assistant", 1, lora_path)

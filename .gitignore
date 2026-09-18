@@ -6,3 +6,4 @@ uncleaned_datasets/
 logs/
 __pycache__/
 *.pyc
+bin/

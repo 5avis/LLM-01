@@ -64,6 +64,129 @@ function autoResize() {
 }
 inputEl.addEventListener("input", autoResize);
 
+function renderBotMessage(container, rawText) {
+  container.innerHTML = "";
+
+  const lines = rawText.split("\n");
+  let tableLines = [];
+  let isTable = false;
+  let hasRenderedTable = false;
+
+  const flushTable = () => {
+    if (tableLines.length === 0) return;
+    hasRenderedTable = true;
+    const wrap = document.createElement("div");
+    wrap.className = "schedule-table-wrap";
+    const table = document.createElement("table");
+    table.className = "schedule-table";
+
+    const validRows = tableLines.filter(row => {
+      const cleaned = row.replace(/\|/g, "").trim();
+      return !/^[-:\s]+$/.test(cleaned);
+    });
+
+    validRows.forEach((rowStr, index) => {
+      const row = document.createElement("tr");
+      const cells = rowStr.split("|").slice(1, -1);
+      cells.forEach(c => {
+        const cell = document.createElement(index === 0 ? "th" : "td");
+        cell.textContent = c.trim();
+        row.appendChild(cell);
+      });
+      table.appendChild(row);
+    });
+
+    wrap.appendChild(table);
+    container.appendChild(wrap);
+    tableLines = [];
+  };
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmed = line.trim();
+    if (trimmed.startsWith("|") && trimmed.endsWith("|")) {
+      isTable = true;
+      tableLines.push(trimmed);
+    } else {
+      if (isTable) {
+        flushTable();
+        isTable = false;
+      }
+      if (trimmed) {
+        const p = document.createElement("p");
+        p.textContent = trimmed;
+        p.style.margin = "4px 0";
+        container.appendChild(p);
+      }
+    }
+  }
+  if (isTable) {
+    flushTable();
+  }
+
+  const mentionsSchedule = /schedule|timeline|medication plan|routine/i.test(rawText);
+  if (hasRenderedTable || mentionsSchedule) {
+    const btn = document.createElement("button");
+    btn.className = "pdf-download-btn";
+    btn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+        <polyline points="7 10 12 15 17 10"/>
+        <line x1="12" y1="15" x2="12" y2="3"/>
+      </svg>
+      Download as PDF
+    `;
+    btn.addEventListener("click", async () => {
+      btn.disabled = true;
+      btn.textContent = "Generating PDF...";
+      try {
+        const formData = new FormData();
+        formData.append("message", rawText);
+        formData.append("schedule_text", rawText);
+        const res = await fetch("/api/generate-schedule-pdf", {
+          method: "POST",
+          body: formData
+        });
+        if (!res.ok) throw new Error("Failed to generate PDF");
+        const blob = await res.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "medhub_schedule.pdf";
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        window.URL.revokeObjectURL(url);
+        btn.innerHTML = `
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"/>
+          </svg>
+          Downloaded!
+        `;
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.innerHTML = `
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+              <polyline points="7 10 12 15 17 10"/>
+              <line x1="12" y1="15" x2="12" y2="3"/>
+            </svg>
+            Download as PDF
+          `;
+        }, 3000);
+      } catch (err) {
+        console.error(err);
+        btn.textContent = "Error downloading PDF";
+        setTimeout(() => {
+          btn.disabled = false;
+          btn.textContent = "Download as PDF";
+        }, 2500);
+      }
+    });
+    container.appendChild(btn);
+  }
+}
+
 async function sendMessage() {
   const text = inputEl.value.trim();
   if (!text && !pendingFile) return;
@@ -85,8 +208,8 @@ async function sendMessage() {
       body: formData
     });
     const data = await res.json();
-    typingDiv.textContent = data.response;
     typingDiv.classList.remove("typing");
+    renderBotMessage(typingDiv, data.response);
   } catch (err) {
     typingDiv.textContent = "Something went wrong. Please try again.";
     typingDiv.classList.remove("typing");
@@ -97,6 +220,7 @@ async function sendMessage() {
   sendBtn.disabled = false;
   const preview = document.getElementById("filePreview");
   if (preview) preview.remove();
+  chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 sendBtn.addEventListener("click", sendMessage);

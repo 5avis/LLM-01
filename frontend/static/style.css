@@ -215,3 +215,71 @@ body {
 
 ::-webkit-scrollbar { width: 8px; }
 ::-webkit-scrollbar-thumb { background: #2c2d31; border-radius: 4px; }
+
+/* Table & Schedule PDF styling */
+.schedule-table-wrap {
+  width: 100%;
+  overflow-x: auto;
+  margin: 12px 0 8px 0;
+  border-radius: 8px;
+  border: 1px solid #33363d;
+}
+
+.schedule-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.92rem;
+  background: #181a1e;
+  text-align: left;
+}
+
+.schedule-table th, .schedule-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid #2a2c33;
+}
+
+.schedule-table th {
+  background: #23262c;
+  color: #8ab4f8;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.schedule-table tr:last-child td {
+  border-bottom: none;
+}
+
+.schedule-table tr:hover {
+  background: #1e2025;
+}
+
+.pdf-download-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  padding: 8px 16px;
+  background: #1e293b;
+  color: #93c5fd;
+  border: 1px solid #3b82f6;
+  border-radius: 8px;
+  font-size: 0.88rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.pdf-download-btn:hover {
+  background: #2563eb;
+  color: #ffffff;
+  box-shadow: 0 2px 8px rgba(59, 130, 246, 0.4);
+}
+
+.pdf-download-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.pdf-download-btn svg {
+  flex-shrink: 0;
+}
