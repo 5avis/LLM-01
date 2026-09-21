@@ -26,7 +26,7 @@ body {
 .logo {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 8px;
 }
 .logo-svg {
   width: 22px;
@@ -41,8 +41,6 @@ body {
   background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
-  display: flex;
-  align-items: center;
 }
 
 .chat-area {

@@ -326,7 +326,6 @@ if __name__ == "__main__":
     import uvicorn
     print("\n" + "=" * 60)
     print(" MedHub AI Assistant is live and ready!")
-    print(" Network URL: http://192.168.4.99:7860")
-    print(" Local URL:   http://localhost:7860")
+    print(" Remote URL: http://192.168.4.99:7860")
     print("=" * 60 + "\n")
     uvicorn.run(app, host="0.0.0.0", port=7860)
