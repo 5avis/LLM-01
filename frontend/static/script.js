@@ -214,8 +214,7 @@ function renderBotMessage(container, rawText) {
     flushTable();
   }
 
-  const mentionsSchedule = /schedule|timeline|medication plan|routine/i.test(rawText);
-  if (hasRenderedTable || mentionsSchedule) {
+  if (hasRenderedTable) {
     const btn = document.createElement("button");
     btn.className = "pdf-download-btn";
     btn.innerHTML = `
