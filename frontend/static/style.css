@@ -23,14 +23,26 @@ body {
   width: 100%;
   margin: 0 auto;
 }
-.logo { display: flex; align-items: center; gap: 10px; }
-.logo-icon { font-size: 1.4rem; }
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.logo-svg {
+  width: 22px;
+  height: 22px;
+  display: block;
+  flex-shrink: 0;
+}
 .logo-text {
   font-size: 1.3rem;
   font-weight: 600;
+  line-height: 1;
   background: linear-gradient(90deg, #4285f4, #9b72cb, #d96570);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  display: flex;
+  align-items: center;
 }
 
 .chat-area {
