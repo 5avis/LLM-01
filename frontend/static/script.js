@@ -16,6 +16,14 @@ fileInput.addEventListener("change", () => {
   }
 });
 
+function formatFileSize(bytes) {
+  if (!bytes || bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + " " + sizes[i];
+}
+
 function showFilePreview(file) {
   let preview = document.getElementById("filePreview");
   if (!preview) {
@@ -28,15 +36,25 @@ function showFilePreview(file) {
   let thumbHtml;
   if (isImage) {
     const url = URL.createObjectURL(file);
-    thumbHtml = `<img src="${url}" class="thumb-img">`;
+    thumbHtml = `<img src="${url}" class="thumb-img" alt="preview">`;
   } else {
-    thumbHtml = `<div class="thumb-file">📄</div>`;
+    thumbHtml = `
+      <div class="thumb-file">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+        </svg>
+      </div>`;
   }
 
   preview.innerHTML = `
     <div class="thumb-wrap">
       ${thumbHtml}
-      <button id="removeFileBtn" class="thumb-remove">
+      <div class="thumb-details">
+        <span class="thumb-details-name" title="${file.name}">${file.name}</span>
+        <span class="thumb-details-size">${formatFileSize(file.size)} • Ready to send</span>
+      </div>
+      <button id="removeFileBtn" class="thumb-remove" title="Remove file" type="button">
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
       </button>
     </div>
@@ -52,7 +70,79 @@ function addMessage(text, sender) {
   welcomeEl.style.display = "none";
   const div = document.createElement("div");
   div.className = `msg ${sender}`;
-  div.textContent = text;
+  if (sender.includes("typing")) {
+    div.innerHTML = `<span>${text}</span><div class="typing-dots"><span></span><span></span><span></span></div>`;
+  } else {
+    div.textContent = text;
+  }
+  messagesEl.appendChild(div);
+  chatArea.scrollTop = chatArea.scrollHeight;
+  return div;
+}
+
+function addUserMessage(text, file) {
+  welcomeEl.style.display = "none";
+  const div = document.createElement("div");
+  div.className = "msg user";
+
+  if (file) {
+    const isImage = file.type.startsWith("image/");
+    const attachWrap = document.createElement("div");
+    attachWrap.className = "chat-attachment";
+
+    if (isImage) {
+      const imgWrap = document.createElement("div");
+      imgWrap.className = "chat-attachment-img-wrap";
+      imgWrap.title = "Click to view original image";
+
+      const fileUrl = URL.createObjectURL(file);
+      const img = document.createElement("img");
+      img.className = "chat-attachment-img";
+      img.src = fileUrl;
+      img.alt = file.name;
+      img.onload = () => { chatArea.scrollTop = chatArea.scrollHeight; };
+      imgWrap.onclick = () => window.open(fileUrl, "_blank");
+
+      imgWrap.appendChild(img);
+      attachWrap.appendChild(imgWrap);
+
+      const meta = document.createElement("div");
+      meta.className = "chat-attachment-meta";
+      meta.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        <span>${file.name} (${formatFileSize(file.size)})</span>
+      `;
+      attachWrap.appendChild(meta);
+    } else {
+      const fileCard = document.createElement("div");
+      fileCard.className = "chat-attachment-card";
+      fileCard.innerHTML = `
+        <div class="chat-attachment-card-icon">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+        </div>
+        <div class="chat-attachment-card-info">
+          <div class="chat-attachment-card-name" title="${file.name}">${file.name}</div>
+          <div class="chat-attachment-card-size">${file.type === "application/pdf" ? "PDF Document" : "Attached Document"} • ${formatFileSize(file.size)}</div>
+        </div>
+      `;
+      attachWrap.appendChild(fileCard);
+    }
+    div.appendChild(attachWrap);
+  }
+
+  if (text) {
+    const textDiv = document.createElement("div");
+    textDiv.className = "msg-text";
+    textDiv.textContent = text;
+    div.appendChild(textDiv);
+  }
+
   messagesEl.appendChild(div);
   chatArea.scrollTop = chatArea.scrollHeight;
   return div;
@@ -189,38 +279,52 @@ function renderBotMessage(container, rawText) {
 
 async function sendMessage() {
   const text = inputEl.value.trim();
-  if (!text && !pendingFile) return;
+  const fileToSend = pendingFile;
+  if (!text && !fileToSend) return;
 
-  addMessage(text || `[File uploaded: ${pendingFile ? pendingFile.name : ""}]`, "user");
+  // 1. Immediately clean up input bar and remove file preview from input area
+  pendingFile = null;
+  fileInput.value = "";
+  const preview = document.getElementById("filePreview");
+  if (preview) preview.remove();
+
   inputEl.value = "";
   autoResize();
   sendBtn.disabled = true;
 
-  const typingDiv = addMessage("MedHub is thinking...", "bot typing");
+  // 2. Immediately place user message and uploaded file into chat feed
+  addUserMessage(text, fileToSend);
+
+  // 3. Show appropriate thinking / file analysis indicator
+  const typingStatus = fileToSend
+    ? "MedHub is analyzing your file and thinking..."
+    : "MedHub is thinking...";
+  const typingDiv = addMessage(typingStatus, "bot typing");
 
   try {
     const formData = new FormData();
-    formData.append("message", text);
-    if (pendingFile) formData.append("file", pendingFile);
+    const promptMessage = text || (fileToSend ? `Please analyze this uploaded document (${fileToSend.name}) and provide medical insights.` : "");
+    formData.append("message", promptMessage);
+    if (fileToSend) {
+      formData.append("file", fileToSend);
+    }
 
     const res = await fetch("/api/chat-with-file", {
       method: "POST",
       body: formData
     });
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
     typingDiv.classList.remove("typing");
     renderBotMessage(typingDiv, data.response);
   } catch (err) {
-    typingDiv.textContent = "Something went wrong. Please try again.";
+    console.error("Error sending message:", err);
     typingDiv.classList.remove("typing");
+    typingDiv.innerHTML = `<p style="color:#f28b82; margin:0;">⚠️ Something went wrong while processing your request. Please try again.</p>`;
+  } finally {
+    sendBtn.disabled = false;
+    chatArea.scrollTop = chatArea.scrollHeight;
   }
-
-  pendingFile = null;
-  fileInput.value = "";
-  sendBtn.disabled = false;
-  const preview = document.getElementById("filePreview");
-  if (preview) preview.remove();
-  chatArea.scrollTop = chatArea.scrollHeight;
 }
 
 sendBtn.addEventListener("click", sendMessage);

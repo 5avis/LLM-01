@@ -79,15 +79,34 @@ EMERGENCY_KEYWORDS = ["chest pain", "chest tightness", "can't breathe",
     "self harm", "want to die"]
 
 BASE_SAFETY_INSTRUCTION = (
-    "You are MedHub, a general medical assistant, not a specialist. "
-    "Always respond in the SAME language the patient used to ask their question. "
-    "If asked for a schedule, medication plan, or timeline: FORMAT AS A TABLE with columns like Time/Day | Activity/Medication | Notes. "
-    "Keep answers SHORT and DIRECT — give only the best recommendation, no alternatives. "
-    "If asked for a schedule or plan, give ONE clear, simple schedule only. "
-    "Use bullet points or numbered lists for clarity. "
-    "Only state a dosage if verified FDA information is explicitly provided below "
-    "AND it covers the patient's specific case. Otherwise say to consult a doctor."
+    "You are MedHub, a caring and knowledgeable AI medical assistant. "
+    "Your purpose is to assist patients with medical advice, symptoms, illnesses, medications, first aid, and health schedules.\n"
+    "1. Medical Scope: You strictly assist with medical, healthcare, symptom, medication, and medical schedule questions. If the user asks an unrelated, general, or non-medical question (such as coding, math, history, politics, entertainment, sports, or casual trivia), politely decline and ask them to ask only medical or health-related questions.\n"
+    "2. Greetings: For simple greetings (like 'hi' or 'hello'), warmly introduce yourself as MedHub and ask how you can help with their health or medications.\n"
+    "3. Format Schedules as Table: If asked for a schedule, medication plan, or routine, ALWAYS format it as a clear markdown table with columns (e.g. Time/Day | Medication/Activity | Instructions/Notes).\n"
+    "4. Concise & Direct: Keep answers short, direct, and easy to understand. Use bullet points for clarity.\n"
+    "5. Language: Always respond in the same language the patient used.\n"
+    "6. Dosage Safety: Only state specific numeric dosages if verified FDA info is explicitly provided below for the patient's case; otherwise advise consulting a doctor or pharmacist.\n"
+    "7. Doctor Guidance: For medical concerns, provide helpful, accurate, doctor-like guidance and recommend seeing a healthcare professional if symptoms persist."
 )
+
+REFUSAL_MESSAGE = "I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions."
+
+EXPLICIT_NON_MEDICAL_KEYWORDS = [
+    "write code", "write a python", "write python", "write a script", "create a function",
+    "write a program", "reverse a list", "reverse a string", "bubble sort", "binary search",
+    "capital of", "who won the", "who was the first president", "who is the president of",
+    "tell me a joke", "write an essay on", "write a poem about", "solve the equation"
+]
+
+def is_explicitly_non_medical(text):
+    text_lower = text.lower()
+    return any(keyword in text_lower for keyword in EXPLICIT_NON_MEDICAL_KEYWORDS)
+
+def sanitize_response(user_input, response):
+    if any(code_tag in response for code_tag in ["```python", "```javascript", "```java", "```c", "```cpp", "```html", "```sql"]):
+        return REFUSAL_MESSAGE
+    return response
 
 def is_emotionally_sensitive(text):
     return any(k in text.lower() for k in EMOTIONAL_KEYWORDS)
@@ -115,24 +134,30 @@ def log_conversation(user_input, response):
         f.write(json.dumps({"timestamp": datetime.now().isoformat(), "patient": user_input, "doctor": response}) + "\n")
 
 def extract_text_from_file(file_bytes, filename):
-    if filename.lower().endswith(".pdf"):
-        reader = PdfReader(io.BytesIO(file_bytes))
-        text = ""
-        for page in reader.pages:
-            text += page.extract_text() or ""
-        return text.strip()
-    else:
-        response = req_lib.post(
-            "https://api.ocr.space/parse/image",
-            files={"file": (filename, file_bytes)},
-            data={"apikey": OCR_SPACE_API_KEY, "language": "eng"},
-            timeout=30
-        )
-        result = response.json()
-        try:
-            return result["ParsedResults"][0]["ParsedText"].strip()
-        except (KeyError, IndexError):
-            return "Could not extract text from image."
+    try:
+        if not file_bytes or len(file_bytes) == 0:
+            return ""
+        if filename.lower().endswith(".pdf"):
+            reader = PdfReader(io.BytesIO(file_bytes))
+            text = ""
+            for page in reader.pages:
+                text += page.extract_text() or ""
+            return text.strip()
+        else:
+            response = req_lib.post(
+                "https://api.ocr.space/parse/image",
+                files={"file": (filename, file_bytes)},
+                data={"apikey": OCR_SPACE_API_KEY, "language": "eng"},
+                timeout=30
+            )
+            result = response.json()
+            try:
+                return result["ParsedResults"][0]["ParsedText"].strip()
+            except (KeyError, IndexError):
+                return "Could not extract text from image."
+    except Exception as e:
+        print(f"File extraction error for {filename}: {e}")
+        return ""
 
 def generate_schedule_pdf(schedule_text):
     """Convert schedule text/table to PDF"""
@@ -238,9 +263,13 @@ class ChatRequest(BaseModel):
 
 @app.post("/api/chat")
 def chat(req: ChatRequest):
+    if is_explicitly_non_medical(req.message):
+        log_conversation(req.message, REFUSAL_MESSAGE)
+        return {"response": REFUSAL_MESSAGE}
+
     prompt = build_prompt(req.message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = output[0].outputs[0].text.strip()
+    response = sanitize_response(req.message, output[0].outputs[0].text.strip())
     log_conversation(req.message, response)
     return {"response": response}
 
@@ -250,11 +279,18 @@ async def chat_with_file(message: str = Form(...), file: UploadFile = File(None)
     if file:
         file_bytes = await file.read()
         extracted_text = extract_text_from_file(file_bytes, file.filename)
-        full_message += f"\n\n[Extracted text from uploaded file]:\n{extracted_text}"
+        if not extracted_text or extracted_text == "Could not extract text from image.":
+            full_message += f"\n\n[Uploaded document/image: {file.filename}. Note: Text could not be automatically extracted from this file. Inform the user kindly and advise them to type out the relevant medical details or consult a doctor.]"
+        else:
+            full_message += f"\n\n[Extracted text from uploaded file ({file.filename})]:\n{extracted_text}"
+
+    if not file and is_explicitly_non_medical(message):
+        log_conversation(message, REFUSAL_MESSAGE)
+        return {"response": REFUSAL_MESSAGE}
 
     prompt = build_prompt(full_message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = output[0].outputs[0].text.strip()
+    response = sanitize_response(full_message, output[0].outputs[0].text.strip())
     log_conversation(full_message, response)
     return {"response": response}
 
