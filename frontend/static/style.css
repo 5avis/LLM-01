@@ -493,6 +493,31 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.new-chat-btn {
+  background: #1e2025;
+  color: #c4c7c5;
+  border: 1px solid #33363f;
+  border-radius: 18px;
+  padding: 6px 13px;
+  font-size: 0.82rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.new-chat-btn:hover {
+  background: #2b2e37;
+  border-color: #4f535e;
+  color: #ffffff;
 }
 
 .logout-btn {

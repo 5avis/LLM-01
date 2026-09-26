@@ -30,6 +30,20 @@ const loginPromptBtn = document.getElementById("loginPromptBtn");
 
 let pendingFile = null;
 
+const newChatBtn = document.getElementById("newChatBtn");
+let isFirstMessageInSession = true;
+
+if (newChatBtn) {
+  newChatBtn.addEventListener("click", () => {
+    messagesEl.innerHTML = "";
+    welcomeEl.style.display = "flex";
+    isFirstMessageInSession = true;
+    inputEl.value = "";
+    autoResize();
+    inputEl.focus();
+  });
+}
+
 uploadBtn.addEventListener("click", () => fileInput.click());
 fileInput.addEventListener("change", () => {
   if (fileInput.files.length > 0) {
@@ -394,6 +408,8 @@ async function sendMessage() {
     formData.append("message", promptMessage);
     formData.append("username", currentUser);
     formData.append("enhance", isEnhancedMode ? "true" : "false");
+    formData.append("is_first_message", isFirstMessageInSession ? "true" : "false");
+    isFirstMessageInSession = false;
     if (fileToSend) {
       formData.append("file", fileToSend);
     }
@@ -543,6 +559,7 @@ async function loadHistory() {
     const res = await fetch(`/api/history?username=${encodeURIComponent(currentUser)}`);
     const data = await res.json();
     if (data.history && data.history.length > 0) {
+      isFirstMessageInSession = false;
       welcomeEl.style.display = "none";
       data.history.forEach(item => {
         addMessage(item.patient, "user");
@@ -551,6 +568,7 @@ async function loadHistory() {
       });
       chatArea.scrollTop = chatArea.scrollHeight;
     } else {
+      isFirstMessageInSession = true;
       welcomeEl.style.display = "flex";
     }
   } catch (err) {

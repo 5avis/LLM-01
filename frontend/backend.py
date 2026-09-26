@@ -92,7 +92,16 @@ BASE_SAFETY_INSTRUCTION = (
     "7. Doctor Guidance: For medical concerns, provide brief, accurate guidance and recommend consulting a healthcare professional if symptoms persist."
 )
 
+import re
+
 REFUSAL_MESSAGE = "I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions."
+REFUSAL_MESSAGE_SUBSEQUENT = "Please ask me only health, symptom, medication, or medical schedule-related questions."
+
+def strip_repeated_intro(text: str) -> str:
+    """Strips repetitive greetings and self-introductions (e.g. 'Hello! I am MedHub...') from follow-up messages."""
+    pattern = r'^(?:\s*(?:hello|hi|hey|greetings)[\s,!.]*)*(?:I(?:\'m|\s+am)\s+MedHub[^\.\n]*[\.\!\:\-]?\s*|As\s+MedHub[^\.\n]*[\.\!\:\-]?\s*)'
+    cleaned = re.sub(pattern, '', text.strip(), flags=re.IGNORECASE).strip()
+    return cleaned if cleaned else text
 
 EXPLICIT_NON_MEDICAL_KEYWORDS = [
     "write code", "write a python", "write python", "write a script", "create a function",
@@ -109,9 +118,11 @@ def is_explicitly_non_medical(text):
     text_lower = text.lower()
     return any(keyword in text_lower for keyword in EXPLICIT_NON_MEDICAL_KEYWORDS)
 
-def sanitize_response(user_input, response):
+def sanitize_response(user_input, response, is_first_message=True):
     if any(code_tag in response for code_tag in ["```python", "```javascript", "```java", "```c", "```cpp", "```html", "```sql"]):
-        return REFUSAL_MESSAGE
+        return REFUSAL_MESSAGE if is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
+    if not is_first_message:
+        response = strip_repeated_intro(response)
     return response
 
 def is_emotionally_sensitive(text):
@@ -120,8 +131,10 @@ def is_emotionally_sensitive(text):
 def is_emergency(text):
     return any(k in text.lower() for k in EMERGENCY_KEYWORDS)
 
-def build_prompt(user_input):
+def build_prompt(user_input, is_first_message=True):
     instruction = BASE_SAFETY_INSTRUCTION
+    if not is_first_message:
+        instruction += "\nCRITICAL: DO NOT introduce yourself. Do NOT say 'I am MedHub' or 'Hello'. Jump directly into the medical facts and answer."
     fda_context = ""
     drug_name, drug_info = find_drug_in_text(user_input)
     if drug_info:
@@ -352,16 +365,16 @@ def generate_schedule_pdf(schedule_text):
     buffer.seek(0)
     return buffer
 
-def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False) -> str:
+def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False, is_first_message: bool = True) -> str:
     """
     Dynamically loads and invokes api_polisher.py if it exists on disk.
     If the file is deleted or disabled, returns text immediately with zero downtime and zero errors.
     """
     if not enabled:
-        return text
+        return strip_repeated_intro(text) if not is_first_message else text
     polisher_file = os.path.join(BASE_DIR, "api_polisher.py")
     if not os.path.exists(polisher_file):
-        return text
+        return strip_repeated_intro(text) if not is_first_message else text
     try:
         import importlib.util
         spec = importlib.util.spec_from_file_location("api_polisher", polisher_file)
@@ -369,10 +382,11 @@ def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bo
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             if hasattr(mod, "polish_text"):
-                return mod.polish_text(text, user_query)
+                res = mod.polish_text(text, user_query, is_first_message=is_first_message)
+                return strip_repeated_intro(res) if not is_first_message else res
     except Exception:
         pass
-    return text
+    return strip_repeated_intro(text) if not is_first_message else text
 
 app = FastAPI()
 
@@ -384,6 +398,7 @@ class ChatRequest(BaseModel):
     message: str
     username: str = "guest"
     enhance: bool = False
+    is_first_message: bool = True
 
 @app.post("/api/signup")
 def signup(req: AuthRequest):
@@ -440,23 +455,24 @@ def history(username: str):
 @app.post("/api/chat")
 def chat(req: ChatRequest):
     user = sanitize_username(req.username) or "guest"
+    refusal_msg = REFUSAL_MESSAGE if req.is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
     if is_explicitly_non_medical(req.message):
-        log_conversation(req.message, REFUSAL_MESSAGE)
-        log_user_conversation(user, req.message, REFUSAL_MESSAGE)
-        return {"response": REFUSAL_MESSAGE}
+        log_conversation(req.message, refusal_msg)
+        log_user_conversation(user, req.message, refusal_msg)
+        return {"response": refusal_msg}
 
-    prompt = build_prompt(req.message)
+    prompt = build_prompt(req.message, is_first_message=req.is_first_message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = sanitize_response(req.message, output[0].outputs[0].text.strip())
+    response = sanitize_response(req.message, output[0].outputs[0].text.strip(), is_first_message=req.is_first_message)
 
-    if req.enhance and response != REFUSAL_MESSAGE:
-        response = apply_api_polisher_if_available(response, req.message, enabled=True)
+    if req.enhance and response != refusal_msg and response != REFUSAL_MESSAGE:
+        response = apply_api_polisher_if_available(response, req.message, enabled=True, is_first_message=req.is_first_message)
 
     log_conversation(req.message, response)
     log_user_conversation(user, req.message, response)
     return {"response": response}
 
-def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "") -> str:
+def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "", is_first_message: bool = True) -> str:
     """
     Dynamically loads and invokes process_file_with_gemini from api_polisher.py if it exists on disk.
     If deleted or fails, returns empty string to trigger local fallback.
@@ -471,7 +487,8 @@ def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type
             mod = importlib.util.module_from_spec(spec)
             spec.loader.exec_module(mod)
             if hasattr(mod, "process_file_with_gemini"):
-                return mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query)
+                res = mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query, is_first_message=is_first_message)
+                return strip_repeated_intro(res) if not is_first_message else res
     except Exception:
         pass
     return ""
@@ -481,15 +498,18 @@ async def chat_with_file(
     message: str = Form(...),
     username: str = Form("guest"),
     file: UploadFile = File(None),
-    enhance: str = Form("false")
+    enhance: str = Form("false"),
+    is_first_message: str = Form("true")
 ):
     user = sanitize_username(username) or "guest"
     is_enhanced = str(enhance).strip().lower() in ("true", "1", "yes")
+    is_first = str(is_first_message).strip().lower() in ("true", "1", "yes")
+    refusal_msg = REFUSAL_MESSAGE if is_first else REFUSAL_MESSAGE_SUBSEQUENT
 
     if is_explicitly_non_medical(message):
-        log_conversation(message, REFUSAL_MESSAGE)
-        log_user_conversation(user, message, REFUSAL_MESSAGE)
-        return {"response": REFUSAL_MESSAGE}
+        log_conversation(message, refusal_msg)
+        log_user_conversation(user, message, refusal_msg)
+        return {"response": refusal_msg}
 
     file_bytes = None
     if file:
@@ -497,7 +517,7 @@ async def chat_with_file(
 
     # If enhanced mode is active and file was uploaded, try direct multimodal file analysis
     if file and file_bytes and is_enhanced:
-        api_resp = apply_file_polisher_if_available(file_bytes, file.filename, file.content_type or "", message)
+        api_resp = apply_file_polisher_if_available(file_bytes, file.filename, file.content_type or "", message, is_first_message=is_first)
         if api_resp and len(api_resp.strip()) > 10:
             log_title = f"{message} [Uploaded file: {file.filename}]" if message else f"[Uploaded file: {file.filename}]"
             log_conversation(log_title, api_resp)
@@ -508,21 +528,21 @@ async def chat_with_file(
     if file and file_bytes:
         extracted_text = extract_text_from_file(file_bytes, file.filename)
         if extracted_text and is_explicitly_non_medical(extracted_text):
-            log_conversation(message, REFUSAL_MESSAGE)
-            log_user_conversation(user, message, REFUSAL_MESSAGE)
-            return {"response": REFUSAL_MESSAGE}
+            log_conversation(message, refusal_msg)
+            log_user_conversation(user, message, refusal_msg)
+            return {"response": refusal_msg}
 
         if not extracted_text or extracted_text == "Could not extract text from image.":
             full_message += f"\n\n[Uploaded document/image: {file.filename}. Note: Text could not be automatically extracted from this file. Inform the user kindly and advise them to type out the relevant medical details or consult a doctor.]"
         else:
             full_message += f"\n\n[Extracted text from uploaded file ({file.filename})]:\n{extracted_text}"
 
-    prompt = build_prompt(full_message)
+    prompt = build_prompt(full_message, is_first_message=is_first)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = sanitize_response(full_message, output[0].outputs[0].text.strip())
+    response = sanitize_response(full_message, output[0].outputs[0].text.strip(), is_first_message=is_first)
 
-    if is_enhanced and response != REFUSAL_MESSAGE:
-        response = apply_api_polisher_if_available(response, full_message, enabled=True)
+    if is_enhanced and response != refusal_msg and response != REFUSAL_MESSAGE:
+        response = apply_api_polisher_if_available(response, full_message, enabled=True, is_first_message=is_first)
 
     log_conversation(full_message, response)
     log_user_conversation(user, full_message, response)
