@@ -17,6 +17,16 @@
         </svg>
         <span class="logo-text">MedHub</span>
       </div>
+      <div class="topbar-right">
+        <div id="userProfile" class="user-profile" style="display: none;">
+          <div class="user-badge">
+            <span class="user-avatar">👤</span>
+            <span id="userNameDisplay" class="user-name"></span>
+          </div>
+          <button id="logoutBtn" class="logout-btn" type="button" title="Log out">Logout</button>
+        </div>
+        <button id="loginPromptBtn" class="login-prompt-btn" type="button">Sign In</button>
+      </div>
     </header>
 
     <main class="chat-area" id="chatArea">
@@ -42,6 +52,48 @@
       </div>
       <p class="disclaimer">MedHub can make mistakes. Consider checking important information with a doctor.</p>
     </footer>
+  </div>
+
+  <!-- Authentication Modal for Sign In / Sign Up -->
+  <div id="authModal" class="auth-modal-overlay" style="display: none;">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="auth-logo">
+          <svg class="logo-svg" width="26" height="26" viewBox="0 0.5 16 16" xmlns="http://www.w3.org/2000/svg">
+            <path style="fill:#cddff0" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
+            <path style="fill:#62b4e7" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
+            <path style="fill:#357dc5" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
+          </svg>
+          <span class="logo-text">MedHub</span>
+        </div>
+        <h2 id="authTitle">Sign In</h2>
+        <p id="authSubtitle">Enter your username and password to continue</p>
+      </div>
+
+      <div class="auth-tabs">
+        <button id="tabSignIn" class="auth-tab active" type="button">Sign In</button>
+        <button id="tabSignUp" class="auth-tab" type="button">Sign Up</button>
+      </div>
+
+      <div id="authAlert" class="auth-alert" style="display: none;"></div>
+
+      <form id="authForm" class="auth-form" onsubmit="return false;">
+        <div class="form-group">
+          <label for="authUsername">Username</label>
+          <input type="text" id="authUsername" placeholder="e.g. siva" autocomplete="username" required>
+        </div>
+        <div class="form-group">
+          <label for="authPassword">Password</label>
+          <input type="password" id="authPassword" placeholder="Enter password" autocomplete="current-password" required>
+        </div>
+        <button type="submit" id="authSubmitBtn" class="auth-submit-btn">Sign In</button>
+      </form>
+
+      <div class="auth-switch">
+        <span id="authSwitchText">Don't have an account?</span>
+        <button id="authSwitchBtn" class="auth-switch-btn" type="button">Sign Up</button>
+      </div>
+    </div>
   </div>
 
 <script src="/static/script.js"></script>

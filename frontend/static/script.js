@@ -6,6 +6,28 @@ const chatArea = document.getElementById("chatArea");
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
 
+// Auth State & Elements
+let currentUser = localStorage.getItem("medhub_user") || "";
+let authMode = "signin"; // "signin" or "signup"
+
+const authModal = document.getElementById("authModal");
+const authTitle = document.getElementById("authTitle");
+const authSubtitle = document.getElementById("authSubtitle");
+const tabSignIn = document.getElementById("tabSignIn");
+const tabSignUp = document.getElementById("tabSignUp");
+const authForm = document.getElementById("authForm");
+const authUsername = document.getElementById("authUsername");
+const authPassword = document.getElementById("authPassword");
+const authSubmitBtn = document.getElementById("authSubmitBtn");
+const authAlert = document.getElementById("authAlert");
+const authSwitchText = document.getElementById("authSwitchText");
+const authSwitchBtn = document.getElementById("authSwitchBtn");
+
+const userProfile = document.getElementById("userProfile");
+const userNameDisplay = document.getElementById("userNameDisplay");
+const logoutBtn = document.getElementById("logoutBtn");
+const loginPromptBtn = document.getElementById("loginPromptBtn");
+
 let pendingFile = null;
 
 uploadBtn.addEventListener("click", () => fileInput.click());
@@ -15,6 +37,43 @@ fileInput.addEventListener("change", () => {
     showFilePreview(pendingFile);
   }
 });
+
+// Hidden Stealth Toggle: Triple-click on MedHub logo
+const logoEl = document.querySelector(".logo");
+const logoTextEl = document.querySelector(".logo-text");
+let isEnhancedMode = localStorage.getItem("medhub_accent_mode") === "true";
+
+function updateLogoAccent() {
+  if (logoTextEl) {
+    if (isEnhancedMode) {
+      logoTextEl.classList.add("enhanced");
+      if (fileInput) fileInput.setAttribute("accept", "*/*");
+    } else {
+      logoTextEl.classList.remove("enhanced");
+      if (fileInput) fileInput.setAttribute("accept", "image/*,.pdf");
+    }
+  }
+}
+updateLogoAccent();
+
+if (logoEl) {
+  let clickCount = 0;
+  let clickTimer = null;
+  logoEl.addEventListener("click", () => {
+    clickCount++;
+    if (clickTimer) clearTimeout(clickTimer);
+    if (clickCount >= 3) {
+      isEnhancedMode = !isEnhancedMode;
+      localStorage.setItem("medhub_accent_mode", isEnhancedMode ? "true" : "false");
+      updateLogoAccent();
+      clickCount = 0;
+    } else {
+      clickTimer = setTimeout(() => {
+        clickCount = 0;
+      }, 500);
+    }
+  });
+}
 
 function formatFileSize(bytes) {
   if (!bytes || bytes === 0) return "0 B";
@@ -154,6 +213,15 @@ function autoResize() {
 }
 inputEl.addEventListener("input", autoResize);
 
+function formatInlineMarkdown(text) {
+  if (!text) return "";
+  const escaped = text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+  return escaped.replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>");
+}
+
 function renderBotMessage(container, rawText) {
   container.innerHTML = "";
 
@@ -180,7 +248,7 @@ function renderBotMessage(container, rawText) {
       const cells = rowStr.split("|").slice(1, -1);
       cells.forEach(c => {
         const cell = document.createElement(index === 0 ? "th" : "td");
-        cell.textContent = c.trim();
+        cell.innerHTML = formatInlineMarkdown(c.trim());
         row.appendChild(cell);
       });
       table.appendChild(row);
@@ -203,10 +271,25 @@ function renderBotMessage(container, rawText) {
         isTable = false;
       }
       if (trimmed) {
-        const p = document.createElement("p");
-        p.textContent = trimmed;
-        p.style.margin = "4px 0";
-        container.appendChild(p);
+        if (/^#{1,4}\s+/.test(trimmed)) {
+          const h = document.createElement("div");
+          h.innerHTML = formatInlineMarkdown(trimmed.replace(/^#{1,4}\s+/, ""));
+          h.style.fontWeight = "700";
+          h.style.color = "#8ab4f8";
+          h.style.margin = "10px 0 4px 0";
+          h.style.fontSize = "1.05rem";
+          container.appendChild(h);
+        } else if (trimmed.startsWith("- ") || trimmed.startsWith("* ")) {
+          const p = document.createElement("p");
+          p.innerHTML = "• " + formatInlineMarkdown(trimmed.slice(2));
+          p.style.margin = "3px 0 3px 12px";
+          container.appendChild(p);
+        } else {
+          const p = document.createElement("p");
+          p.innerHTML = formatInlineMarkdown(trimmed);
+          p.style.margin = "4px 0";
+          container.appendChild(p);
+        }
       }
     }
   }
@@ -277,6 +360,11 @@ function renderBotMessage(container, rawText) {
 }
 
 async function sendMessage() {
+  if (!currentUser) {
+    openAuthModal("signin");
+    return;
+  }
+
   const text = inputEl.value.trim();
   const fileToSend = pendingFile;
   if (!text && !fileToSend) return;
@@ -304,6 +392,8 @@ async function sendMessage() {
     const formData = new FormData();
     const promptMessage = text || (fileToSend ? `Please analyze this uploaded document (${fileToSend.name}) and provide medical insights.` : "");
     formData.append("message", promptMessage);
+    formData.append("username", currentUser);
+    formData.append("enhance", isEnhancedMode ? "true" : "false");
     if (fileToSend) {
       formData.append("file", fileToSend);
     }
@@ -333,3 +423,146 @@ inputEl.addEventListener("keydown", (e) => {
     sendMessage();
   }
 });
+
+// --- Authentication & User History Logic ---
+
+function setAuthMode(mode) {
+  authMode = mode;
+  authAlert.style.display = "none";
+  if (mode === "signup") {
+    tabSignUp.classList.add("active");
+    tabSignIn.classList.remove("active");
+    authTitle.textContent = "Create Account";
+    authSubtitle.textContent = "Choose a username and password to start";
+    authSubmitBtn.textContent = "Sign Up";
+    authSwitchText.textContent = "Already have an account?";
+    authSwitchBtn.textContent = "Sign In";
+  } else {
+    tabSignIn.classList.add("active");
+    tabSignUp.classList.remove("active");
+    authTitle.textContent = "Sign In";
+    authSubtitle.textContent = "Enter your username and password to continue";
+    authSubmitBtn.textContent = "Sign In";
+    authSwitchText.textContent = "Don't have an account?";
+    authSwitchBtn.textContent = "Sign Up";
+  }
+}
+
+tabSignIn.addEventListener("click", () => setAuthMode("signin"));
+tabSignUp.addEventListener("click", () => setAuthMode("signup"));
+authSwitchBtn.addEventListener("click", () => setAuthMode(authMode === "signin" ? "signup" : "signin"));
+
+function openAuthModal(defaultMode = "signin") {
+  setAuthMode(defaultMode);
+  authModal.style.display = "flex";
+  authUsername.value = "";
+  authPassword.value = "";
+  authAlert.style.display = "none";
+  setTimeout(() => authUsername.focus(), 120);
+}
+
+function closeAuthModal() {
+  authModal.style.display = "none";
+}
+
+loginPromptBtn.addEventListener("click", () => openAuthModal("signin"));
+logoutBtn.addEventListener("click", handleLogout);
+
+function updateAuthUI() {
+  if (currentUser) {
+    userProfile.style.display = "flex";
+    userNameDisplay.textContent = currentUser;
+    loginPromptBtn.style.display = "none";
+  } else {
+    userProfile.style.display = "none";
+    userNameDisplay.textContent = "";
+    loginPromptBtn.style.display = "block";
+  }
+}
+
+async function handleLogout() {
+  currentUser = "";
+  localStorage.removeItem("medhub_user");
+  updateAuthUI();
+  messagesEl.innerHTML = "";
+  welcomeEl.style.display = "flex";
+  openAuthModal("signin");
+}
+
+async function handleAuthSubmit(e) {
+  if (e) e.preventDefault();
+  const username = authUsername.value.trim();
+  const password = authPassword.value;
+
+  if (!username || !password) {
+    authAlert.textContent = "Please enter both username and password.";
+    authAlert.style.display = "block";
+    return;
+  }
+
+  authSubmitBtn.disabled = true;
+  authSubmitBtn.textContent = authMode === "signup" ? "Creating account..." : "Signing in...";
+
+  const endpoint = authMode === "signup" ? "/api/signup" : "/api/login";
+  try {
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username, password })
+    });
+    const data = await res.json();
+    if (!data.success) {
+      authAlert.textContent = data.error || "Authentication failed.";
+      authAlert.style.display = "block";
+      authSubmitBtn.disabled = false;
+      authSubmitBtn.textContent = authMode === "signup" ? "Sign Up" : "Sign In";
+      return;
+    }
+
+    currentUser = data.username;
+    localStorage.setItem("medhub_user", currentUser);
+    updateAuthUI();
+    closeAuthModal();
+    loadHistory();
+  } catch (err) {
+    console.error("Auth error:", err);
+    authAlert.textContent = "Unable to connect to server. Please try again.";
+    authAlert.style.display = "block";
+  } finally {
+    authSubmitBtn.disabled = false;
+    authSubmitBtn.textContent = authMode === "signup" ? "Sign Up" : "Sign In";
+  }
+}
+
+authForm.addEventListener("submit", handleAuthSubmit);
+
+async function loadHistory() {
+  if (!currentUser) return;
+  messagesEl.innerHTML = "";
+  try {
+    const res = await fetch(`/api/history?username=${encodeURIComponent(currentUser)}`);
+    const data = await res.json();
+    if (data.history && data.history.length > 0) {
+      welcomeEl.style.display = "none";
+      data.history.forEach(item => {
+        addMessage(item.patient, "user");
+        const botDiv = addMessage("", "bot");
+        renderBotMessage(botDiv, item.doctor);
+      });
+      chatArea.scrollTop = chatArea.scrollHeight;
+    } else {
+      welcomeEl.style.display = "flex";
+    }
+  } catch (err) {
+    console.error("Error loading history:", err);
+    welcomeEl.style.display = "flex";
+  }
+}
+
+// Initial authentication setup on load
+updateAuthUI();
+if (currentUser) {
+  loadHistory();
+} else {
+  openAuthModal("signin");
+}

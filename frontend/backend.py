@@ -8,6 +8,8 @@ from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel
 import json
 import io
+import hashlib
+import secrets
 import requests as req_lib
 from datetime import datetime
 from pypdf import PdfReader
@@ -60,7 +62,7 @@ if multiprocessing.current_process().name == "MainProcess":
         enforce_eager=True
     )
     lora_request = LoRARequest("medical_assistant", 1, lora_path)
-    sampling_params = SamplingParams(max_tokens=300, temperature=0.3)
+    sampling_params = SamplingParams(max_tokens=200, temperature=0.2)
     print("Model loaded!")
 else:
     llm = None
@@ -79,16 +81,15 @@ EMERGENCY_KEYWORDS = ["chest pain", "chest tightness", "can't breathe",
     "self harm", "want to die"]
 
 BASE_SAFETY_INSTRUCTION = (
-    "You are MedHub, a caring and knowledgeable AI medical assistant. "
-    "Your purpose is to assist patients with medical advice, symptoms, illnesses, medications, first aid, and health schedules.\n"
-    "1. Medical Scope: You strictly assist with medical, healthcare, symptom, medication, and medical schedule questions. If the user asks an unrelated, general, or non-medical question (such as coding, math, history, politics, entertainment, sports, or casual trivia), politely decline and ask them to ask only medical or health-related questions.\n"
-    "2. Greetings: For simple greetings (like 'hi' or 'hello'), reply warmly and briefly: 'Hello! I am MedHub, your medical assistant. How can I help you with your health today?'\n"
-    "3. Answer Only What is Asked: Only answer the specific question asked by the user. Do NOT invent schedules, plans, or extra advice unless explicitly asked for.\n"
-    "4. Format Schedules as Table: ONLY if explicitly asked for a schedule, medication plan, or routine, format it as a markdown table with columns (e.g. Time/Day | Medication/Activity | Instructions/Notes).\n"
-    "5. Concise & Direct: Keep answers short, direct, and easy to understand. Use bullet points for clarity.\n"
-    "6. Language: Always respond in the same language the patient used.\n"
-    "7. Dosage Safety: Only state specific numeric dosages if verified FDA info is explicitly provided below for the patient's case; otherwise advise consulting a doctor or pharmacist.\n"
-    "8. Doctor Guidance: For medical concerns, provide helpful, accurate, doctor-like guidance and recommend seeing a healthcare professional if symptoms persist."
+    "You are MedHub, a direct and concise AI medical assistant. "
+    "Your purpose is strictly to assist with health, symptoms, illnesses, medications, first aid, and health schedules.\n"
+    "1. Strict Medical Scope & Refusal: You strictly answer ONLY health, medical, symptom, medication, and clinical schedule questions. If the user asks ANY non-medical question (such as coding, math, history, politics, sports, general knowledge, recipes, movies, or casual chit-chat), you MUST refuse in ONE short sentence: 'I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions.'\n"
+    "2. Strict Brevity & Conciseness: Keep answers SHORT, DIRECT, and strictly under 3-4 bullet points or short sentences. Do NOT write long paragraphs, generic essays, or unsolicited filler advice.\n"
+    "3. Greetings: For simple greetings (like 'hi' or 'hello'), reply in ONE short sentence: 'Hello! I am MedHub, your medical assistant. How can I assist with your health or medications today?'\n"
+    "4. Answer Only What is Asked: Answer ONLY the specific question asked. Do NOT invent routines or extra unsolicited plans.\n"
+    "5. Format Schedules as Table: ONLY if explicitly asked for a schedule, medication plan, or routine, format it as a compact markdown table.\n"
+    "6. Dosage Safety: Only state specific numeric dosages if verified FDA info is explicitly provided below; otherwise advise consulting a doctor or pharmacist.\n"
+    "7. Doctor Guidance: For medical concerns, provide brief, accurate guidance and recommend consulting a healthcare professional if symptoms persist."
 )
 
 REFUSAL_MESSAGE = "I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions."
@@ -97,7 +98,11 @@ EXPLICIT_NON_MEDICAL_KEYWORDS = [
     "write code", "write a python", "write python", "write a script", "create a function",
     "write a program", "reverse a list", "reverse a string", "bubble sort", "binary search",
     "capital of", "who won the", "who was the first president", "who is the president of",
-    "tell me a joke", "write an essay on", "write a poem about", "solve the equation"
+    "tell me a joke", "write an essay", "write a poem", "solve the equation", "solve this math",
+    "recipe for", "how to cook", "how to bake", "weather in", "weather forecast",
+    "who is the ceo", "stock price", "crypto", "bitcoin", "football", "cricket", "basketball",
+    "car", "bike", "game", "gaming", "translate to", "history of", "summarize the book",
+    "recommend a movie", "recommend a song", "lyrics of", "how to make money", "politics"
 ]
 
 def is_explicitly_non_medical(text):
@@ -127,6 +132,96 @@ def build_prompt(user_input):
     if is_emotionally_sensitive(user_input):
         instruction += " Respond with genuine empathy first, acknowledging their feelings before giving guidance."
     return f"### Instruction:\n{instruction}{fda_context}\n\n### Patient:\n{user_input}\n\n### Doctor:\n"
+
+USER_DATA_DIR = os.path.join(BASE_DIR, "user_data")
+USERS_DB_FILE = os.path.join(USER_DATA_DIR, "users.json")
+os.makedirs(USER_DATA_DIR, exist_ok=True)
+
+def sanitize_username(username: str) -> str:
+    """Returns a sanitized username containing only alphanumeric, hyphen, and underscore characters."""
+    if not username:
+        return ""
+    return "".join(c for c in username.strip() if c.isalnum() or c in ("-", "_"))
+
+def load_users():
+    if not os.path.exists(USERS_DB_FILE):
+        return {}
+    try:
+        with open(USERS_DB_FILE, "r") as f:
+            return json.load(f)
+    except Exception:
+        return {}
+
+def save_users(users):
+    os.makedirs(USER_DATA_DIR, exist_ok=True)
+    with open(USERS_DB_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+def hash_password(password: str, salt: str = "") -> str:
+    return hashlib.sha256((password + salt).encode("utf-8")).hexdigest()
+
+def get_user_dir(username: str) -> str:
+    safe = sanitize_username(username)
+    return os.path.join(USER_DATA_DIR, safe)
+
+def get_user_log_path(username: str) -> str:
+    safe = sanitize_username(username)
+    return os.path.join(get_user_dir(safe), f"{safe}.jsonl")
+
+def init_user_storage(username: str):
+    """Ensures user directory and username.jsonl exist; recreates if deleted."""
+    safe = sanitize_username(username)
+    if not safe:
+        return None
+    user_dir = get_user_dir(safe)
+    os.makedirs(user_dir, exist_ok=True)
+    log_path = get_user_log_path(safe)
+    if not os.path.exists(log_path):
+        with open(log_path, "w") as f:
+            pass
+    return log_path
+
+def log_user_conversation(username: str, user_input: str, bot_response: str):
+    """Logs conversation to the user's personal log file. Recreates folder & file if deleted."""
+    safe = sanitize_username(username)
+    if not safe:
+        safe = "guest"
+    try:
+        log_path = init_user_storage(safe)
+        if log_path:
+            with open(log_path, "a") as f:
+                record = {
+                    "timestamp": datetime.now().isoformat(),
+                    "username": safe,
+                    "patient": user_input,
+                    "doctor": bot_response
+                }
+                f.write(json.dumps(record) + "\n")
+    except Exception as e:
+        print(f"Error logging for user {safe}: {e}")
+
+def get_user_history(username: str):
+    """Reads user's conversation history. Returns [] without error if file was deleted."""
+    safe = sanitize_username(username)
+    if not safe:
+        return []
+    log_path = get_user_log_path(safe)
+    if not os.path.exists(log_path):
+        return []
+    history = []
+    try:
+        with open(log_path, "r") as f:
+            for line in f:
+                line = line.strip()
+                if line:
+                    try:
+                        history.append(json.loads(line))
+                    except Exception:
+                        continue
+    except Exception as e:
+        print(f"Error reading history for {safe}: {e}")
+        return []
+    return history
 
 def log_conversation(user_input, response):
     logs_dir = os.path.join(BASE_DIR, "logs")
@@ -257,42 +352,180 @@ def generate_schedule_pdf(schedule_text):
     buffer.seek(0)
     return buffer
 
+def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False) -> str:
+    """
+    Dynamically loads and invokes api_polisher.py if it exists on disk.
+    If the file is deleted or disabled, returns text immediately with zero downtime and zero errors.
+    """
+    if not enabled:
+        return text
+    polisher_file = os.path.join(BASE_DIR, "api_polisher.py")
+    if not os.path.exists(polisher_file):
+        return text
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("api_polisher", polisher_file)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            if hasattr(mod, "polish_text"):
+                return mod.polish_text(text, user_query)
+    except Exception:
+        pass
+    return text
+
 app = FastAPI()
+
+class AuthRequest(BaseModel):
+    username: str
+    password: str
 
 class ChatRequest(BaseModel):
     message: str
+    username: str = "guest"
+    enhance: bool = False
+
+@app.post("/api/signup")
+def signup(req: AuthRequest):
+    username = sanitize_username(req.username)
+    if not username or len(username) < 2:
+        return {"success": False, "error": "Username must be at least 2 characters (letters, numbers, hyphens, underscores)."}
+    if not req.password or len(req.password) < 3:
+        return {"success": False, "error": "Password must be at least 3 characters."}
+
+    users = load_users()
+    if username.lower() in {u.lower(): u for u in users}:
+        return {"success": False, "error": "Username already exists. Please choose another username or sign in."}
+
+    salt = secrets.token_hex(8)
+    users[username] = {
+        "password_hash": hash_password(req.password, salt),
+        "salt": salt,
+        "created_at": datetime.now().isoformat()
+    }
+    save_users(users)
+    init_user_storage(username)
+    return {"success": True, "username": username}
+
+@app.post("/api/login")
+def login(req: AuthRequest):
+    username = sanitize_username(req.username)
+    if not username:
+        return {"success": False, "error": "Please enter a valid username."}
+
+    users = load_users()
+    matched_user = None
+    for u in users:
+        if u.lower() == username.lower():
+            matched_user = u
+            break
+
+    if not matched_user:
+        return {"success": False, "error": "User does not exist. Please sign up first."}
+
+    user_info = users[matched_user]
+    salt = user_info.get("salt", "")
+    expected_hash = user_info.get("password_hash", "")
+    if hash_password(req.password, salt) != expected_hash:
+        return {"success": False, "error": "Incorrect password. Please try again."}
+
+    # Recreate folder and file if they were deleted directly
+    init_user_storage(matched_user)
+    return {"success": True, "username": matched_user}
+
+@app.get("/api/history")
+def history(username: str):
+    return {"history": get_user_history(username)}
 
 @app.post("/api/chat")
 def chat(req: ChatRequest):
+    user = sanitize_username(req.username) or "guest"
     if is_explicitly_non_medical(req.message):
         log_conversation(req.message, REFUSAL_MESSAGE)
+        log_user_conversation(user, req.message, REFUSAL_MESSAGE)
         return {"response": REFUSAL_MESSAGE}
 
     prompt = build_prompt(req.message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
     response = sanitize_response(req.message, output[0].outputs[0].text.strip())
+
+    if req.enhance and response != REFUSAL_MESSAGE:
+        response = apply_api_polisher_if_available(response, req.message, enabled=True)
+
     log_conversation(req.message, response)
+    log_user_conversation(user, req.message, response)
     return {"response": response}
 
+def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "") -> str:
+    """
+    Dynamically loads and invokes process_file_with_gemini from api_polisher.py if it exists on disk.
+    If deleted or fails, returns empty string to trigger local fallback.
+    """
+    polisher_file = os.path.join(BASE_DIR, "api_polisher.py")
+    if not os.path.exists(polisher_file):
+        return ""
+    try:
+        import importlib.util
+        spec = importlib.util.spec_from_file_location("api_polisher", polisher_file)
+        if spec and spec.loader:
+            mod = importlib.util.module_from_spec(spec)
+            spec.loader.exec_module(mod)
+            if hasattr(mod, "process_file_with_gemini"):
+                return mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query)
+    except Exception:
+        pass
+    return ""
+
 @app.post("/api/chat-with-file")
-async def chat_with_file(message: str = Form(...), file: UploadFile = File(None)):
-    full_message = message
+async def chat_with_file(
+    message: str = Form(...),
+    username: str = Form("guest"),
+    file: UploadFile = File(None),
+    enhance: str = Form("false")
+):
+    user = sanitize_username(username) or "guest"
+    is_enhanced = str(enhance).strip().lower() in ("true", "1", "yes")
+
+    if is_explicitly_non_medical(message):
+        log_conversation(message, REFUSAL_MESSAGE)
+        log_user_conversation(user, message, REFUSAL_MESSAGE)
+        return {"response": REFUSAL_MESSAGE}
+
+    file_bytes = None
     if file:
         file_bytes = await file.read()
+
+    # If enhanced mode is active and file was uploaded, try direct multimodal file analysis
+    if file and file_bytes and is_enhanced:
+        api_resp = apply_file_polisher_if_available(file_bytes, file.filename, file.content_type or "", message)
+        if api_resp and len(api_resp.strip()) > 10:
+            log_title = f"{message} [Uploaded file: {file.filename}]" if message else f"[Uploaded file: {file.filename}]"
+            log_conversation(log_title, api_resp)
+            log_user_conversation(user, log_title, api_resp)
+            return {"response": api_resp}
+
+    full_message = message
+    if file and file_bytes:
         extracted_text = extract_text_from_file(file_bytes, file.filename)
+        if extracted_text and is_explicitly_non_medical(extracted_text):
+            log_conversation(message, REFUSAL_MESSAGE)
+            log_user_conversation(user, message, REFUSAL_MESSAGE)
+            return {"response": REFUSAL_MESSAGE}
+
         if not extracted_text or extracted_text == "Could not extract text from image.":
             full_message += f"\n\n[Uploaded document/image: {file.filename}. Note: Text could not be automatically extracted from this file. Inform the user kindly and advise them to type out the relevant medical details or consult a doctor.]"
         else:
             full_message += f"\n\n[Extracted text from uploaded file ({file.filename})]:\n{extracted_text}"
 
-    if not file and is_explicitly_non_medical(message):
-        log_conversation(message, REFUSAL_MESSAGE)
-        return {"response": REFUSAL_MESSAGE}
-
     prompt = build_prompt(full_message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
     response = sanitize_response(full_message, output[0].outputs[0].text.strip())
+
+    if is_enhanced and response != REFUSAL_MESSAGE:
+        response = apply_api_polisher_if_available(response, full_message, enabled=True)
+
     log_conversation(full_message, response)
+    log_user_conversation(user, full_message, response)
     return {"response": response}
 
 @app.post("/api/generate-schedule-pdf")
