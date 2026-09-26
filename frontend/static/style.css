@@ -493,6 +493,8 @@ body {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
 .topbar-right {
   display: flex;
   align-items: center;
