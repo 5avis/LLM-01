@@ -12,3 +12,4 @@ userdata
 frontend/api_polisher.py
 api_polisher.py
 *.jsonl
+*.pem
