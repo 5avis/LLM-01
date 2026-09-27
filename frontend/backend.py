@@ -106,22 +106,186 @@ def strip_repeated_intro(text: str) -> str:
     cleaned = re.sub(pattern, '', text.strip(), flags=re.IGNORECASE).strip()
     return cleaned if cleaned else text
 
-EXPLICIT_NON_MEDICAL_KEYWORDS = [
-    "write code", "write a python", "write python", "write a script", "create a function",
-    "write a program", "reverse a list", "reverse a string", "bubble sort", "binary search",
-    "capital of", "who won the", "who was the first president", "who is the president of",
-    "tell me a joke", "write an essay", "write a poem", "solve the equation", "solve this math",
-    "recipe for", "how to cook", "how to bake", "weather in", "weather forecast",
-    "who is the ceo", "stock price", "crypto", "bitcoin", "football", "cricket", "basketball",
-    "car", "bike", "game", "gaming", "translate to", "history of", "summarize the book",
-    "recommend a movie", "recommend a song", "lyrics of", "how to make money", "politics"
+MEDICAL_KEYWORDS = [
+    # General medical & clinical
+    "health", "healthy", "medical", "medicine", "medicines", "medicinal", "medication", "medications",
+    "doctor", "physician", "nurse", "hospital", "clinic", "patient", "symptom", "symptoms", "symptomatic",
+    "illness", "illnesses", "disease", "diseases", "condition", "conditions", "disorder", "disorders",
+    "infection", "infections", "syndrome", "syndromes", "diagnosis", "prognosis", "prescription", "prescriptions",
+    "pharmacy", "pharmacist", "pharmacology", "dosage", "dosages", "dose", "doses", "tablet", "tablets",
+    "capsule", "capsules", "pill", "pills", "syrup", "syrups", "injection", "injections", "vaccine", "vaccines",
+    "vaccination", "immunization", "antibody", "antibodies", "side effect", "side effects", "adverse effect",
+    "drug interaction", "contraindication", "first aid", "emergency", "cpr", "triage", "bandage", "tourniquet",
+    "surgery", "surgical", "operation", "therapy", "therapies", "rehabilitation", "rehab", "treatment", "treatments",
+    "remedy", "remedies", "cure", "healing", "recovery", "vitals", "pulse", "blood pressure", "heart rate",
+    "oxygen", "spo2", "temperature", "glucose", "cholesterol", "triglycerides", "bmi", "lab test", "blood test",
+    "urine test", "stool test", "mri", "ct scan", "x-ray", "xray", "ultrasound", "biopsy", "ecg", "ekg",
+    "endoscopy", "pediatric", "pediatrics", "geriatric", "geriatrics", "pregnant", "pregnancy", "trimester",
+    "fetus", "labor", "delivery", "breastfeeding", "lactation", "infant", "newborn", "wellness", "clinical",
+    "soap note", "medication schedule", "pill reminder", "triage level", "esi", "pathology", "anatomy",
+    "physiology", "diet", "nutrition", "deficiency", "supplement", "supplements", "vitamin", "vitamins",
+    "child", "baby", "toddler", "swallow", "swallowed", "poison", "poisoning", "battery", "ingest", "ingested",
+    "overdose", "toxic", "bitten", "stung", "snake", "choking", "suffocating", "suicide", "suicidal",
+    
+    # Body parts & Anatomy
+    "head", "brain", "skull", "scalp", "eye", "eyes", "vision", "ear", "ears", "hearing", "nose", "nasal",
+    "throat", "pharynx", "larynx", "mouth", "oral", "tongue", "tooth", "teeth", "dental", "gum", "gums",
+    "jaw", "neck", "cervical", "chest", "thoracic", "breast", "breasts", "rib", "ribs", "lung", "lungs",
+    "pulmonary", "heart", "cardiac", "cardio", "stomach", "gastric", "gastro", "belly", "abdomen", "abdominal",
+    "gut", "liver", "hepatic", "kidney", "kidneys", "renal", "pancreas", "pancreatic", "spleen", "gallbladder",
+    "colon", "bowel", "bowels", "intestine", "intestines", "intestinal", "rectum", "anus", "bladder", "urinary",
+    "urine", "spine", "spinal", "vertebra", "back", "pelvis", "pelvic", "groin", "genital", "genitals",
+    "prostate", "uterus", "uterine", "ovary", "ovaries", "ovarian", "cervix", "vagina", "vaginal", "penis",
+    "testicle", "testicles", "scrotum", "arm", "arms", "shoulder", "shoulders", "elbow", "elbows", "wrist",
+    "wrists", "hand", "hands", "finger", "fingers", "thumb", "leg", "legs", "hip", "hips", "thigh", "thighs",
+    "knee", "knees", "shin", "calf", "calves", "ankle", "ankles", "foot", "feet", "heel", "toe", "toes",
+    "skin", "derma", "dermal", "epidermis", "hair", "scalp", "nail", "nails", "bone", "bones", "skeletal",
+    "muscle", "muscles", "muscular", "joint", "joints", "ligament", "ligaments", "tendon", "tendons",
+    "nerve", "nerves", "nervous", "neural", "neuron", "artery", "arteries", "arterial", "vein", "veins",
+    "venous", "vessel", "vessels", "vascular", "blood", "thyroid", "lymph", "lymph node", "hormone", "hormones",
+    
+    # Symptoms & Sensations
+    "pain", "pains", "painful", "ache", "aches", "aching", "hurt", "hurts", "hurting", "sore", "soreness",
+    "tender", "tenderness", "fever", "feverish", "high temp", "chills", "sweat", "sweats", "sweating",
+    "night sweats", "cough", "coughs", "coughing", "sneeze", "sneezing", "congestion", "congested",
+    "runny nose", "cold", "flu", "phlegm", "mucus", "sputum", "nausea", "nauseous", "vomit", "vomits",
+    "vomiting", "diarrhea", "constipation", "constipated", "bloating", "bloated", "gas", "indigestion",
+    "heartburn", "acid reflux", "gerd", "cramp", "cramps", "cramping", "spasm", "spasms", "dizzy",
+    "dizziness", "vertigo", "lightheaded", "lightheadedness", "fatigue", "fatigued", "tired", "tiredness",
+    "weak", "weakness", "exhaustion", "exhausted", "lethargy", "lethargic", "sleepy", "insomnia", "sleepless",
+    "sleep disorder", "apnea", "snoring", "rash", "rashes", "itch", "itches", "itching", "itchy", "hives",
+    "welts", "burn", "burns", "burning", "swelling", "swollen", "edema", "inflammation", "inflamed",
+    "redness", "bruise", "bruises", "bruising", "bleeding", "bleed", "hemorrhage", "lump", "lumps",
+    "bump", "bumps", "cyst", "cysts", "nodule", "nodules", "lesion", "lesions", "ulcer", "ulcers",
+    "blister", "blisters", "pus", "abscess", "numb", "numbness", "tingling", "pins and needles",
+    "stiffness", "stiff", "twitching", "tremor", "tremors", "shaking", "seizure", "seizures",
+    "convulsion", "convulsions", "faint", "fainted", "fainting", "syncope", "blackout", "palpitation",
+    "palpitations", "shortness of breath", "breathless", "breathlessness", "wheeze", "wheezing",
+    "choking", "gasping", "migraine", "migraines", "headache", "headaches", "discharge", "wound", "wounds",
+    "cut", "cuts", "scrape", "scrapes", "laceration", "puncture", "fracture", "fractures", "broken bone",
+    "sprain", "sprains", "strain", "strains", "dislocation", "concussion", "allergic", "allergy", "allergies",
+    
+    # Diseases, Conditions & Infections
+    "diabetes", "diabetic", "hypertension", "hypertensive", "hypotension", "asthma", "asthmatic",
+    "cancer", "carcinoma", "tumor", "tumors", "malignant", "benign", "leukemia", "lymphoma", "melanoma",
+    "stroke", "heart attack", "myocardial", "cardiac arrest", "arrhythmia", "fibrillation", "pneumonia",
+    "bronchitis", "covid", "covid-19", "coronavirus", "tuberculosis", "tb", "arthritis", "osteoarthritis",
+    "rheumatoid", "gout", "hepatitis", "cirrhosis", "anemia", "anemic", "sepsis", "septic", "meningitis",
+    "encephalitis", "colitis", "gastritis", "appendicitis", "pancreatitis", "nephritis", "crohn", "crohns",
+    "celiac", "eczema", "psoriasis", "dermatitis", "acne", "rosacea", "depression", "depressed",
+    "anxiety", "anxious", "panic attack", "bipolar", "schizophrenia", "dementia", "alzheimer", "alzheimers",
+    "parkinson", "parkinsons", "epilepsy", "hiv", "aids", "malaria", "dengue", "typhoid", "cholera",
+    "rabies", "tetanus", "measles", "mumps", "rubella", "chickenpox", "shingles", "herpes", "hpv",
+    "chlamydia", "gonorrhea", "syphilis", "glaucoma", "cataract", "cataracts", "conjunctivitis", "pink eye",
+    "otitis", "sinusitis", "sinus infection", "pharyngitis", "strep", "tonsillitis", "laryngitis", "sciatica",
+    
+    # Medications & Substances
+    "paracetamol", "acetaminophen", "ibuprofen", "aspirin", "naproxen", "advil", "tylenol", "motrin",
+    "amoxicillin", "penicillin", "azithromycin", "ciprofloxacin", "metformin", "insulin", "atorvastatin",
+    "simvastatin", "rosuvastatin", "lisinopril", "amlodipine", "losartan", "omeprazole", "pantoprazole",
+    "esomeprazole", "metoprolol", "atenolol", "albuterol", "montelukast", "prednisone", "prednisolone",
+    "dexamethasone", "gabapentin", "pregabalin", "sertraline", "fluoxetine", "escitalopram", "citalopram",
+    "duloxetine", "venlafaxine", "tramadol", "codeine", "morphine", "fentanyl", "oxycodone", "hydrocodone",
+    "warfarin", "apixaban", "eliquis", "xarelto", "rivaroxaban", "clopidogrel", "plavix", "levothyroxine",
+    "synthroid", "cetirizine", "zyrtec", "loratadine", "claritin", "fexofenadine", "allegra",
+    "diphenhydramine", "benadryl", "furosemide", "lasix", "hydrochlorothiazide", "hctz", "spironolactone",
+    "doxycycline", "cephalexin", "keflex", "augmentin", "iron", "calcium", "magnesium", "potassium",
+    "zinc", "folic acid", "antibiotic", "antibiotics", "antiviral", "antifungal", "antihistamine",
+    "antidepressant", "analgesic", "painkiller", "painkillers", "sedative", "inhaler", "eyedrops",
+    
+    # Multilingual terms (Spanish, French, German, Tamil, Hindi)
+    "dolor", "cabeza", "fiebre", "tos", "garganta", "medicamento", "pastilla", "medico", "salud", "enfermedad",
+    "tete", "mal", "fievre", "toux", "medicament", "medecin", "sante", "douleur", "maladie",
+    "schmerz", "schmerzen", "kopf", "fieber", "husten", "arzt", "medikament", "gesundheit", "krankheit",
+    "sir dard", "bukhar", "khasi", "dawa", "ilaj", "sehat", "talai vali", "kaichal", "marunthu", "maruthuvar",
+    "காய்ச்சல்", "தலைவலி", "மருந்து", "மருத்துவர்", "உடல்நிலை", "வலி", "இருமல்", "சளி", "நோய்",
+    "सिरदर्द", "बुखार", "खांसी", "दवा", "इलाज", "दर्द", "तबीयत", "स्वास्थ्य", "बीमारी"
 ]
 
-def is_explicitly_non_medical(text):
-    text_lower = text.lower()
-    return any(keyword in text_lower for keyword in EXPLICIT_NON_MEDICAL_KEYWORDS)
+EXPLICIT_NON_MEDICAL_PATTERNS = [
+    r"\b(?:write|create|generate|debug|fix)\s+(?:a\s+)?(?:python|javascript|java|c\+\+|html|css|sql|rust|golang|php|ruby|swift|kotlin|code|script|program|function|class|algorithm|regex)\b",
+    r"\b(?:bubble sort|binary search|fibonacci|linked list|binary tree|reverse string|leetcode|hackerrank)\b",
+    r"\b(?:capital of|who is the president|who was the first president|who is the prime minister|who is the king|who is the queen)\b",
+    r"\b(?:tell me a joke|tell a joke|tell me a story|write a poem|write an essay|write a song|write a story|write lyrics)\b",
+    r"\b(?:solve\s+(?:the\s+)?(?:equation|math|integral|derivative|algebra)|calculus|pythagorean|quadratic equation)\b",
+    r"\b(?:recipe for|how to cook|how to bake|make a cake|bake cookies|cook pasta|make pizza)\b",
+    r"\b(?:weather in|weather forecast|weather today|tomorrow weather)\b",
+    r"\b(?:stock price|crypto|cryptocurrency|bitcoin|ethereum|forex|invest in stocks|buy shares)\b",
+    r"\b(?:who is elon musk|who is cristiano ronaldo|who is lionel messi|who is virat kohli|who is taylor swift)\b",
+    r"\b(?:cricket match|football score|nba score|fifa world cup|ipl match|super bowl|champions league)\b",
+    r"\b(?:recommend a movie|best movies of|tv show|netflix series|video game|playstation|xbox|nintendo|gta)\b",
+    r"\b(?:how to hack|how to make money|make money online|drop shipping|seo optimization)\b",
+    r"\b(?:lyrics of|who sang|meaning of life|tell me about cars|repair a car|fix a bike)\b"
+]
+
+GREETING_WORDS = {
+    "hi", "hello", "hey", "greetings", "good morning", "good afternoon", "good evening",
+    "who are you", "what are you", "what can you do", "help", "thanks", "thank you",
+    "bye", "goodbye", "ok", "okay", "yes", "no", "namaste", "vanakkam", "bonjour", "hola"
+}
+
+def is_medical_query(text: str) -> bool:
+    """
+    High-precision medical domain classifier.
+    Returns True ONLY if the text is medical/health-related or an assistant greeting/identity query.
+    Returns False for any unrelated topic (coding, trivia, math, entertainment, sports, politics, etc.).
+    """
+    if not text or not text.strip():
+        return False
+    t = text.strip().lower()
+    
+    # 1. Allow pure greetings & assistant capability questions
+    cleaned_t = re.sub(r"[^\w\s]", "", t).strip()
+    if cleaned_t in GREETING_WORDS or any(t.startswith(g) for g in [
+        "hi medhub", "hello medhub", "hey medhub", "who are you", "what are you", "what can you do", "how can you help"
+    ]):
+        return True
+    
+    # 2. Check explicit non-medical blacklist patterns
+    for pat in EXPLICIT_NON_MEDICAL_PATTERNS:
+        if re.search(pat, t, re.IGNORECASE):
+            # Allow if medical condition context is present (e.g. "diabetic diet recipe", "hypertension diet")
+            if any(med in t for med in ["diabet", "hypertens", "renal", "cholesterol", "blood pressure", "kidney", "heart", "ulcer"]):
+                return True
+            return False
+            
+    # 3. Check pharmacological drug suffixes
+    drug_suffixes = [
+        r"\w+cillin\b", r"\w+statin\b", r"\w+pril\b", r"\w+olol\b", r"\w+zole\b",
+        r"\w+sartan\b", r"\w+afil\b", r"\w+mycin\b", r"\w+cycline\b", r"\w+mab\b",
+        r"\w+dipine\b", r"\w+triptan\b", r"\w+coxib\b", r"\w+asone\b", r"\w+olone\b",
+        r"\w+gliflozin\b", r"\w+gliptin\b", r"\w+xaban\b"
+    ]
+    for ds in drug_suffixes:
+        if re.search(ds, t, re.IGNORECASE):
+            return True
+            
+    # 4. Check medical keywords dictionary (handles both ASCII word boundaries and non-ASCII scripts)
+    for kw in MEDICAL_KEYWORDS:
+        if any(ord(c) > 127 for c in kw):
+            if kw in t:
+                return True
+        else:
+            if re.search(r"\b" + re.escape(kw) + r"\b", t, re.IGNORECASE):
+                return True
+            
+    # 5. Check if numbers with medical dosage units or readings exist (e.g. 500mg, 10ml, 120/80 mmHg)
+    if re.search(r"\b\d+\s*(?:mg|mcg|ml|iu|tablet|tablets|capsule|capsules|drops|puff|puffs)\b", t, re.IGNORECASE):
+        return True
+    if re.search(r"\b\d{2,3}\s*/\s*\d{2,3}\s*(?:mmhg)?\b", t):
+        return True
+    if re.search(r"\b(?:esi|triage|ddi|soap|fda|otc|rx)\b", t, re.IGNORECASE):
+        return True
+
+    return False
+
+def is_explicitly_non_medical(text: str) -> bool:
+    """Maintained for backward compatibility."""
+    return not is_medical_query(text)
 
 def sanitize_response(user_input, response, is_first_message=True):
+    if not is_medical_query(user_input):
+        return REFUSAL_MESSAGE if is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
     if any(code_tag in response for code_tag in ["```python", "```javascript", "```java", "```c", "```cpp", "```html", "```sql"]):
         return REFUSAL_MESSAGE if is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
     if not is_first_message:
