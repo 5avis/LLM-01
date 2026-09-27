@@ -159,23 +159,6 @@ def sanitize_username(username: str) -> str:
         return ""
     return "".join(c for c in username.strip() if c.isalnum() or c in ("-", "_"))
 
-def load_users():
-    if not os.path.exists(USERS_DB_FILE):
-        return {}
-    try:
-        with open(USERS_DB_FILE, "r") as f:
-            return json.load(f)
-    except Exception:
-        return {}
-
-def save_users(users):
-    os.makedirs(USER_DATA_DIR, exist_ok=True)
-    with open(USERS_DB_FILE, "w") as f:
-        json.dump(users, f, indent=2)
-
-def hash_password(password: str, salt: str = "") -> str:
-    return hashlib.sha256((password + salt).encode("utf-8")).hexdigest()
-
 def get_user_dir(username: str) -> str:
     safe = sanitize_username(username)
     return os.path.join(USER_DATA_DIR, safe)
@@ -183,6 +166,51 @@ def get_user_dir(username: str) -> str:
 def get_user_log_path(username: str) -> str:
     safe = sanitize_username(username)
     return os.path.join(get_user_dir(safe), f"{safe}.jsonl")
+
+def save_users(users):
+    os.makedirs(USER_DATA_DIR, exist_ok=True)
+    with open(USERS_DB_FILE, "w") as f:
+        json.dump(users, f, indent=2)
+
+def load_users():
+    users = {}
+    if os.path.exists(USERS_DB_FILE):
+        try:
+            with open(USERS_DB_FILE, "r") as f:
+                users = json.load(f)
+        except Exception:
+            users = {}
+
+    # Discover any user directories that contain auth.json
+    try:
+        for entry in os.listdir(USER_DATA_DIR):
+            full_path = os.path.join(USER_DATA_DIR, entry)
+            if os.path.isdir(full_path) and entry != "guest":
+                auth_file = os.path.join(full_path, "auth.json")
+                if os.path.exists(auth_file) and entry not in users:
+                    try:
+                        with open(auth_file, "r") as af:
+                            users[entry] = json.load(af)
+                    except Exception:
+                        pass
+    except Exception:
+        pass
+
+    # Prune any user whose folder was deleted on disk!
+    modified = False
+    active_users = {}
+    for u, data in users.items():
+        udir = get_user_dir(u)
+        if os.path.isdir(udir):
+            active_users[u] = data
+        else:
+            modified = True
+    if modified:
+        save_users(active_users)
+    return active_users
+
+def hash_password(password: str, salt: str = "") -> str:
+    return hashlib.sha256((password + salt).encode("utf-8")).hexdigest()
 
 def init_user_storage(username: str):
     """Ensures user directory and username.jsonl exist; recreates if deleted."""
@@ -411,20 +439,32 @@ def signup(req: AuthRequest):
     if not req.password or len(req.password) < 3:
         return {"success": False, "error": "Password must be at least 3 characters."}
 
+    user_dir = get_user_dir(username)
     users = load_users()
     if username.lower() == "guest":
         return {"success": False, "error": "'guest' is reserved for guest mode. Please choose a personalized username."}
-    if username.lower() in {u.lower(): u for u in users}:
+
+    # If the user directory on disk was deleted, prune any stale entry and allow recreation!
+    if not os.path.isdir(user_dir):
+        users = {u: d for u, d in users.items() if u.lower() != username.lower()}
+        save_users(users)
+    elif username.lower() in {u.lower(): u for u in users}:
         return {"success": False, "error": "Username already exists. Please choose another username or sign in."}
 
     salt = secrets.token_hex(8)
-    users[username] = {
+    user_data = {
         "password_hash": hash_password(req.password, salt),
         "salt": salt,
         "created_at": datetime.now().isoformat()
     }
+    users[username] = user_data
     save_users(users)
     init_user_storage(username)
+    try:
+        with open(os.path.join(user_dir, "auth.json"), "w") as af:
+            json.dump(user_data, af, indent=2)
+    except Exception:
+        pass
     return {"success": True, "username": username}
 
 @app.post("/api/login")

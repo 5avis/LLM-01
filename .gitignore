@@ -8,6 +8,7 @@ __pycache__/
 *.pyc
 bin/
 user_data/
+userdata
 frontend/api_polisher.py
 api_polisher.py
 *.jsonl

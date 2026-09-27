@@ -42,6 +42,7 @@ const triageTriggers = document.getElementById("triageTriggers");
 // Feature 3: SOAP Note Elements
 const downloadSoapBtn = document.getElementById("downloadSoapBtn");
 const downloadSoapBtnText = document.getElementById("downloadSoapBtnText");
+const appLangSelect = document.getElementById("appLangSelect");
 const soapLangSelect = document.getElementById("soapLangSelect");
 const soapSubjectivePreview = document.getElementById("soapSubjectivePreview");
 const soapObjectivePreview = document.getElementById("soapObjectivePreview");
@@ -650,7 +651,10 @@ function applyAppLanguage(lang) {
 
   const t = APP_I18N[currentAppLang];
 
-  // Synchronize both language dropdowns
+  // Synchronize language dropdowns
+  if (appLangSelect && appLangSelect.value !== currentAppLang) {
+    appLangSelect.value = currentAppLang;
+  }
   if (authLangSelect && authLangSelect.value !== currentAppLang) {
     authLangSelect.value = currentAppLang;
   }
@@ -813,7 +817,7 @@ if (newChatBtn) {
     latestUserQuery = "";
     latestSoapData = null;
     resetCockpitMetrics();
-    applyAppLanguage(soapLangSelect ? soapLangSelect.value : "en");
+    applyAppLanguage(currentAppLang);
     inputEl.value = "";
     autoResize();
     inputEl.focus();
@@ -1365,6 +1369,12 @@ inputEl.addEventListener("keydown", (e) => {
 // 9. FEATURE 3: MULTILINGUAL S.O.A.P. / S.B.A.R. PDF EXPORT (6 LANGUAGES)
 // Synchronized with Auth Modal Language Selector and App-Wide Localization
 // ---------------------------------------------------------------------------
+if (appLangSelect) {
+  appLangSelect.addEventListener("change", (e) => {
+    applyAppLanguage(e.target.value);
+  });
+}
+
 if (soapLangSelect) {
   soapLangSelect.addEventListener("change", (e) => {
     applyAppLanguage(e.target.value);
@@ -1379,7 +1389,7 @@ if (authLangSelect) {
 
 if (downloadSoapBtn) {
   downloadSoapBtn.addEventListener("click", async () => {
-    const selectedLang = (soapLangSelect ? soapLangSelect.value : currentAppLang || "en").toLowerCase();
+    const selectedLang = (currentAppLang || (appLangSelect ? appLangSelect.value : "en")).toLowerCase();
     const t = APP_I18N[selectedLang] || APP_I18N.en;
 
     downloadSoapBtn.disabled = true;
