@@ -193,51 +193,6 @@ body {
   opacity: 0.95;
 }
 
-/* Feature 6: Sleek Frosted Privacy Pill in Topbar */
-.topbar-center {
-  display: flex;
-  align-items: center;
-}
-
-.privacy-vault-pill {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 7px 16px;
-  border-radius: var(--radius-pill);
-  background: rgba(18, 46, 29, 0.6);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-top: 1.5px solid var(--glass-border-top);
-  color: var(--text-bright);
-  font-size: 0.78rem;
-  font-weight: 700;
-  cursor: pointer;
-  transition: all 0.25s ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
-}
-
-.privacy-vault-pill:hover {
-  background: rgba(28, 64, 42, 0.75);
-  border-color: var(--lime-vibrant);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 15px rgba(163, 230, 53, 0.25);
-}
-
-.vault-indicator-dot {
-  width: 8px;
-  height: 8px;
-  border-radius: 50%;
-  background: var(--lime-electric);
-  box-shadow: 0 0 10px var(--lime-electric);
-  animation: pulseDot 2s infinite ease-in-out;
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.4; transform: scale(0.8); }
-}
 
 .topbar-right {
   display: flex;
