@@ -1,5 +1,6 @@
 import sys
 import os
+import re
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from fastapi import FastAPI, File, UploadFile, Form
@@ -95,10 +96,81 @@ BASE_SAFETY_INSTRUCTION = (
     "7. Doctor Guidance: For medical concerns, provide brief, accurate guidance and recommend consulting a healthcare professional if symptoms persist."
 )
 
-import re
+LOCALIZED_REFUSALS = {
+    "en": {
+        "initial": "I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions.",
+        "subsequent": "Please ask me only health, symptom, medication, or medical schedule-related questions."
+    },
+    "ta": {
+        "initial": "நான் மெட்ஹப் (MedHub), ஒரு மருத்துவ உதவியாளர். தயவுசெய்து உடல்நலம், அறிகுறிகள், மருந்துகள் அல்லது மருத்துவ அட்டவணை தொடர்பான கேள்விகளை மட்டுமே கேளுங்கள்.",
+        "subsequent": "தயவுசெய்து உடல்நலம், அறிகுறிகள், மருந்துகள் அல்லது மருத்துவ அட்டவணை தொடர்பான கேள்விகளை மட்டுமே கேளுங்கள்."
+    },
+    "hi": {
+        "initial": "मैं मेडहब (MedHub) हूँ, एक चिकित्सा सहायक। कृपया मुझसे केवल स्वास्थ्य, लक्षण, दवाइयों या मेडिकल शेड्यूल से संबंधित प्रश्न ही पूछें।",
+        "subsequent": "कृपया मुझसे केवल स्वास्थ्य, लक्षण, दवाइयों या मेडिकल शेड्यूल से संबंधित प्रश्न ही पूछें।"
+    },
+    "ml": {
+        "initial": "ഞാൻ മെഡ്ഹബ് (MedHub), ഒരു മെഡിക്കൽ അസിസ്റ്റന്റാണ്. ദയവായി ആരോഗ്യം, ലക്ഷണങ്ങൾ, മരുന്നുകൾ അല്ലെങ്കിൽ മെഡിക്കൽ ഷെഡ്യൂൾ എന്നിവയുമായി ബന്ധപ്പെട്ട ചോദ്യങ്ങൾ മാത്രം ചോദിക്കുക.",
+        "subsequent": "ദയവായി ആരോഗ്യം, ലക്ഷണങ്ങൾ, മരുന്നുകൾ അല്ലെങ്കിൽ മെഡിക്കൽ ഷെഡ്യൂൾ എന്നിവയുമായി ബന്ധപ്പെട്ട ചോദ്യങ്ങൾ മാത്രം ചോദിക്കുക."
+    },
+    "te": {
+        "initial": "నేను మెడ్‌హబ్ (MedHub), ఒక వైద్య సహాయకుడిని. దయచేసి ఆరోగ్యం, లక్షణాలు, మందులు లేదా మెడికల్ షెడ్యూల్‌కు సంబంధించిన ప్రశ్నలను మాత్రమే అడగండి.",
+        "subsequent": "దయచేసి ఆరోగ్యం, లక్షణాలు, మందులు లేదా మెడికల్ షెడ్యూల్‌కు సంబంధించిన ప్రశ్నలను మాత్రమే అడగండి."
+    },
+    "kn": {
+        "initial": "ನಾನು ಮೆಡ್‌ಹಬ್ (MedHub), ವೈದ್ಯಕೀಯ ಸಹಾಯಕ. ದಯವಿಟ್ಟು ಆರೋಗ್ಯ, ಲಕ್ಷಣಗಳು, ಔಷಧಗಳು ಅಥವಾ ವೈದ್ಯಕೀಯ ವೇಳಾಪಟ್ಟಿಗೆ ಸಂಬಂಧಿಸಿದ ಪ್ರಶ್ನೆಗಳನ್ನು ಮಾತ್ರ ಕೇಳಿ.",
+        "subsequent": "ದಯವಿಟ್ಟು ಆರೋಗ್ಯ, ಲಕ್ಷಣಗಳು, ಔಷಧಗಳು ಅಥವಾ ವೈದ್ಯಕೀಯ ವೇಳಾಪಟ್ಟಿಗೆ ಸಂಬಂಧಿಸಿದ ಪ್ರಶ್ನೆಗಳನ್ನು ಮಾತ್ರ ಕೇಳಿ."
+    },
+    "es": {
+        "initial": "Soy MedHub, un asistente médico. Por favor, hágame únicamente preguntas relacionadas con la salud, síntomas, medicamentos o horarios médicos.",
+        "subsequent": "Por favor, hágame únicamente preguntas relacionadas con la salud, síntomas, medicamentos o horarios médicos."
+    },
+    "fr": {
+        "initial": "Je suis MedHub, un assistant médical. Veuillez me poser uniquement des questions concernant la santé, les symptômes, les médicaments ou les plannings médicaux.",
+        "subsequent": "Veuillez me poser uniquement des questions concernant la santé, les symptômes, les medicamentos ou les plannings médicaux."
+    },
+    "de": {
+        "initial": "Ich bin MedHub, ein medizinischer Assistent. Bitte stellen Sie mir nur Fragen zu Gesundheit, Symptomen, Medikamenten oder medizinischen Plänen.",
+        "subsequent": "Bitte stellen Sie mir nur Fragen zu Gesundheit, Symptomen, Medikamenten oder medizinischen Plänen."
+    }
+}
 
-REFUSAL_MESSAGE = "I am MedHub, a medical assistant. Please ask me only health, symptom, medication, or medical schedule-related questions."
-REFUSAL_MESSAGE_SUBSEQUENT = "Please ask me only health, symptom, medication, or medical schedule-related questions."
+ALL_REFUSAL_MESSAGES = set()
+for _lang_dict in LOCALIZED_REFUSALS.values():
+    ALL_REFUSAL_MESSAGES.add(_lang_dict["initial"])
+    ALL_REFUSAL_MESSAGES.add(_lang_dict["subsequent"])
+
+def detect_language(text: str, default_lang: str = "en") -> str:
+    if text:
+        for char in text:
+            cp = ord(char)
+            if 0x0B80 <= cp <= 0x0BFF:
+                return "ta"
+            if 0x0900 <= cp <= 0x097F:
+                return "hi"
+            if 0x0D00 <= cp <= 0x0D7F:
+                return "ml"
+            if 0x0C00 <= cp <= 0x0C7F:
+                return "te"
+            if 0x0C80 <= cp <= 0x0CFF:
+                return "kn"
+    clean_default = (default_lang or "en").lower().strip()
+    if clean_default in LOCALIZED_REFUSALS:
+        return clean_default
+    return "en"
+
+def get_refusal_message(lang: str = "en", is_first_message: bool = True, text: str = "") -> str:
+    det_lang = detect_language(text, default_lang=lang)
+    refusals = LOCALIZED_REFUSALS.get(det_lang, LOCALIZED_REFUSALS["en"])
+    return refusals["initial"] if is_first_message else refusals["subsequent"]
+
+def is_refusal_text(text: str) -> bool:
+    if not text:
+        return False
+    return text.strip() in ALL_REFUSAL_MESSAGES
+
+REFUSAL_MESSAGE = LOCALIZED_REFUSALS["en"]["initial"]
+REFUSAL_MESSAGE_SUBSEQUENT = LOCALIZED_REFUSALS["en"]["subsequent"]
 
 def strip_repeated_intro(text: str) -> str:
     """Strips repetitive greetings and self-introductions (e.g. 'Hello! I am MedHub...') from follow-up messages."""
@@ -283,11 +355,11 @@ def is_explicitly_non_medical(text: str) -> bool:
     """Maintained for backward compatibility."""
     return not is_medical_query(text)
 
-def sanitize_response(user_input, response, is_first_message=True):
+def sanitize_response(user_input, response, is_first_message=True, lang="en"):
     if not is_medical_query(user_input):
-        return REFUSAL_MESSAGE if is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
+        return get_refusal_message(lang=lang, is_first_message=is_first_message, text=user_input)
     if any(code_tag in response for code_tag in ["```python", "```javascript", "```java", "```c", "```cpp", "```html", "```sql"]):
-        return REFUSAL_MESSAGE if is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
+        return get_refusal_message(lang=lang, is_first_message=is_first_message, text=user_input)
     if not is_first_message:
         response = strip_repeated_intro(response)
     return response
@@ -582,7 +654,7 @@ def get_polisher_module():
                 return None
     return None
 
-def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False, is_first_message: bool = True) -> str:
+def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False, is_first_message: bool = True, lang: str = "en") -> str:
     """
     Dynamically loads and invokes api_polisher.py if it exists on disk.
     If the file is deleted or disabled, returns text immediately with zero downtime and zero errors.
@@ -592,7 +664,7 @@ def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bo
     mod = get_polisher_module()
     if mod and hasattr(mod, "polish_text"):
         try:
-            res = mod.polish_text(text, user_query, is_first_message=is_first_message)
+            res = mod.polish_text(text, user_query, is_first_message=is_first_message, lang=lang)
             return strip_repeated_intro(res) if not is_first_message else res
         except Exception:
             pass
@@ -732,7 +804,7 @@ def package_clinical_data(user_query: str, response: str, username: str = "guest
 @app.post("/api/chat")
 def chat(req: ChatRequest):
     user = sanitize_username(req.username) or "guest"
-    refusal_msg = REFUSAL_MESSAGE if req.is_first_message else REFUSAL_MESSAGE_SUBSEQUENT
+    refusal_msg = get_refusal_message(lang=req.lang, is_first_message=req.is_first_message, text=req.message)
     if is_explicitly_non_medical(req.message):
         log_conversation(req.message, refusal_msg)
         log_user_conversation(user, req.message, refusal_msg)
@@ -746,16 +818,16 @@ def chat(req: ChatRequest):
 
     prompt = build_prompt(req.message, is_first_message=req.is_first_message)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = sanitize_response(req.message, output[0].outputs[0].text.strip(), is_first_message=req.is_first_message)
+    response = sanitize_response(req.message, output[0].outputs[0].text.strip(), is_first_message=req.is_first_message, lang=req.lang)
 
-    if req.enhance and response != refusal_msg and response != REFUSAL_MESSAGE:
-        response = apply_api_polisher_if_available(response, req.message, enabled=True, is_first_message=req.is_first_message)
+    if req.enhance and not is_refusal_text(response):
+        response = apply_api_polisher_if_available(response, req.message, enabled=True, is_first_message=req.is_first_message, lang=req.lang)
 
     log_conversation(req.message, response)
     log_user_conversation(user, req.message, response)
     return package_clinical_data(req.message, response, user, lang=req.lang)
 
-def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "", is_first_message: bool = True) -> str:
+def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "", is_first_message: bool = True, lang: str = "en") -> str:
     """
     Dynamically loads and invokes process_file_with_gemini from api_polisher.py if it exists on disk.
     If deleted or fails, returns empty string to trigger local fallback.
@@ -763,7 +835,7 @@ def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type
     mod = get_polisher_module()
     if mod and hasattr(mod, "process_file_with_gemini"):
         try:
-            res = mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query, is_first_message=is_first_message)
+            res = mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query, is_first_message=is_first_message, lang=lang)
             return strip_repeated_intro(res) if not is_first_message else res
         except Exception:
             pass
@@ -781,7 +853,7 @@ async def chat_with_file(
     user = sanitize_username(username) or "guest"
     is_enhanced = str(enhance).strip().lower() in ("true", "1", "yes")
     is_first = str(is_first_message).strip().lower() in ("true", "1", "yes")
-    refusal_msg = REFUSAL_MESSAGE if is_first else REFUSAL_MESSAGE_SUBSEQUENT
+    refusal_msg = get_refusal_message(lang=lang, is_first_message=is_first, text=message)
 
     if is_explicitly_non_medical(message):
         log_conversation(message, refusal_msg)
@@ -800,7 +872,7 @@ async def chat_with_file(
 
     # If enhanced mode is active and file was uploaded, try direct multimodal file analysis
     if file and file_bytes and is_enhanced:
-        api_resp = apply_file_polisher_if_available(file_bytes, file.filename, file.content_type or "", message, is_first_message=is_first)
+        api_resp = apply_file_polisher_if_available(file_bytes, file.filename, file.content_type or "", message, is_first_message=is_first, lang=lang)
         if api_resp and len(api_resp.strip()) > 10:
             log_title = f"{message} [Uploaded file: {file.filename}]" if message else f"[Uploaded file: {file.filename}]"
             log_conversation(log_title, api_resp)
@@ -811,10 +883,11 @@ async def chat_with_file(
     if file and file_bytes:
         extracted_text = extract_text_from_file(file_bytes, file.filename)
         if extracted_text and is_explicitly_non_medical(extracted_text):
-            log_conversation(message, refusal_msg)
-            log_user_conversation(user, message, refusal_msg)
+            file_refusal = get_refusal_message(lang=lang, is_first_message=is_first, text=extracted_text)
+            log_conversation(message, file_refusal)
+            log_user_conversation(user, message, file_refusal)
             return {
-                "response": refusal_msg,
+                "response": file_refusal,
                 "triage": evaluate_triage("non-medical", lang=lang),
                 "ddi": check_drug_interactions([], lang=lang),
                 "fda_info": {"drug_name": "N/A", "verified": False},
@@ -828,10 +901,10 @@ async def chat_with_file(
 
     prompt = build_prompt(full_message, is_first_message=is_first)
     output = llm.generate(prompt, sampling_params, lora_request=lora_request)
-    response = sanitize_response(full_message, output[0].outputs[0].text.strip(), is_first_message=is_first)
+    response = sanitize_response(full_message, output[0].outputs[0].text.strip(), is_first_message=is_first, lang=lang)
 
-    if is_enhanced and response != refusal_msg and response != REFUSAL_MESSAGE:
-        response = apply_api_polisher_if_available(response, full_message, enabled=True, is_first_message=is_first)
+    if is_enhanced and not is_refusal_text(response):
+        response = apply_api_polisher_if_available(response, full_message, enabled=True, is_first_message=is_first, lang=lang)
 
     log_conversation(full_message, response)
     log_user_conversation(user, full_message, response)
