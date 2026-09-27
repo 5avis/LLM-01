@@ -258,6 +258,10 @@ const APP_I18N = {
     downloadSoapLoading: "Synthesizing Audit PDF...",
     downloadSoapSuccess: "Downloaded SOAP Note!",
     soapS: "Subjective",
+    soapS_Full: "Subjective",
+    soapO_Full: "Objective",
+    soapA_Full: "Assessment",
+    soapP_Full: "Plan",
     soapO: "Objective",
     soapA: "Assessment",
     soapP: "Plan",
@@ -362,6 +366,10 @@ const APP_I18N = {
     downloadSoapLoading: "தமிழ் அறிக்கை தயாராகிறது...",
     downloadSoapSuccess: "பதிவிறக்கம் முடிந்தது!",
     soapS: "அகநிலை",
+    soapS_Full: "அகநிலை (Subjective)",
+    soapO_Full: "புறநிலை (Objective)",
+    soapA_Full: "மதிப்பீடு (Assessment)",
+    soapP_Full: "திட்டம் (Plan)",
     soapO: "புறநிலை",
     soapA: "மதிப்பீடு",
     soapP: "திட்டம்",
@@ -466,6 +474,10 @@ const APP_I18N = {
     downloadSoapLoading: "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
     downloadSoapSuccess: "ഡൗൺലോഡ് ചെയ്തു!",
     soapS: "സബ്ജക്റ്റീവ്",
+    soapS_Full: "സബ്ജക്റ്റീവ് (Subjective)",
+    soapO_Full: "ഒബ്ജക്റ്റീവ് (Objective)",
+    soapA_Full: "അസസ്സ്മെന്റ് (Assessment)",
+    soapP_Full: "പ്ലാൻ (Plan)",
     soapO: "ഒബ്ജക്റ്റീവ്",
     soapA: "അസസ്സ്മെന്റ്",
     soapP: "ചികിത്സാ പദ്ധതി",
@@ -570,6 +582,10 @@ const APP_I18N = {
     downloadSoapLoading: "నివేదిక సిద్ధమవుతోంది...",
     downloadSoapSuccess: "డౌన్‌లోడ్ పూర్తయింది!",
     soapS: "సబ్జెక్టివ్",
+    soapS_Full: "సబ్జెక్టివ్ (Subjective)",
+    soapO_Full: "ఆబ్జెక్టివ్ (Objective)",
+    soapA_Full: "అంచనా (Assessment)",
+    soapP_Full: "ప్రణాళిక (Plan)",
     soapO: "ఆబ్జెక్టివ్",
     soapA: "అంచనా",
     soapP: "ప్రణాళిక",
@@ -674,6 +690,10 @@ const APP_I18N = {
     downloadSoapLoading: "ವರದಿ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...",
     downloadSoapSuccess: "ಡೌನ್‌ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿದೆ!",
     soapS: "ಸಬ್ಜೆಕ್ಟಿವ್",
+    soapS_Full: "ಸಬ್ಜೆಕ್ಟಿವ್ (Subjective)",
+    soapO_Full: "ಆಬ್ಜೆಕ್ಟಿವ್ (Objective)",
+    soapA_Full: "ಮೌಲ್ಯಮಾಪನ (Assessment)",
+    soapP_Full: "ಯೋಜನೆ (Plan)",
     soapO: "ಆಬ್ಜೆಕ್ಟಿವ್",
     soapA: "ಮೌಲ್ಯಮಾಪನ",
     soapP: "ಯೋಜನೆ",
@@ -778,6 +798,10 @@ const APP_I18N = {
     downloadSoapLoading: "हिन्दी रिपोर्ट तैयार हो रही है...",
     downloadSoapSuccess: "डाउनलोड पूरा हुआ!",
     soapS: "व्यक्तिपरक",
+    soapS_Full: "व्यक्तिपरक (Subjective)",
+    soapO_Full: "वस्तुपरक (Objective)",
+    soapA_Full: "मूल्यांकन (Assessment)",
+    soapP_Full: "योजना (Plan)",
     soapO: "वस्तुपरक",
     soapA: "मूल्यांकन",
     soapP: "उपचार योजना",
@@ -855,30 +879,37 @@ function setTopbarLangDisplay(lang) {
   }
 }
 
-// Custom Green Language Selector Dropdown Event Listeners
-if (topbarLangTrigger && topbarLangMenu) {
+// Custom Green Language Selector Dropdown Event Listeners (Always responsive & solid)
+function toggleLangDropdown(forceOpen) {
+  if (!topbarLangMenu || !topbarLangTrigger) return;
+  const isCurrentlyOpen = topbarLangMenu.classList.contains("open") && topbarLangMenu.style.display === "flex";
+  const shouldOpen = (typeof forceOpen === "boolean") ? forceOpen : !isCurrentlyOpen;
+
+  if (shouldOpen) {
+    topbarLangMenu.classList.add("open");
+    topbarLangMenu.style.display = "flex";
+    topbarLangTrigger.classList.add("open");
+    topbarLangTrigger.setAttribute("aria-expanded", "true");
+  } else {
+    topbarLangMenu.classList.remove("open");
+    topbarLangMenu.style.display = "none";
+    topbarLangTrigger.classList.remove("open");
+    topbarLangTrigger.setAttribute("aria-expanded", "false");
+  }
+}
+
+if (topbarLangTrigger) {
   topbarLangTrigger.addEventListener("click", (e) => {
     e.stopPropagation();
-    const isOpen = topbarLangMenu.classList.contains("open");
-    if (isOpen) {
-      topbarLangMenu.classList.remove("open");
-      topbarLangTrigger.classList.remove("open");
-      topbarLangTrigger.setAttribute("aria-expanded", "false");
-    } else {
-      topbarLangMenu.classList.add("open");
-      topbarLangTrigger.classList.add("open");
-      topbarLangTrigger.setAttribute("aria-expanded", "true");
-    }
-  });
-
-  document.addEventListener("click", (e) => {
-    if (topbarLangDropdown && !topbarLangDropdown.contains(e.target)) {
-      topbarLangMenu.classList.remove("open");
-      topbarLangTrigger.classList.remove("open");
-      topbarLangTrigger.setAttribute("aria-expanded", "false");
-    }
+    toggleLangDropdown();
   });
 }
+
+document.addEventListener("click", (e) => {
+  if (topbarLangDropdown && !topbarLangDropdown.contains(e.target)) {
+    toggleLangDropdown(false);
+  }
+});
 
 if (langOptionBtns) {
   langOptionBtns.forEach(btn => {
@@ -888,13 +919,7 @@ if (langOptionBtns) {
       if (selectedLang) {
         applyAppLanguage(selectedLang);
       }
-      if (topbarLangMenu) {
-        topbarLangMenu.classList.remove("open");
-        if (topbarLangTrigger) {
-          topbarLangTrigger.classList.remove("open");
-          topbarLangTrigger.setAttribute("aria-expanded", "false");
-        }
-      }
+      toggleLangDropdown(false);
     });
   });
 }
@@ -984,11 +1009,30 @@ function applyAppLanguage(lang) {
   if (downloadSoapBtnText && !downloadSoapBtn.disabled) {
     downloadSoapBtnText.textContent = t.downloadSoapBtn;
   }
-  if (!latestSoapData) {
-    if (soapSubjectivePreview) soapSubjectivePreview.textContent = t.soapDefaultS;
-    if (soapObjectivePreview) soapObjectivePreview.textContent = t.soapDefaultO;
-    if (soapAssessmentPreview) soapAssessmentPreview.textContent = t.soapDefaultA;
-    if (soapPlanPreview) soapPlanPreview.textContent = t.soapDefaultP;
+  // Standard S.O.A.P. 4 Full Form Points (Always standard, stable, never changing into messy paragraphs)
+  if (soapSubjectivePreview) {
+    soapSubjectivePreview.textContent = t.soapS_Full || "Subjective";
+    if (soapSubjectivePreview.parentElement) {
+      soapSubjectivePreview.parentElement.title = (latestSoapData && latestSoapData.subjective) ? latestSoapData.subjective : (t.soapS_Full || "Subjective");
+    }
+  }
+  if (soapObjectivePreview) {
+    soapObjectivePreview.textContent = t.soapO_Full || "Objective";
+    if (soapObjectivePreview.parentElement) {
+      soapObjectivePreview.parentElement.title = (latestSoapData && latestSoapData.objective) ? latestSoapData.objective : (t.soapO_Full || "Objective");
+    }
+  }
+  if (soapAssessmentPreview) {
+    soapAssessmentPreview.textContent = t.soapA_Full || "Assessment";
+    if (soapAssessmentPreview.parentElement) {
+      soapAssessmentPreview.parentElement.title = (latestSoapData && latestSoapData.assessment) ? latestSoapData.assessment : (t.soapA_Full || "Assessment");
+    }
+  }
+  if (soapPlanPreview) {
+    soapPlanPreview.textContent = t.soapP_Full || "Plan";
+    if (soapPlanPreview.parentElement) {
+      soapPlanPreview.parentElement.title = (latestSoapData && latestSoapData.plan) ? latestSoapData.plan : (t.soapP_Full || "Plan");
+    }
   }
   if (playAdviceBtnText) playAdviceBtnText.textContent = t.playAdvice;
   if (stopAdviceBtnText) stopAdviceBtnText.textContent = t.stopAdvice;
@@ -1168,10 +1212,35 @@ function resetCockpitMetrics() {
     if (ddiActionBox) ddiActionBox.style.display = "none";
   }
 
-  if (soapSubjectivePreview) soapSubjectivePreview.textContent = t.soapDefaultS;
-  if (soapObjectivePreview) soapObjectivePreview.textContent = t.soapDefaultO;
-  if (soapAssessmentPreview) soapAssessmentPreview.textContent = t.soapDefaultA;
-  if (soapPlanPreview) soapPlanPreview.textContent = t.soapDefaultP;
+  // Standard S.O.A.P. 4 Full Form Points (Always standard)
+  if (soapSubjectivePreview) {
+    soapSubjectivePreview.textContent = t.soapS_Full || "Subjective";
+    if (soapSubjectivePreview.parentElement) {
+      soapSubjectivePreview.parentElement.classList.remove("active");
+      soapSubjectivePreview.parentElement.title = t.soapS_Full || "Subjective";
+    }
+  }
+  if (soapObjectivePreview) {
+    soapObjectivePreview.textContent = t.soapO_Full || "Objective";
+    if (soapObjectivePreview.parentElement) {
+      soapObjectivePreview.parentElement.classList.remove("active");
+      soapObjectivePreview.parentElement.title = t.soapO_Full || "Objective";
+    }
+  }
+  if (soapAssessmentPreview) {
+    soapAssessmentPreview.textContent = t.soapA_Full || "Assessment";
+    if (soapAssessmentPreview.parentElement) {
+      soapAssessmentPreview.parentElement.classList.remove("active");
+      soapAssessmentPreview.parentElement.title = t.soapA_Full || "Assessment";
+    }
+  }
+  if (soapPlanPreview) {
+    soapPlanPreview.textContent = t.soapP_Full || "Plan";
+    if (soapPlanPreview.parentElement) {
+      soapPlanPreview.parentElement.classList.remove("active");
+      soapPlanPreview.parentElement.title = t.soapP_Full || "Plan";
+    }
+  }
 
   stopVoiceAudio();
 }
@@ -1589,10 +1658,35 @@ function updateCockpitDashboard(data) {
   // 3. Feature 3: S.O.A.P. Record Update
   if (data.soap) {
     latestSoapData = data.soap;
-    soapSubjectivePreview.textContent = data.soap.subjective.replace(/\n/g, " • ").slice(0, 80) + "...";
-    soapObjectivePreview.textContent = data.soap.objective.replace(/\n/g, " • ").slice(0, 80) + "...";
-    soapAssessmentPreview.textContent = data.soap.assessment.replace(/\n/g, " • ").slice(0, 80) + "...";
-    soapPlanPreview.textContent = data.soap.plan.replace(/\n/g, " • ").slice(0, 80) + "...";
+    // Standard SOAP 4 full-form points stay constant to preserve UI integrity!
+    if (soapSubjectivePreview) {
+      soapSubjectivePreview.textContent = tLoc.soapS_Full || "Subjective";
+      if (soapSubjectivePreview.parentElement) {
+        soapSubjectivePreview.parentElement.classList.add("active");
+        soapSubjectivePreview.parentElement.title = data.soap.subjective || tLoc.soapS_Full;
+      }
+    }
+    if (soapObjectivePreview) {
+      soapObjectivePreview.textContent = tLoc.soapO_Full || "Objective";
+      if (soapObjectivePreview.parentElement) {
+        soapObjectivePreview.parentElement.classList.add("active");
+        soapObjectivePreview.parentElement.title = data.soap.objective || tLoc.soapO_Full;
+      }
+    }
+    if (soapAssessmentPreview) {
+      soapAssessmentPreview.textContent = tLoc.soapA_Full || "Assessment";
+      if (soapAssessmentPreview.parentElement) {
+        soapAssessmentPreview.parentElement.classList.add("active");
+        soapAssessmentPreview.parentElement.title = data.soap.assessment || tLoc.soapA_Full;
+      }
+    }
+    if (soapPlanPreview) {
+      soapPlanPreview.textContent = tLoc.soapP_Full || "Plan";
+      if (soapPlanPreview.parentElement) {
+        soapPlanPreview.parentElement.classList.add("active");
+        soapPlanPreview.parentElement.title = data.soap.plan || tLoc.soapP_Full;
+      }
+    }
   }
 
   // 4. Feature 5: OpenFDA Grounding Update
@@ -2098,7 +2192,8 @@ async function loadHistory() {
           body: JSON.stringify({
             query: lastItem.patient,
             response: lastItem.doctor,
-            username: currentUser
+            username: currentUser,
+            lang: currentAppLang || "en"
           })
         }).then(r => r.json()).then(payload => {
           updateCockpitDashboard(payload);

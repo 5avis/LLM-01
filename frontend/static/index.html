@@ -53,7 +53,7 @@
             <span class="topbar-lang-current" id="topbarLangCurrent">English (EN)</span>
             <svg class="topbar-lang-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
-          <div class="topbar-lang-menu" id="topbarLangMenu" role="listbox" style="display: none;">
+          <div class="topbar-lang-menu" id="topbarLangMenu" role="listbox">
             <button class="lang-option active" data-lang="en" type="button" role="option">
               <span class="lang-opt-name">English</span>
               <span class="lang-opt-code">EN</span>
@@ -284,12 +284,24 @@
               <span id="downloadSoapBtnText">Download S.O.A.P. Summary (PDF)</span>
             </button>
 
-            <!-- Compact SOAP Preview Pills -->
+            <!-- Standard S.O.A.P. Full Form Clinical Pillars -->
             <div class="soap-compact-row">
-              <div class="soap-tag-item"><span class="soap-tag s">S</span><span class="soap-tag-text" id="soapSubjectivePreview">Subjective</span></div>
-              <div class="soap-tag-item"><span class="soap-tag o">O</span><span class="soap-tag-text" id="soapObjectivePreview">Objective</span></div>
-              <div class="soap-tag-item"><span class="soap-tag a">A</span><span class="soap-tag-text" id="soapAssessmentPreview">Assessment</span></div>
-              <div class="soap-tag-item"><span class="soap-tag p">P</span><span class="soap-tag-text" id="soapPlanPreview">Plan</span></div>
+              <div class="soap-tag-item" title="Subjective: Patient complaints, symptoms, and medical history">
+                <span class="soap-tag s">S</span>
+                <span class="soap-tag-text" id="soapSubjectivePreview">Subjective</span>
+              </div>
+              <div class="soap-tag-item" title="Objective: Vital signs, physical examination, and lab findings">
+                <span class="soap-tag o">O</span>
+                <span class="soap-tag-text" id="soapObjectivePreview">Objective</span>
+              </div>
+              <div class="soap-tag-item" title="Assessment: Differential diagnosis, clinical evaluation, and triage">
+                <span class="soap-tag a">A</span>
+                <span class="soap-tag-text" id="soapAssessmentPreview">Assessment</span>
+              </div>
+              <div class="soap-tag-item" title="Plan: Treatment protocol, medication schedule, and follow-up">
+                <span class="soap-tag p">P</span>
+                <span class="soap-tag-text" id="soapPlanPreview">Plan</span>
+              </div>
             </div>
 
             <!-- Feature 4: Audio Prescription Voice Controller -->
