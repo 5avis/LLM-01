@@ -396,6 +396,28 @@ def generate_schedule_pdf(schedule_text):
     buffer.seek(0)
     return buffer
 
+def get_polisher_module():
+    """
+    Dynamically loads api_polisher if present on disk (in frontend/ or root).
+    If api_polisher.py is deleted, returns None immediately with zero downtime or traces.
+    """
+    candidates = [
+        os.path.join(FRONTEND_DIR, "api_polisher.py"),
+        os.path.join(BASE_DIR, "api_polisher.py")
+    ]
+    for p in candidates:
+        if os.path.exists(p):
+            try:
+                import importlib.util
+                spec = importlib.util.spec_from_file_location("api_polisher", p)
+                if spec and spec.loader:
+                    mod = importlib.util.module_from_spec(spec)
+                    spec.loader.exec_module(mod)
+                    return mod
+            except Exception:
+                return None
+    return None
+
 def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bool = False, is_first_message: bool = True) -> str:
     """
     Dynamically loads and invokes api_polisher.py if it exists on disk.
@@ -403,20 +425,13 @@ def apply_api_polisher_if_available(text: str, user_query: str = "", enabled: bo
     """
     if not enabled:
         return strip_repeated_intro(text) if not is_first_message else text
-    polisher_file = os.path.join(BASE_DIR, "api_polisher.py")
-    if not os.path.exists(polisher_file):
-        return strip_repeated_intro(text) if not is_first_message else text
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("api_polisher", polisher_file)
-        if spec and spec.loader:
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            if hasattr(mod, "polish_text"):
-                res = mod.polish_text(text, user_query, is_first_message=is_first_message)
-                return strip_repeated_intro(res) if not is_first_message else res
-    except Exception:
-        pass
+    mod = get_polisher_module()
+    if mod and hasattr(mod, "polish_text"):
+        try:
+            res = mod.polish_text(text, user_query, is_first_message=is_first_message)
+            return strip_repeated_intro(res) if not is_first_message else res
+        except Exception:
+            pass
     return strip_repeated_intro(text) if not is_first_message else text
 
 app = FastAPI()
@@ -581,20 +596,13 @@ def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type
     Dynamically loads and invokes process_file_with_gemini from api_polisher.py if it exists on disk.
     If deleted or fails, returns empty string to trigger local fallback.
     """
-    polisher_file = os.path.join(BASE_DIR, "api_polisher.py")
-    if not os.path.exists(polisher_file):
-        return ""
-    try:
-        import importlib.util
-        spec = importlib.util.spec_from_file_location("api_polisher", polisher_file)
-        if spec and spec.loader:
-            mod = importlib.util.module_from_spec(spec)
-            spec.loader.exec_module(mod)
-            if hasattr(mod, "process_file_with_gemini"):
-                res = mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query, is_first_message=is_first_message)
-                return strip_repeated_intro(res) if not is_first_message else res
-    except Exception:
-        pass
+    mod = get_polisher_module()
+    if mod and hasattr(mod, "process_file_with_gemini"):
+        try:
+            res = mod.process_file_with_gemini(file_bytes, filename, mime_type, user_query, is_first_message=is_first_message)
+            return strip_repeated_intro(res) if not is_first_message else res
+        except Exception:
+            pass
     return ""
 
 @app.post("/api/chat-with-file")
@@ -716,6 +724,26 @@ async def generate_soap_pdf_endpoint(
         filename=f"medhub_soap_report_{lang_clean}.pdf"
     )
 
+@app.post("/api/transcribe_audio")
+async def transcribe_audio_endpoint(
+    audio: UploadFile = File(...),
+    lang: str = Form("en")
+):
+    """
+    Audio speech-to-text endpoint using optional api_polisher.py.
+    If api_polisher.py is deleted, returns clean fallback response without errors.
+    """
+    try:
+        audio_bytes = await audio.read()
+        mime_type = audio.content_type or "audio/webm"
+        mod = get_polisher_module()
+        if mod and hasattr(mod, "transcribe_audio_with_gemini"):
+            text = mod.transcribe_audio_with_gemini(audio_bytes, mime_type=mime_type, lang=lang)
+            if text and text.strip():
+                return {"success": True, "text": text.strip()}
+    except Exception as e:
+        print(f"Audio transcription error: {e}")
+    return {"success": False, "text": "", "error": "Transcription unavailable"}
 
 @app.get("/")
 def serve_index():
@@ -725,8 +753,26 @@ app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
 
 if __name__ == "__main__":
     import uvicorn
+    import threading
+
+    cert_path = os.path.join(FRONTEND_DIR, "cert.pem")
+    key_path = os.path.join(FRONTEND_DIR, "key.pem")
+    has_ssl = os.path.exists(cert_path) and os.path.exists(key_path)
+
+    if has_ssl:
+        def start_https():
+            try:
+                uvicorn.run(app, host="0.0.0.0", port=7861, ssl_certfile=cert_path, ssl_keyfile=key_path, log_level="warning")
+            except Exception as e:
+                print(f"HTTPS service note: {e}")
+        https_thread = threading.Thread(target=start_https, daemon=True)
+        https_thread.start()
+
     print("\n" + "=" * 60)
     print(" MedHub AI Assistant is live and ready!")
-    print(" Remote URL: http://192.168.4.99:7860")
+    print(" Standard HTTP: http://192.168.4.99:7860")
+    if has_ssl:
+        print(" Secure HTTPS:   https://192.168.4.99:7861 (Microphone natively enabled)")
     print("=" * 60 + "\n")
+
     uvicorn.run(app, host="0.0.0.0", port=7860)

@@ -2307,106 +2307,22 @@ speedChips.forEach(chip => {
 // ---------------------------------------------------------------------------
 // 10.1 AUDIO INPUT / VOICE DICTATION (Microphone & Headphone Support)
 // ---------------------------------------------------------------------------
-function initSpeechRecognition() {
+// ---------------------------------------------------------------------------
+// 10.1 AUDIO INPUT / VOICE DICTATION (Hardware MediaRecorder + API Transcription)
+// ---------------------------------------------------------------------------
+let mediaRecorderInstance = null;
+let mediaAudioChunks = [];
+let mediaStreamRef = null;
+let isAudioRecording = false;
+
+function initLiveSpeechRecognition() {
   const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognitionClass) {
-    return null;
-  }
+  if (!SpeechRecognitionClass) return null;
 
   const recognition = new SpeechRecognitionClass();
   recognition.continuous = true;
   recognition.interimResults = true;
   recognition.maxAlternatives = 1;
-
-  recognition.onstart = () => {
-    isSpeechRecognizing = true;
-    if (micBtn) micBtn.classList.add("recording");
-    if (micRecordingStatus) micRecordingStatus.style.display = "flex";
-    const t = APP_I18N[currentAppLang] || APP_I18N.en;
-    if (micStatusLabel) micStatusLabel.textContent = t.micListening || "Listening via microphone... Speak your symptoms";
-    speechBaseInputText = inputEl.value ? inputEl.value.trim() + " " : "";
-  };
-
-  recognition.onresult = (event) => {
-    let interimText = "";
-    let finalText = "";
-
-    for (let i = event.resultIndex; i < event.results.length; i++) {
-      const transcript = event.results[i][0].transcript;
-      if (event.results[i].isFinal) {
-        finalText += transcript + " ";
-      } else {
-        interimText += transcript;
-      }
-    }
-
-    if (finalText) {
-      speechBaseInputText += finalText;
-    }
-
-    inputEl.value = (speechBaseInputText + interimText).trimStart();
-    autoResize();
-  };
-
-  recognition.onerror = (event) => {
-    console.warn("Speech recognition error:", event.error);
-    if (event.error === "not-allowed" || event.error === "permission-denied") {
-      showMicGuideModal();
-    }
-    stopSpeechRecognition();
-  };
-
-  recognition.onend = () => {
-    stopSpeechRecognition();
-  };
-
-  return recognition;
-}
-
-function toggleSpeechRecognition() {
-  if (isSpeechRecognizing) {
-    stopSpeechRecognition();
-    return;
-  }
-  startSpeechRecognition();
-}
-
-async function startSpeechRecognition() {
-  const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
-  if (!SpeechRecognitionClass) {
-    alert("Voice speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge to use your laptop mic or headphones.");
-    return;
-  }
-
-  // Check if browser context is insecure HTTP (Chrome blocks mic on remote HTTP IPs)
-  const isSecure = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
-  if (!isSecure) {
-    showMicGuideModal();
-    return;
-  }
-
-  // Request microphone device access to prompt browser permissions dialog if not yet granted
-  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      stream.getTracks().forEach(track => track.stop());
-    } catch (err) {
-      console.warn("Microphone permission check:", err);
-      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        showMicGuideModal();
-        return;
-      }
-    }
-  }
-
-  // Wake up audio subsystem
-  primeAudioHardware();
-
-  if (!recognitionInstance) {
-    recognitionInstance = initSpeechRecognition();
-  }
-
-  if (!recognitionInstance) return;
 
   const recLangMap = {
     en: "en-US",
@@ -2416,30 +2332,202 @@ async function startSpeechRecognition() {
     kn: "kn-IN",
     hi: "hi-IN"
   };
-  recognitionInstance.lang = recLangMap[currentAppLang] || "en-US";
+  recognition.lang = recLangMap[currentAppLang] || "en-US";
 
-  try {
-    recognitionInstance.start();
-  } catch (err) {
-    console.warn("Recognition start note:", err);
-    try {
-      recognitionInstance.stop();
-      setTimeout(() => recognitionInstance.start(), 200);
-    } catch (e) {
-      stopSpeechRecognition();
+  recognition.onresult = (event) => {
+    let interimText = "";
+    let finalText = "";
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript + " ";
+      } else {
+        interimText += transcript;
+      }
     }
-  }
+    if (finalText) {
+      speechBaseInputText += finalText;
+    }
+    inputEl.value = (speechBaseInputText + interimText).trimStart();
+    autoResize();
+  };
+
+  recognition.onerror = () => {};
+  recognition.onend = () => {};
+  return recognition;
 }
 
-function stopSpeechRecognition() {
+function startLiveInterimSpeech() {
+  try {
+    if (!recognitionInstance) {
+      recognitionInstance = initLiveSpeechRecognition();
+    }
+    if (recognitionInstance) {
+      const recLangMap = {
+        en: "en-US",
+        ta: "ta-IN",
+        ml: "ml-IN",
+        te: "te-IN",
+        kn: "kn-IN",
+        hi: "hi-IN"
+      };
+      recognitionInstance.lang = recLangMap[currentAppLang] || "en-US";
+      recognitionInstance.start();
+    }
+  } catch (e) {}
+}
+
+function stopLiveInterimSpeech() {
   if (recognitionInstance) {
     try {
       recognitionInstance.stop();
     } catch (e) {}
   }
+}
+
+function toggleSpeechRecognition() {
+  if (isAudioRecording) {
+    stopSpeechRecognition();
+    return;
+  }
+  startAudioRecording();
+}
+
+async function startAudioRecording() {
+  if (isAudioRecording) {
+    stopSpeechRecognition();
+    return;
+  }
+
+  // Check if browser context is insecure HTTP on IP address
+  const isSecure = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  if (!isSecure && !navigator.mediaDevices) {
+    showMicGuideModal();
+    return;
+  }
+
+  // Wake up hardware audio subsystem
+  primeAudioHardware();
+
+  try {
+    mediaStreamRef = await navigator.mediaDevices.getUserMedia({
+      audio: {
+        echoCancellation: true,
+        noiseSuppression: true,
+        autoGainControl: true
+      }
+    });
+  } catch (err) {
+    console.warn("Microphone access check:", err);
+    showMicGuideModal();
+    return;
+  }
+
+  try {
+    mediaAudioChunks = [];
+    let mimeType = "audio/webm";
+    if (typeof MediaRecorder.isTypeSupported === "function") {
+      if (MediaRecorder.isTypeSupported("audio/webm;codecs=opus")) {
+        mimeType = "audio/webm;codecs=opus";
+      } else if (MediaRecorder.isTypeSupported("audio/webm")) {
+        mimeType = "audio/webm";
+      } else if (MediaRecorder.isTypeSupported("audio/mp4")) {
+        mimeType = "audio/mp4";
+      } else if (MediaRecorder.isTypeSupported("audio/ogg")) {
+        mimeType = "audio/ogg";
+      }
+    }
+
+    mediaRecorderInstance = new MediaRecorder(mediaStreamRef, { mimeType });
+    mediaRecorderInstance.ondataavailable = (e) => {
+      if (e.data && e.data.size > 0) {
+        mediaAudioChunks.push(e.data);
+      }
+    };
+
+    mediaRecorderInstance.onstart = () => {
+      isAudioRecording = true;
+      isSpeechRecognizing = true;
+      if (micBtn) micBtn.classList.add("recording");
+      if (micRecordingStatus) micRecordingStatus.style.display = "flex";
+      const t = APP_I18N[currentAppLang] || APP_I18N.en;
+      if (micStatusLabel) micStatusLabel.textContent = t.micListening || "Listening via microphone... Click Mic or Done when finished";
+      speechBaseInputText = inputEl.value ? inputEl.value.trim() + " " : "";
+    };
+
+    mediaRecorderInstance.onstop = async () => {
+      isAudioRecording = false;
+      isSpeechRecognizing = false;
+      if (micBtn) micBtn.classList.remove("recording");
+
+      if (mediaStreamRef) {
+        mediaStreamRef.getTracks().forEach(track => track.stop());
+        mediaStreamRef = null;
+      }
+
+      stopLiveInterimSpeech();
+
+      if (mediaAudioChunks.length === 0) {
+        if (micRecordingStatus) micRecordingStatus.style.display = "none";
+        return;
+      }
+
+      const recordedBlob = new Blob(mediaAudioChunks, { type: mimeType });
+      if (recordedBlob.size < 600) {
+        if (micRecordingStatus) micRecordingStatus.style.display = "none";
+        return;
+      }
+
+      if (micStatusLabel) micStatusLabel.textContent = "Transcribing speech via AI...";
+
+      try {
+        const formData = new FormData();
+        formData.append("audio", recordedBlob, "speech.webm");
+        formData.append("lang", currentAppLang || "en");
+
+        const res = await fetch("/api/transcribe_audio", {
+          method: "POST",
+          body: formData
+        });
+
+        if (res.ok) {
+          const result = await res.json();
+          if (result.success && result.text && result.text.trim()) {
+            inputEl.value = (speechBaseInputText + result.text.trim()).trim();
+            autoResize();
+            inputEl.focus();
+            const len = inputEl.value.length;
+            inputEl.setSelectionRange(len, len);
+          }
+        }
+      } catch (transcribeErr) {
+        console.warn("API audio transcription note:", transcribeErr);
+      } finally {
+        if (micRecordingStatus) micRecordingStatus.style.display = "none";
+      }
+    };
+
+    mediaRecorderInstance.start(250);
+
+    // Live interim feedback if supported
+    startLiveInterimSpeech();
+
+  } catch (recErr) {
+    console.error("Failed to start MediaRecorder:", recErr);
+    stopSpeechRecognition();
+  }
+}
+
+function stopSpeechRecognition() {
+  if (mediaRecorderInstance && mediaRecorderInstance.state !== "inactive") {
+    try {
+      mediaRecorderInstance.stop();
+    } catch (e) {}
+  }
+  stopLiveInterimSpeech();
+  isAudioRecording = false;
   isSpeechRecognizing = false;
   if (micBtn) micBtn.classList.remove("recording");
-  if (micRecordingStatus) micRecordingStatus.style.display = "none";
   if (inputEl) {
     inputEl.focus();
     const len = inputEl.value.length;
