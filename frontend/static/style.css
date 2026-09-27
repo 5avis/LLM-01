@@ -1,59 +1,52 @@
 /* ==========================================================================
-   MEDHUB CLINICAL INTELLIGENCE — CALMING BOTANICAL, SOFT BEIGE & FROSTED GLASS
-   Harmonious blend of soothing soft beige, clean crisp white, and deep botanical green
+   MEDHUB CLINICAL INTELLIGENCE — MOODY OBSIDIAN & MUTED SAGE GLASS ARCHITECTURE
+   - Global Background: Deep Obsidian Green (#050A07) & Dark Pine Green (#16261E)
+   - Glass Panels: Semi-transparent Muted Sage Green rgba(67, 89, 76, 0.15) with blur(16px)
+   - Primary Text & Headings: Pure White (#FFFFFF)
+   - Secondary Text & Inputs: Soft Grayish-White (rgba(255, 255, 255, 0.6) / #A3B0A7)
+   - Glass Borders (3D Depth): 1px solid; Top/Left rgba(255, 255, 255, 0.15), Bottom/Right rgba(0, 0, 0, 0.3)
+   - Drop Shadows: Deep, diffused black rgba(0, 0, 0, 0.5)
    ========================================================================== */
 
 :root {
-  /* Rich Botanical Green Foundation */
-  --bg-botanical-dark: #0b1a11;
-  --bg-botanical-mid: #132a1c;
-  --bg-botanical-light: #1c3d2a;
+  /* Moody Obsidian & Dark Pine Background */
+  --bg-obsidian: #050A07;
+  --bg-dark-pine: #16261E;
 
-  /* Soft Beige & Warm Linen Tones */
-  --beige-pure: #fbf9f5;
-  --beige-soft: #f5efe4;
-  --beige-warm: #ede4d3;
-  --beige-muted: #dfd4c0;
-  --beige-dim: #cfc2ab;
-  --beige-glow: rgba(245, 239, 228, 0.22);
+  /* Glass Panels: Semi-transparent Muted Sage Green with blur(16px) */
+  --glass-sage: rgba(67, 89, 76, 0.15);
+  --glass-surface: rgba(67, 89, 76, 0.15);
+  --glass-blur: blur(16px);
 
-  /* Frosted Glass Layers with Soft Beige & Pure White Luster */
-  --glass-surface: rgba(255, 255, 255, 0.14);
-  --glass-surface-card: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(248, 244, 236, 0.13) 45%, rgba(235, 227, 212, 0.07) 100%);
-  --glass-surface-card-hover: linear-gradient(135deg, rgba(255, 255, 255, 0.32) 0%, rgba(250, 246, 238, 0.18) 45%, rgba(238, 231, 218, 0.12) 100%);
-  --glass-surface-dark: rgba(14, 25, 18, 0.82);
-  --glass-surface-input: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(248, 244, 236, 0.09) 50%, rgba(14, 30, 21, 0.75) 100%);
+  /* 3D Glass Depth Borders */
+  --glass-border-highlight: rgba(255, 255, 255, 0.15);
+  --glass-border-shadow: rgba(0, 0, 0, 0.3);
 
-  /* Crisp White & Soft Beige Specular Highlights */
-  --glass-border: rgba(255, 255, 255, 0.28);
-  --glass-border-beige: rgba(245, 239, 228, 0.35);
-  --glass-border-top: rgba(255, 255, 255, 0.72);
-  --glass-border-active: rgba(255, 255, 255, 0.6);
-  --glass-inner-glow: inset 0 1px 2px rgba(255, 255, 255, 0.65), inset 0 0 20px rgba(245, 239, 228, 0.08);
-  --glass-shadow: 0 16px 42px -6px rgba(0, 0, 0, 0.32);
-  --glass-blur: blur(26px) saturate(130%);
+  /* Deep Diffused Black Drop Shadows */
+  --glass-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
+  --glass-shadow-deep: 0 20px 48px rgba(0, 0, 0, 0.55);
 
-  /* Softer, Refined Clinical Accents */
-  --lime-electric: #9fe64b;
-  --lime-vibrant: #8ed63e;
-  --lime-deep: #65a30d;
+  /* Primary Text & Headings: Pure White */
+  --text-pure: #FFFFFF;
+  --text-bright: #FFFFFF;
+  --text-primary: #FFFFFF;
+
+  /* Secondary Text & Inputs: Soft Grayish-White */
+  --text-secondary: rgba(255, 255, 255, 0.6);
+  --text-dim: #A3B0A7;
+  --text-muted: #A3B0A7;
+  --text-mint: #a7f3d0;
+  --text-dark: #050A07;
+
+  /* Botanical Accents for Action Buttons & Badges */
+  --lime-electric: #a3e635;
   --emerald-fresh: #22c55e;
-  --mint-bright: #9ae6b4;
   --alert-red: #ef4444;
   --caution-amber: #f59e0b;
 
-  /* Typography: Crisp Pure White & Calming Soft Beige */
-  --text-pure: #ffffff;
-  --text-bright: #ffffff;
-  --text-beige: #f5efe4;
-  --text-beige-muted: #e4dac7;
-  --text-dim: #b8c4bc;
-  --text-mint: #a7f3d0;
-  --text-dark: #081706;
-
   --radius-sm: 10px;
-  --radius-md: 18px;
-  --radius-lg: 26px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
   --radius-xl: 32px;
   --radius-pill: 9999px;
 }
@@ -65,17 +58,13 @@
 }
 
 body {
-  background-color: var(--bg-botanical-dark);
-  /* Soothing Botanical Environment with Soft Beige Diffused Light */
+  background-color: var(--bg-obsidian);
   background-image:
-    radial-gradient(circle 950px at 15% 10%, rgba(248, 244, 236, 0.22) 0%, rgba(235, 226, 210, 0.12) 35%, transparent 65%),
-    radial-gradient(circle 900px at 85% 15%, rgba(248, 244, 236, 0.18) 0%, rgba(245, 240, 230, 0.12) 30%, rgba(34, 197, 94, 0.12) 60%, transparent 75%),
-    radial-gradient(circle 800px at 50% 85%, rgba(245, 238, 225, 0.15) 0%, rgba(20, 83, 45, 0.18) 45%, transparent 70%),
-    radial-gradient(circle 650px at 90% 80%, rgba(245, 239, 228, 0.14) 0%, rgba(22, 101, 52, 0.18) 50%, transparent 70%),
-    radial-gradient(circle 550px at 8% 75%, rgba(240, 232, 218, 0.16) 0%, transparent 60%),
-    linear-gradient(145deg, #0e2217 0%, #153322 35%, #0f271a 70%, #09170f 100%);
+    radial-gradient(circle 900px at 15% 15%, rgba(22, 38, 30, 0.7) 0%, transparent 70%),
+    radial-gradient(circle 850px at 85% 85%, rgba(22, 38, 30, 0.6) 0%, transparent 70%),
+    linear-gradient(145deg, #050A07 0%, #16261E 50%, #050A07 100%);
   background-attachment: fixed;
-  color: var(--text-bright);
+  color: var(--text-primary);
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
   height: 100vh;
   overflow: hidden;
@@ -83,7 +72,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
-/* Ambient Floating Bokeh Orbs (Soft Beige & Botanical Green Diffused Glow) */
+/* Ambient Floating Bokeh Orbs (Deep Diffused Atmosphere) */
 .ambient-glow {
   position: fixed;
   border-radius: 50%;
@@ -92,25 +81,25 @@ body {
   z-index: 0;
 }
 .glow-top-left {
-  width: 620px;
-  height: 620px;
+  width: 600px;
+  height: 600px;
   top: -120px;
   left: -90px;
-  background: radial-gradient(circle, rgba(252, 249, 242, 0.25) 0%, rgba(243, 235, 220, 0.15) 45%, transparent 75%);
+  background: radial-gradient(circle, rgba(22, 38, 30, 0.45) 0%, transparent 70%);
 }
 .glow-bottom-right {
   width: 650px;
   height: 650px;
   bottom: -140px;
   right: -90px;
-  background: radial-gradient(circle, rgba(248, 244, 236, 0.2) 0%, rgba(246, 240, 230, 0.12) 45%, rgba(34, 197, 94, 0.15) 70%, transparent 80%);
+  background: radial-gradient(circle, rgba(22, 38, 30, 0.35) 0%, transparent 75%);
 }
 .glow-center {
-  width: 520px;
-  height: 520px;
+  width: 500px;
+  height: 500px;
   top: 30%;
   left: 35%;
-  background: radial-gradient(circle, rgba(248, 242, 232, 0.14) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(22, 38, 30, 0.2) 0%, transparent 70%);
 }
 
 .app-layout {
@@ -131,11 +120,14 @@ body {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.1) 0%, rgba(14, 38, 23, 0.5) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-bottom: 1px solid var(--glass-border);
-  box-shadow: 0 6px 25px rgba(0, 0, 0, 0.22);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   flex-shrink: 0;
   z-index: 100;
   overflow: visible;
@@ -243,11 +235,17 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 6px;
   padding: 6px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--mint-bright);
+  color: var(--text-dim);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   user-select: none;
 }
 
@@ -270,29 +268,32 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   display: inline-flex;
   align-items: center;
   gap: 7px;
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.18) 0%, rgba(245, 239, 228, 0.1) 45%, rgba(34, 197, 94, 0.16) 100%);
-  border: 1.5px solid rgba(248, 244, 236, 0.35);
-  border-top: 1.5px solid rgba(248, 244, 236, 0.6);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-pill);
   padding: 0 13px 0 11px;
   height: 38px;
-  color: var(--beige-soft);
+  color: #FFFFFF;
   font-family: inherit;
   font-size: 0.82rem;
   font-weight: 700;
   cursor: pointer;
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
   transition: all 0.22s ease;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(248, 244, 236, 0.45);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   user-select: none;
 }
 
 .topbar-lang-trigger:hover,
 .topbar-lang-trigger.open {
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.26) 0%, rgba(250, 246, 238, 0.16) 45%, rgba(34, 197, 94, 0.22) 100%);
-  border-color: rgba(248, 244, 236, 0.65);
-  box-shadow: 0 0 16px rgba(245, 239, 228, 0.3), inset 0 1px 2px rgba(248, 244, 236, 0.7);
+  background: rgba(67, 89, 76, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6);
   color: #ffffff;
 }
 
@@ -309,7 +310,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 }
 
 .topbar-lang-chevron {
-  color: #e4dac7;
+  color: var(--text-dim);
   transition: transform 0.25s ease;
   margin-left: 2px;
 }
@@ -324,16 +325,19 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   top: calc(100% + 7px);
   left: 0;
   min-width: 175px;
-  background: linear-gradient(145deg, rgba(22, 42, 30, 0.97) 0%, rgba(12, 26, 18, 0.98) 100%);
-  border: 1.5px solid rgba(248, 244, 236, 0.3);
+  background: rgba(18, 32, 24, 0.95);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-md);
   padding: 6px;
   display: none;
   flex-direction: column;
   gap: 3px;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
-  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.7), 0 0 20px rgba(245, 239, 228, 0.12);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   z-index: 99999;
 }
 
@@ -362,7 +366,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   border-radius: var(--radius-sm);
   background: transparent;
   border: 1px solid transparent;
-  color: #f5efe6;
+  color: var(--text-dim);
   font-family: inherit;
   font-size: 0.83rem;
   font-weight: 600;
@@ -373,15 +377,15 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 }
 
 .lang-option:hover {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(67, 89, 76, 0.25);
   color: #ffffff;
-  border-color: rgba(245, 239, 228, 0.3);
+  border-color: rgba(255, 255, 255, 0.15);
   transform: translateX(2px);
 }
 
 .lang-option.active {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(34, 197, 94, 0.26) 100%);
-  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(67, 89, 76, 0.35);
+  border-color: rgba(255, 255, 255, 0.25);
   color: #ffffff;
   font-weight: 700;
 }
@@ -395,14 +399,14 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   font-weight: 800;
   padding: 2px 6px;
   border-radius: 4px;
-  background: rgba(255, 255, 255, 0.16);
-  color: #f5efe6;
+  background: rgba(67, 89, 76, 0.3);
+  color: var(--text-dim);
   letter-spacing: 0.05em;
 }
 
 .lang-option.active .lang-opt-code {
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
+  color: #050A07;
 }
 
 /* Tactile Pill Buttons */
@@ -416,38 +420,42 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   font-weight: 700;
   cursor: pointer;
   transition: all 0.22s ease;
-  border: none;
   font-family: inherit;
 }
 
 .cockpit-btn.primary {
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
-  border: 1.5px solid rgba(248, 244, 236, 0.6);
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  color: #050A07;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(34, 197, 94, 0.3);
 }
 
 .cockpit-btn.primary:hover {
   background: linear-gradient(135deg, #bbf451 0%, #4ade80 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 22px rgba(34, 197, 94, 0.5), inset 0 1px 2px rgba(248, 244, 236, 0.8);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(34, 197, 94, 0.4);
 }
 
 .cockpit-btn.secondary {
-  background: rgba(248, 244, 236, 0.12);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  color: var(--beige-soft);
-  border: 1px solid rgba(248, 244, 236, 0.28);
-  border-top: 1.5px solid rgba(248, 244, 236, 0.6);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2), inset 0 1px 2px rgba(248, 244, 236, 0.35);
+  background: rgba(67, 89, 76, 0.2);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  color: #FFFFFF;
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.45);
 }
 
 .cockpit-btn.secondary:hover {
-  background: rgba(248, 244, 236, 0.22);
-  border-color: rgba(248, 244, 236, 0.5);
-  color: var(--beige-pure);
+  background: rgba(67, 89, 76, 0.3);
+  color: #ffffff;
   transform: translateY(-1px);
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.55);
 }
 
 /* Unified Clinician Profile Capsule (Single Luxury Frosted Glass Pill) */
@@ -457,18 +465,21 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 0;
   padding: 3px 5px 3px 14px;
   border-radius: var(--radius-pill);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(14, 38, 24, 0.55) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-top: 1.5px solid var(--glass-border-top);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5);
   transition: all 0.25s ease;
 }
 
 .user-pill-unified:hover {
-  border-color: rgba(189, 249, 66, 0.45);
-  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 14px rgba(189, 249, 66, 0.18);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.6);
 }
 
 .user-pill-meta {
@@ -588,12 +599,14 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   margin: auto;
   padding: 38px 34px;
   border-radius: var(--radius-xl);
-  background: linear-gradient(145deg, rgba(248, 244, 236, 0.16) 0%, rgba(245, 239, 228, 0.1) 40%, rgba(13, 33, 22, 0.6) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(248, 244, 236, 0.26);
-  border-top: 2px solid rgba(248, 244, 236, 0.65);
-  box-shadow: 0 20px 48px -8px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.5), inset 0 0 24px rgba(245, 239, 228, 0.08);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.5);
   animation: fadeIn 0.4s ease;
 }
 
@@ -606,13 +619,16 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   width: 68px;
   height: 68px;
   border-radius: 50%;
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.2) 0%, rgba(245, 240, 230, 0.12) 60%, rgba(34, 197, 94, 0.15) 100%);
-  border: 1.5px solid rgba(248, 244, 236, 0.5);
+  background: rgba(67, 89, 76, 0.25);
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  border-left: 1px solid rgba(255, 255, 255, 0.2);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--lime-electric);
-  box-shadow: 0 0 28px rgba(245, 239, 228, 0.2), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  color: #FFFFFF;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.5);
   margin-bottom: 18px;
 }
 
@@ -649,29 +665,33 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 /* User Message: Satin Dark Glass Capsule */
 .msg.user {
   align-self: flex-end;
-  background: linear-gradient(135deg, rgba(22, 38, 28, 0.9) 0%, rgba(15, 28, 19, 0.94) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.6);
+  background: rgba(22, 38, 30, 0.65);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 22px 22px 6px 22px;
   padding: 12px 18px;
   color: #ffffff;
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.5);
 }
 
-/* Assistant Message: Soft Beige & Green Botanical Frosted Glass Card */
+/* Assistant Message: Muted Sage Frosted Glass Card */
 .msg.bot {
   align-self: flex-start;
-  background: linear-gradient(140deg, rgba(248, 244, 236, 0.16) 0%, rgba(245, 239, 228, 0.1) 45%, rgba(13, 33, 22, 0.6) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(248, 244, 236, 0.25);
-  border-top: 1.5px solid rgba(248, 244, 236, 0.6);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 24px 24px 24px 8px;
   padding: 18px 22px;
   color: #ffffff;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.28), inset 0 1px 2px rgba(248, 244, 236, 0.45), inset 0 0 20px rgba(245, 239, 228, 0.06);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
 }
 
 .msg.bot.typing {
@@ -744,20 +764,25 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 6px;
   padding: 5px 12px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.08);
-  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(67, 89, 76, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   color: var(--text-dim);
   font-size: 0.74rem;
   font-weight: 700;
   cursor: pointer;
   transition: all 0.2s;
   font-family: inherit;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .bot-action-btn:hover {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(67, 89, 76, 0.35);
   color: #ffffff;
-  border-color: rgba(255, 255, 255, 0.35);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
 }
 
 .bot-action-btn.active-audio {
@@ -807,20 +832,23 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   padding: 8px 16px;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
+  color: #050A07;
   font-weight: 800;
   font-size: 0.8rem;
   cursor: pointer;
-  border: 1.5px solid rgba(248, 244, 236, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
   margin-top: 8px;
   transition: all 0.2s;
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(34, 197, 94, 0.3);
 }
 
 .pdf-download-btn:hover {
   background: linear-gradient(135deg, #bbf451 0%, #4ade80 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 18px rgba(34, 197, 94, 0.5), inset 0 1px 2px #ffffff;
+  box-shadow: 0 12px 26px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(34, 197, 94, 0.45);
 }
 
 /* --------------------------------------------------------------------------
@@ -845,25 +873,28 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   align-items: flex-end;
   gap: 10px;
   padding: 8px 14px;
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.15) 0%, rgba(245, 239, 228, 0.08) 45%, rgba(14, 32, 22, 0.75) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(248, 244, 236, 0.25);
-  border-top: 1.5px solid rgba(248, 244, 236, 0.6);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: 36px;
-  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.45);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   transition: all 0.25s ease;
 }
 
 .input-bar:focus-within {
-  border-color: rgba(248, 244, 236, 0.55);
-  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.45), 0 0 24px rgba(245, 239, 228, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-left-color: rgba(255, 255, 255, 0.3);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
 }
 
 .icon-btn {
   background: transparent;
   border: none;
-  color: #cfdcd3;
+  color: var(--text-dim);
   cursor: pointer;
   padding: 7px;
   border-radius: 50%;
@@ -876,7 +907,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .icon-btn:hover {
   color: #ffffff;
-  background: rgba(255, 255, 255, 0.2);
+  background: rgba(67, 89, 76, 0.25);
 }
 
 #userInput {
@@ -894,7 +925,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 }
 
 #userInput::placeholder {
-  color: #b8c7be;
+  color: var(--text-dim);
 }
 
 /* Stop Generation Button in Chat Input */
@@ -932,22 +963,26 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   height: 40px;
   border-radius: 50%;
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  border: 1.5px solid rgba(248, 244, 236, 0.6);
-  color: #07190b;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+  color: #050A07;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   transition: all 0.2s ease;
   flex-shrink: 0;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.4), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(34, 197, 94, 0.3);
 }
 
 .send-btn:hover:not(:disabled) {
   background: linear-gradient(135deg, #bbf451 0%, #4ade80 100%);
   transform: scale(1.08);
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.6), inset 0 1px 2px rgba(248, 244, 236, 0.8);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(34, 197, 94, 0.45);
 }
+
 
 .send-btn:disabled {
   opacity: 0.4;
@@ -957,7 +992,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .disclaimer-bar {
   text-align: center;
   font-size: 0.72rem;
-  color: #8da496;
+  color: var(--text-dim);
   max-width: 860px;
   margin: 0 auto;
 }
@@ -966,21 +1001,25 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
    RIGHT PANE: LIVE PATIENT HEALTH & SAFETY COCKPIT (40%)
    -------------------------------------------------------------------------- */
 .dashboard-pane {
-  background: linear-gradient(180deg, rgba(248, 244, 236, 0.12) 0%, rgba(245, 239, 228, 0.06) 35%, rgba(13, 33, 22, 0.68) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border-left: 1px solid rgba(248, 244, 236, 0.22);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   display: flex;
   flex-direction: column;
   height: 100%;
   overflow: hidden;
   transition: all 0.3s ease;
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
 }
 
 .dashboard-header {
   padding: 16px 24px;
-  border-bottom: 1px solid rgba(248, 244, 236, 0.18);
-  background: linear-gradient(180deg, rgba(248, 244, 236, 0.08) 0%, rgba(16, 36, 25, 0.5) 100%);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  background: rgba(67, 89, 76, 0.1);
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -1035,7 +1074,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .dashboard-sub {
   font-size: 0.7rem;
-  color: #d1fae5;
+  color: var(--text-dim);
   font-weight: 600;
 }
 
@@ -1048,22 +1087,25 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 16px;
 }
 
-/* Streamlined Frosted Glass Cards with Soft Beige & Green Harmony */
+/* Streamlined Frosted Glass Cards with Muted Sage & 3D Depth Borders */
 .cockpit-card {
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.16) 0%, rgba(245, 239, 228, 0.1) 45%, rgba(13, 33, 22, 0.55) 100%);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid rgba(248, 244, 236, 0.25);
-  border-top: 1.5px solid rgba(248, 244, 236, 0.6);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-lg);
   padding: 18px 20px;
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.32), inset 0 1px 2px rgba(248, 244, 236, 0.45), inset 0 0 20px rgba(245, 239, 228, 0.06);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   transition: all 0.25s ease;
 }
 
 .cockpit-card:hover {
-  border-color: rgba(248, 244, 236, 0.45);
-  box-shadow: 0 24px 52px rgba(0, 0, 0, 0.4), 0 0 20px rgba(245, 239, 228, 0.14);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
 }
 
 .card-head {
@@ -1182,7 +1224,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   width: 16px;
   height: 16px;
   border-radius: 50%;
-  background: var(--beige-pure);
+  background: #ffffff;
   border: 2px solid var(--lime-electric);
   box-shadow: 0 0 12px rgba(159, 230, 75, 0.6);
   transform: translateX(-50%);
@@ -1254,15 +1296,18 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .drug-pill {
   padding: 4px 10px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid var(--glass-border);
-  border-top: 1.5px solid var(--glass-border-top);
+  background: rgba(67, 89, 76, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   font-size: 0.75rem;
   font-weight: 700;
   color: #ffffff;
   display: inline-flex;
   align-items: center;
   gap: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .empty-tray-pill {
@@ -1357,20 +1402,23 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   padding: 12px 18px;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
+  color: #050A07;
   font-size: 0.85rem;
   font-weight: 800;
-  border: 1.5px solid rgba(248, 244, 236, 0.6);
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
   cursor: pointer;
   transition: all 0.22s ease;
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(34, 197, 94, 0.3);
   margin-bottom: 12px;
 }
 
 .soap-export-btn:hover {
   background: linear-gradient(135deg, #bbf451 0%, #4ade80 100%);
   transform: translateY(-1px);
-  box-shadow: 0 8px 26px rgba(34, 197, 94, 0.55), inset 0 1px 2px rgba(248, 244, 236, 0.8);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(34, 197, 94, 0.45);
 }
 
 .soap-compact-row {
@@ -1386,8 +1434,14 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 8px;
   padding: 8px 10px;
   border-radius: var(--radius-sm);
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
   transition: all 0.22s ease;
   min-height: 38px;
   height: 38px;
@@ -1396,9 +1450,10 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 }
 
 .soap-tag-item.active {
-  border-color: rgba(255, 255, 255, 0.55);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.22) 0%, rgba(246, 240, 230, 0.12) 100%);
-  box-shadow: 0 0 12px rgba(245, 239, 228, 0.16);
+  border-top-color: rgba(255, 255, 255, 0.3);
+  border-left-color: rgba(255, 255, 255, 0.3);
+  background: rgba(67, 89, 76, 0.25);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 .soap-tag {
@@ -1423,7 +1478,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .soap-tag-text {
   font-size: 0.75rem;
   font-weight: 700;
-  color: var(--text-beige);
+  color: #ffffff;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -1434,10 +1489,14 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .audio-controller-wrap {
   padding: 12px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.18) 0%, rgba(248, 244, 235, 0.09) 50%, rgba(14, 28, 20, 0.55) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.28);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.6);
-  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.35);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
   margin-bottom: 12px;
 }
 
@@ -1454,7 +1513,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   width: 4px;
   height: 6px;
   border-radius: 2px;
-  background: linear-gradient(180deg, var(--beige-soft) 0%, #a7f3d0 100%);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.7) 0%, #22c55e 100%);
   opacity: 0.5;
   transition: height 0.2s ease;
 }
@@ -1499,14 +1558,17 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 }
 
 .audio-btn.play-btn {
-  background: rgba(255, 255, 255, 0.18);
+  background: rgba(67, 89, 76, 0.2);
   color: #ffffff;
-  border: 1px solid rgba(255, 255, 255, 0.35);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.65);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
 }
 
 .audio-btn.play-btn:hover {
-  background: rgba(255, 255, 255, 0.28);
+  background: rgba(67, 89, 76, 0.3);
 }
 
 .audio-btn.stop-btn {
@@ -1532,37 +1594,45 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   font-size: 0.68rem;
   font-weight: 700;
   background: transparent;
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   color: var(--text-dim);
   cursor: pointer;
 }
 
 .speed-chip.active {
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
-  border-color: rgba(248, 244, 236, 0.7);
-  box-shadow: 0 2px 8px rgba(34, 197, 94, 0.4);
+  color: #050A07;
+  border: none;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 /* OpenFDA Mini Drawer (Feature 5) */
 .fda-mini-drawer {
   padding: 10px 14px;
   border-radius: var(--radius-md);
-  background: linear-gradient(135deg, rgba(248, 244, 236, 0.14) 0%, rgba(246, 242, 233, 0.08) 45%, rgba(14, 28, 20, 0.6) 100%);
-  border: 1px solid rgba(248, 244, 236, 0.22);
-  border-top: 1.5px solid rgba(255, 255, 255, 0.55);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.5);
   cursor: pointer;
   transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
 }
 
 .fda-mini-drawer:hover {
-  border-color: rgba(255, 255, 255, 0.45);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 12px rgba(245, 239, 228, 0.1);
+  border-top-color: rgba(255, 255, 255, 0.25);
+  border-left-color: rgba(255, 255, 255, 0.25);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.65);
 }
 
 .fda-mini-drawer.open {
-  background: linear-gradient(135deg, rgba(255, 255, 255, 0.24) 0%, rgba(246, 242, 233, 0.14) 45%, rgba(14, 28, 20, 0.75) 100%);
-  border-color: rgba(255, 255, 255, 0.38);
+  background: rgba(67, 89, 76, 0.22);
 }
 
 .card-head.collapsible {
@@ -1620,7 +1690,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .fda-snippet-block strong {
   display: block;
-  color: #f7f3ea;
+  color: #ffffff;
   font-size: 0.72rem;
   font-weight: 700;
   margin-bottom: 3px;
@@ -1629,7 +1699,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .fda-snippet-block p {
   margin: 0;
-  color: #ede5d7;
+  color: var(--text-dim);
   font-size: 0.72rem;
   line-height: 1.45;
   word-wrap: break-word;
@@ -1647,9 +1717,9 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   left: 0;
   width: 100vw;
   height: 100vh;
-  background: rgba(6, 20, 12, 0.75);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  background: rgba(5, 10, 7, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1660,14 +1730,16 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .auth-card {
   width: 100%;
   max-width: 440px;
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.28) 0%, rgba(248, 244, 236, 0.16) 45%, rgba(14, 28, 20, 0.88) 100%);
-  backdrop-filter: blur(35px) saturate(140%);
-  -webkit-backdrop-filter: blur(35px) saturate(140%);
-  border: 1px solid rgba(255, 255, 255, 0.4);
-  border-top: 2px solid rgba(255, 255, 255, 0.8);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   border-radius: var(--radius-xl);
   padding: 30px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.65);
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
   animation: modalScale 0.25s cubic-bezier(0.4, 0, 0.2, 1);
   position: relative;
 }
@@ -1684,8 +1756,11 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   width: 32px;
   height: 32px;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(67, 89, 76, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   color: var(--text-dim);
   font-size: 0.95rem;
   display: flex;
@@ -1724,14 +1799,19 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .auth-header p {
   font-size: 0.82rem;
-  color: var(--text-beige);
+  color: var(--text-secondary);
 }
 
 .auth-tabs {
   display: flex;
   gap: 8px;
-  background: rgba(255, 255, 255, 0.1);
-  border: 1px solid rgba(255, 255, 255, 0.2);
+  background: rgba(67, 89, 76, 0.15);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   padding: 4px;
   border-radius: var(--radius-md);
   margin-bottom: 18px;
@@ -1742,7 +1822,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   padding: 9px;
   border: none;
   background: transparent;
-  color: #e2dcd2;
+  color: var(--text-dim);
   font-weight: 700;
   font-size: 0.82rem;
   border-radius: 12px;
@@ -1753,9 +1833,12 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .auth-tab.active {
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  color: #07190b;
-  border: 1px solid rgba(248, 244, 236, 0.5);
-  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.4), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  color: #050A07;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
 }
 
 .auth-alert {
@@ -1783,14 +1866,17 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .form-group label {
   font-size: 0.78rem;
   font-weight: 700;
-  color: #d1fae5;
+  color: var(--text-dim);
 }
 
 .form-group input {
   padding: 12px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.28);
+  background: rgba(67, 89, 76, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   color: #ffffff;
   font-size: 0.92rem;
   outline: none;
@@ -1798,9 +1884,14 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   font-family: inherit;
 }
 
+.form-group input::placeholder {
+  color: var(--text-secondary);
+}
+
 .form-group input:focus {
-  border-color: rgba(255, 255, 255, 0.65);
-  box-shadow: 0 0 14px rgba(245, 239, 228, 0.25);
+  border-top-color: rgba(255, 255, 255, 0.35);
+  border-left-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 14px rgba(67, 89, 76, 0.4);
 }
 
 .auth-lang-group {
@@ -1813,7 +1904,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   gap: 6px;
   font-size: 0.74rem;
   font-weight: 700;
-  color: #d1fae5;
+  color: var(--text-dim);
 }
 
 .auth-lang-group label svg {
@@ -1831,8 +1922,11 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   -webkit-appearance: none;
   padding: 10px 34px 10px 14px;
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.14);
-  border: 1px solid rgba(255, 255, 255, 0.32);
+  background: rgba(67, 89, 76, 0.2);
+  border-top: 1px solid rgba(255, 255, 255, 0.15);
+  border-left: 1px solid rgba(255, 255, 255, 0.15);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.3);
+  border-right: 1px solid rgba(0, 0, 0, 0.3);
   color: #ffffff;
   font-size: 0.88rem;
   font-weight: 700;
@@ -1844,13 +1938,13 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 
 .auth-lang-select:hover,
 .auth-lang-select:focus {
-  border-color: rgba(255, 255, 255, 0.6);
-  box-shadow: 0 0 14px rgba(245, 239, 228, 0.22);
-  background: rgba(255, 255, 255, 0.2);
+  border-top-color: rgba(255, 255, 255, 0.35);
+  border-left-color: rgba(255, 255, 255, 0.35);
+  box-shadow: 0 0 14px rgba(67, 89, 76, 0.4);
 }
 
 .auth-lang-select option {
-  background: #0e2417;
+  background: #050A07;
   color: #ffffff;
   padding: 8px;
   font-size: 0.88rem;
@@ -1862,7 +1956,7 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   top: 50%;
   transform: translateY(-50%);
   pointer-events: none;
-  color: #e4dac7;
+  color: var(--text-dim);
   opacity: 0.9;
 }
 
@@ -1871,20 +1965,23 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   padding: 13px;
   border-radius: var(--radius-pill);
   background: linear-gradient(135deg, #a3e635 0%, #22c55e 100%);
-  border: 1.5px solid rgba(248, 244, 236, 0.6);
-  color: #07190b;
+  border-top: 1px solid rgba(255, 255, 255, 0.35);
+  border-left: 1px solid rgba(255, 255, 255, 0.35);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.4);
+  border-right: 1px solid rgba(0, 0, 0, 0.4);
+  color: #050A07;
   font-size: 0.9rem;
   font-weight: 800;
   cursor: pointer;
   transition: all 0.22s;
-  box-shadow: 0 4px 16px rgba(34, 197, 94, 0.35), inset 0 1px 2px rgba(248, 244, 236, 0.5);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 2px 10px rgba(34, 197, 94, 0.3);
   font-family: inherit;
 }
 
 .auth-submit-btn:hover {
   background: linear-gradient(135deg, #bbf451 0%, #4ade80 100%);
   transform: translateY(-1px);
-  box-shadow: 0 6px 20px rgba(34, 197, 94, 0.55), inset 0 1px 2px rgba(248, 244, 236, 0.8);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.6), 0 4px 14px rgba(34, 197, 94, 0.45);
 }
 
 .auth-switch {
