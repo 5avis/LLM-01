@@ -143,9 +143,11 @@ let isVoicePlaying = false;
 // ---------------------------------------------------------------------------
 const logoEl = document.querySelector(".logo");
 let isAiMode = localStorage.getItem("medhub_ai_mode") === "true";
+let isEnhancedMode = isAiMode;
 
 function updateAiMode() {
   document.body.classList.toggle("ai-mode", isAiMode);
+  isEnhancedMode = isAiMode;
   if (fileInput) {
     fileInput.setAttribute("accept", isAiMode ? "*/*" : "image/*,.pdf");
   }
@@ -1302,7 +1304,7 @@ async function sendMessage() {
     const promptMessage = text || (fileToSend ? `Please analyze this clinical document (${fileToSend.name}) and evaluate health insights.` : "");
     formData.append("message", promptMessage);
     formData.append("username", currentUser || "guest");
-    formData.append("enhance", isEnhancedMode ? "true" : "false");
+    formData.append("enhance", (typeof isAiMode !== "undefined" && isAiMode) ? "true" : "false");
     formData.append("is_first_message", isFirstMessageInSession ? "true" : "false");
     isFirstMessageInSession = false;
     if (fileToSend) {
@@ -1329,7 +1331,9 @@ async function sendMessage() {
       typingDiv.innerHTML = `<p style="color:#fcd34d; margin:0; font-style:italic;">⏹ Consultation generation stopped by user.</p>`;
     } else {
       console.error("Error sending message:", err);
-      typingDiv.innerHTML = `<p style="color:#fca5a5; margin:0;">⚠️ Something went wrong while connecting to the local inference vault. Please try again.</p>`;
+      const t = (typeof APP_I18N !== "undefined" && APP_I18N[currentAppLang]) ? APP_I18N[currentAppLang] : (typeof APP_I18N !== "undefined" ? APP_I18N.en : null);
+      const errText = (t && t.chatError) ? t.chatError : "⚠️ Something went wrong while connecting to the local inference vault. Please try again.";
+      typingDiv.innerHTML = `<p style="color:#fca5a5; margin:0;">${errText}</p>`;
     }
   } finally {
     currentAbortController = null;
