@@ -41,6 +41,8 @@ const triageTriggers = document.getElementById("triageTriggers");
 
 // Feature 3: SOAP Note Elements
 const downloadSoapBtn = document.getElementById("downloadSoapBtn");
+const downloadSoapBtnText = document.getElementById("downloadSoapBtnText");
+const soapLangSelect = document.getElementById("soapLangSelect");
 const soapSubjectivePreview = document.getElementById("soapSubjectivePreview");
 const soapObjectivePreview = document.getElementById("soapObjectivePreview");
 const soapAssessmentPreview = document.getElementById("soapAssessmentPreview");
@@ -90,6 +92,7 @@ const signupPromptBtn = document.getElementById("signupPromptBtn");
 // Session Clinical State
 let pendingFile = null;
 let isFirstMessageInSession = true;
+let latestUserQuery = "";
 let latestBotAdvice = "";
 let latestSoapData = null;
 let currentSpeechSpeed = 1.0;
@@ -200,8 +203,10 @@ if (newChatBtn) {
     welcomeEl.style.display = "flex";
     isFirstMessageInSession = true;
     latestBotAdvice = "";
+    latestUserQuery = "";
     latestSoapData = null;
     resetCockpitMetrics();
+    updateSoapLangUI(soapLangSelect ? soapLangSelect.value : "en");
     inputEl.value = "";
     autoResize();
     inputEl.focus();
@@ -659,6 +664,8 @@ async function sendMessage() {
   const fileToSend = pendingFile;
   if (!text && !fileToSend) return;
 
+  latestUserQuery = text;
+
   // Clean input
   pendingFile = null;
   fileInput.value = "";
@@ -745,13 +752,101 @@ inputEl.addEventListener("keydown", (e) => {
 });
 
 // ---------------------------------------------------------------------------
-// 9. FEATURE 3: ONE-CLICK S.O.A.P. / S.B.A.R. PDF EXPORT
+// 9. FEATURE 3: MULTILINGUAL S.O.A.P. / S.B.A.R. PDF EXPORT (6 LANGUAGES)
 // ---------------------------------------------------------------------------
+const SOAP_UI_LOCALIZED = {
+  en: {
+    btn: "Download S.O.A.P. Summary (PDF)",
+    loading: "Synthesizing Audit PDF...",
+    success: "Downloaded SOAP Note!",
+    s: "Subjective",
+    o: "Objective",
+    a: "Assessment",
+    p: "Plan"
+  },
+  ta: {
+    btn: "S.O.A.P. பதிவிறக்கு (தமிழ் PDF)",
+    loading: "தமிழ் அறிக்கை தயாராகிறது...",
+    success: "பதிவிறக்கம் முடிந்தது!",
+    s: "அகநிலை",
+    o: "புறநிலை",
+    a: "மதிப்பீடு",
+    p: "திட்டம்"
+  },
+  ml: {
+    btn: "S.O.A.P. ഡൗൺലോഡ് (മലയാളം PDF)",
+    loading: "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
+    success: "ഡൗൺലോഡ് ചെയ്തു!",
+    s: "സബ്ജക്റ്റീവ്",
+    o: "ഒബ്ജക്റ്റീവ്",
+    a: "അസസ്സ്മെന്റ്",
+    p: "ചികിത്സാ പദ്ധതി"
+  },
+  te: {
+    btn: "S.O.A.P. డౌన్‌లోడ్ (తెలుగు PDF)",
+    loading: "నివేదిక సిద్ధమవుతోంది...",
+    success: "డౌన్‌లోడ్ పూర్తయింది!",
+    s: "సబ్జెక్టివ్",
+    o: "ఆబ్జెక్టివ్",
+    a: "అసెస్మెంట్",
+    p: "ప్రణాళిక"
+  },
+  kn: {
+    btn: "S.O.A.P. ಡೌನ್‌ಲೋಡ್ (ಕನ್ನಡ PDF)",
+    loading: "ವರದಿ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...",
+    success: "ಡೌನ್‌ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿದೆ!",
+    s: "ಸಬ್ಜೆಕ್ಟಿವ್",
+    o: "ಆಬ್ಜೆಕ್ಟಿವ್",
+    a: "ಮೌಲ್ಯಮಾಪನ",
+    p: "ಯೋಜನೆ"
+  },
+  hi: {
+    btn: "S.O.A.P. सारांश डाउनलोड (हिन्दी PDF)",
+    loading: "हिन्दी रिपोर्ट तैयार हो रही है...",
+    success: "डाउनलोड पूरा हुआ!",
+    s: "व्यक्तिपरक",
+    o: "वस्तुपरक",
+    a: "मूल्यांकन",
+    p: "उपचार योजना"
+  }
+};
+
+function updateSoapLangUI(lang) {
+  const chosenLang = (lang || "en").toLowerCase();
+  const texts = SOAP_UI_LOCALIZED[chosenLang] || SOAP_UI_LOCALIZED.en;
+  if (downloadSoapBtnText) {
+    downloadSoapBtnText.textContent = texts.btn;
+  }
+  if (!latestSoapData) {
+    if (soapSubjectivePreview) soapSubjectivePreview.textContent = texts.s;
+    if (soapObjectivePreview) soapObjectivePreview.textContent = texts.o;
+    if (soapAssessmentPreview) soapAssessmentPreview.textContent = texts.a;
+    if (soapPlanPreview) soapPlanPreview.textContent = texts.p;
+  }
+}
+
+// Initialize language from localStorage or default to English
+if (soapLangSelect) {
+  const savedLang = localStorage.getItem("medhub_soap_lang") || "en";
+  soapLangSelect.value = savedLang;
+  updateSoapLangUI(savedLang);
+
+  soapLangSelect.addEventListener("change", (e) => {
+    const selectedLang = e.target.value;
+    localStorage.setItem("medhub_soap_lang", selectedLang);
+    updateSoapLangUI(selectedLang);
+  });
+}
+
 if (downloadSoapBtn) {
   downloadSoapBtn.addEventListener("click", async () => {
+    const selectedLang = (soapLangSelect ? soapLangSelect.value : "en").toLowerCase();
+    const texts = SOAP_UI_LOCALIZED[selectedLang] || SOAP_UI_LOCALIZED.en;
+
     downloadSoapBtn.disabled = true;
-    const originalText = downloadSoapBtn.innerHTML;
-    downloadSoapBtn.innerHTML = `<span>Synthesizing Audit PDF...</span>`;
+    if (downloadSoapBtnText) {
+      downloadSoapBtnText.textContent = texts.loading;
+    }
 
     try {
       const formData = new FormData();
@@ -759,8 +854,9 @@ if (downloadSoapBtn) {
         formData.append("soap_json", JSON.stringify(latestSoapData));
       }
       formData.append("patient_name", currentUser || "Guest Patient");
-      formData.append("query", "Clinical Consultation Summary");
+      formData.append("query", latestUserQuery || "Clinical Consultation Summary");
       formData.append("response", latestBotAdvice || "Routine medical advice provided.");
+      formData.append("lang", selectedLang);
 
       const res = await fetch("/api/generate-soap-pdf", {
         method: "POST",
@@ -772,23 +868,27 @@ if (downloadSoapBtn) {
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = `medhub_soap_report_${currentUser || 'patient'}.pdf`;
+      a.download = `medhub_soap_${selectedLang}_${currentUser || 'patient'}.pdf`;
       document.body.appendChild(a);
       a.click();
       a.remove();
       window.URL.revokeObjectURL(url);
 
-      downloadSoapBtn.innerHTML = `<span>Downloaded SOAP Note!</span>`;
+      if (downloadSoapBtnText) {
+        downloadSoapBtnText.textContent = texts.success;
+      }
       setTimeout(() => {
         downloadSoapBtn.disabled = false;
-        downloadSoapBtn.innerHTML = originalText;
-      }, 3000);
+        updateSoapLangUI(selectedLang);
+      }, 2800);
     } catch (err) {
       console.error("Error generating SOAP PDF:", err);
-      downloadSoapBtn.innerHTML = `<span>Export Error</span>`;
+      if (downloadSoapBtnText) {
+        downloadSoapBtnText.textContent = "Export Error";
+      }
       setTimeout(() => {
         downloadSoapBtn.disabled = false;
-        downloadSoapBtn.innerHTML = originalText;
+        updateSoapLangUI(selectedLang);
       }, 2500);
     }
   });

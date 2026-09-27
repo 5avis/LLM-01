@@ -1129,6 +1129,86 @@ body {
 }
 
 /* CARD 3: Feature 3, 4, 5 - Clinical Action & Documentation Hub */
+.soap-lang-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 6px 10px;
+  margin-bottom: 10px;
+  background: rgba(189, 249, 66, 0.05);
+  border: 1px solid rgba(189, 249, 66, 0.22);
+  border-radius: var(--radius-sm);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  transition: border-color 0.2s ease, background 0.2s ease;
+}
+
+.soap-lang-bar:hover {
+  background: rgba(189, 249, 66, 0.08);
+  border-color: rgba(189, 249, 66, 0.35);
+}
+
+.soap-lang-label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #a7f3d0;
+}
+
+.soap-lang-label svg {
+  color: #bdf942;
+  flex-shrink: 0;
+}
+
+.soap-lang-select-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.soap-lang-select {
+  appearance: none;
+  -webkit-appearance: none;
+  background: rgba(4, 30, 22, 0.85);
+  border: 1px solid rgba(189, 249, 66, 0.45);
+  border-radius: var(--radius-pill);
+  padding: 4px 26px 4px 10px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #f0fdf4;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.25);
+}
+
+.soap-lang-select:hover,
+.soap-lang-select:focus {
+  border-color: #bdf942;
+  box-shadow: 0 0 10px rgba(189, 249, 66, 0.4);
+  background: rgba(6, 42, 30, 0.95);
+}
+
+.soap-lang-select option {
+  background: #041e16;
+  color: #f0fdf4;
+  font-size: 0.78rem;
+  padding: 6px 8px;
+}
+
+.soap-select-arrow {
+  position: absolute;
+  right: 9px;
+  pointer-events: none;
+  color: #bdf942;
+  opacity: 0.85;
+}
+
 .soap-export-btn {
   width: 100%;
   display: flex;

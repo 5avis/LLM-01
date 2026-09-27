@@ -214,10 +214,33 @@
               <span class="status-badge verified">AUDIT READY</span>
             </div>
 
+            <!-- Multilingual Language Selection Pill Box -->
+            <div class="soap-lang-bar">
+              <div class="soap-lang-label">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                  <circle cx="12" cy="12" r="10"></circle>
+                  <line x1="2" y1="12" x2="22" y2="12"></line>
+                  <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+                </svg>
+                <span>Report Language</span>
+              </div>
+              <div class="soap-lang-select-wrap">
+                <select id="soapLangSelect" class="soap-lang-select" aria-label="Select S.O.A.P. Report Language">
+                  <option value="en" selected>English (EN)</option>
+                  <option value="ta">Tamil (தமிழ்)</option>
+                  <option value="ml">Malayalam (മലയാളം)</option>
+                  <option value="te">Telugu (తెలుగు)</option>
+                  <option value="kn">Kannada (ಕನ್ನಡ)</option>
+                  <option value="hi">Hindi (हिन्दी)</option>
+                </select>
+                <svg class="soap-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </div>
+            </div>
+
             <!-- Feature 3: One-Click S.O.A.P. Export Button -->
             <button class="soap-export-btn" id="downloadSoapBtn" type="button" title="Generate Audit-Grade Medical Note">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-              <span>Download S.O.A.P. Summary (PDF)</span>
+              <span id="downloadSoapBtnText">Download S.O.A.P. Summary (PDF)</span>
             </button>
 
             <!-- Compact SOAP Preview Pills -->

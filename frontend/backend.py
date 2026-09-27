@@ -644,7 +644,8 @@ async def generate_soap_pdf_endpoint(
     soap_json: str = Form(None),
     patient_name: str = Form("guest"),
     query: str = Form(""),
-    response: str = Form("")
+    response: str = Form(""),
+    lang: str = Form("en")
 ):
     soap_data = None
     if soap_json and soap_json.strip():
@@ -658,13 +659,14 @@ async def generate_soap_pdf_endpoint(
         triage = evaluate_triage(query, response)
         drugs = extract_all_drugs(query + " " + response)
         ddi = check_drug_interactions(drugs)
-        soap_data = build_soap_note(query, response, triage, ddi)
+        soap_data = build_soap_note(query, response, triage, ddi, lang=lang)
 
-    pdf_buffer = generate_soap_pdf(soap_data, patient_name=patient_name)
+    pdf_buffer = generate_soap_pdf(soap_data, patient_name=patient_name, lang=lang)
+    lang_clean = (lang or "en").lower().strip()
     return FastAPIFileResponse(
         pdf_buffer,
         media_type="application/pdf",
-        filename="medhub_soap_report.pdf"
+        filename=f"medhub_soap_report_{lang_clean}.pdf"
     )
 
 
