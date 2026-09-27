@@ -168,16 +168,38 @@ body {
   font-size: 1.22rem;
   font-weight: 800;
   letter-spacing: -0.02em;
-  color: #ffffff;
+  color: #ffffff !important;
   line-height: 1.1;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
 }
 
-.logo-text.enhanced {
-  background: linear-gradient(135deg, #bdf942, #4ade80);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  filter: drop-shadow(0 0 14px rgba(189, 249, 66, 0.6));
+/* ==========================================================================
+   MEDHUB 4 MAIN SVG ICONS COLOR CONTROLLER
+   - Normal Mode: All 4 icons are Blue (#cddff0, #62b4e7, #357dc5)
+   - AI Mode: All 4 icons are Green (#ffffff, #bdf942, #22c55e) (Triple click on top-left logo)
+   - MedHub text: CONSTANT white, never changes color in either mode!
+   ========================================================================== */
+.medhub-main-icon .svg-tier-1 {
+  fill: #cddff0 !important;
+  transition: fill 0.35s ease;
+}
+.medhub-main-icon .svg-tier-2 {
+  fill: #62b4e7 !important;
+  transition: fill 0.35s ease;
+}
+.medhub-main-icon .svg-tier-3 {
+  fill: #357dc5 !important;
+  transition: fill 0.35s ease;
+}
+
+body.ai-mode .medhub-main-icon .svg-tier-1 {
+  fill: #ffffff !important;
+}
+body.ai-mode .medhub-main-icon .svg-tier-2 {
+  fill: #bdf942 !important;
+}
+body.ai-mode .medhub-main-icon .svg-tier-3 {
+  fill: #22c55e !important;
 }
 
 .logo-badge {
@@ -1605,6 +1627,69 @@ body {
 .form-group input:focus {
   border-color: var(--lime-vibrant);
   box-shadow: 0 0 14px rgba(189, 249, 66, 0.25);
+}
+
+.auth-lang-group {
+  margin-bottom: 2px;
+}
+
+.auth-lang-group label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 0.74rem;
+  font-weight: 700;
+  color: #a7f3d0;
+}
+
+.auth-lang-group label svg {
+  color: #bdf942;
+}
+
+.auth-lang-select-wrap {
+  position: relative;
+  width: 100%;
+}
+
+.auth-lang-select {
+  width: 100%;
+  appearance: none;
+  -webkit-appearance: none;
+  padding: 10px 34px 10px 14px;
+  border-radius: 12px;
+  background: rgba(10, 26, 17, 0.85);
+  border: 1px solid rgba(189, 249, 66, 0.35);
+  color: #f0fdf4;
+  font-size: 0.88rem;
+  font-weight: 700;
+  outline: none;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-family: inherit;
+}
+
+.auth-lang-select:hover,
+.auth-lang-select:focus {
+  border-color: #bdf942;
+  box-shadow: 0 0 14px rgba(189, 249, 66, 0.3);
+  background: rgba(8, 36, 22, 0.95);
+}
+
+.auth-lang-select option {
+  background: #041e16;
+  color: #f0fdf4;
+  padding: 8px;
+  font-size: 0.88rem;
+}
+
+.auth-select-arrow {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  pointer-events: none;
+  color: #bdf942;
+  opacity: 0.85;
 }
 
 .auth-submit-btn {

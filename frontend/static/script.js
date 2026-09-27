@@ -82,12 +82,47 @@ const authAlert = document.getElementById("authAlert");
 const authSwitchText = document.getElementById("authSwitchText");
 const authSwitchBtn = document.getElementById("authSwitchBtn");
 
+const authLangSelect = document.getElementById("authLangSelect");
+const authLangLabelText = document.getElementById("authLangLabelText");
+const authUsernameLabel = document.getElementById("authUsernameLabel");
+const authPasswordLabel = document.getElementById("authPasswordLabel");
+const guestDividerText = document.getElementById("guestDividerText");
+const guestLoginBtnText = document.getElementById("guestLoginBtnText");
+
 const userProfile = document.getElementById("userProfile");
 const userNameDisplay = document.getElementById("userNameDisplay");
 const logoutBtn = document.getElementById("logoutBtn");
 const authButtonsGroup = document.getElementById("authButtonsGroup");
 const loginPromptBtn = document.getElementById("loginPromptBtn");
 const signupPromptBtn = document.getElementById("signupPromptBtn");
+
+// Page-wide Multilingual DOM Elements
+const logoBadgeText = document.getElementById("logoBadgeText");
+const newChatBtnText = document.getElementById("newChatBtnText");
+const toggleCockpitBtnText = document.getElementById("toggleCockpitBtnText");
+const logoutBtnText = document.getElementById("logoutBtnText");
+const guestIndicatorText = document.getElementById("guestIndicatorText");
+const loginPromptBtnText = document.getElementById("loginPromptBtnText");
+const signupPromptBtnText = document.getElementById("signupPromptBtnText");
+const heroTitleText = document.getElementById("heroTitleText");
+const stopGenBtnText = document.getElementById("stopGenBtnText");
+const disclaimerNoticeText = document.getElementById("disclaimerNoticeText");
+
+// Dashboard headers & cards
+const dashboardTitleText = document.getElementById("dashboardTitleText");
+const dashboardSubText = document.getElementById("dashboardSubText");
+const triageCardTitle = document.getElementById("triageCardTitle");
+const meterLabelRoutine = document.getElementById("meterLabelRoutine");
+const meterLabelUrgent = document.getElementById("meterLabelUrgent");
+const meterLabelER = document.getElementById("meterLabelER");
+const ddiCardTitle = document.getElementById("ddiCardTitle");
+const activeDrugsLabel = document.getElementById("activeDrugsLabel");
+const emptyTrayPill = document.getElementById("emptyTrayPill");
+const actionCardTitle = document.getElementById("actionCardTitle");
+const auditReadyBadge = document.getElementById("auditReadyBadge");
+const soapLangLabelText = document.getElementById("soapLangLabelText");
+const playAdviceBtnText = document.getElementById("playAdviceBtnText");
+const stopAdviceBtnText = document.getElementById("stopAdviceBtnText");
 
 // Session Clinical State
 let pendingFile = null;
@@ -101,24 +136,21 @@ let activeSpeakingBtn = null;
 let isVoicePlaying = false;
 
 // ---------------------------------------------------------------------------
-// 1. STEALTH MODE TOGGLE (Triple-click on MedHub logo)
+// 1. AI MODE TOGGLE (Triple-click on MedHub logo at top-left)
+// - Normal Mode: All 4 main SVG icons are Blue (#cddff0, #62b4e7, #357dc5)
+// - AI Mode: All 4 main SVG icons are Green (#ffffff, #bdf942, #22c55e)
+// - MedHub text: CONSTANT white, never changes color in either mode!
 // ---------------------------------------------------------------------------
 const logoEl = document.querySelector(".logo");
-const logoTextEl = document.querySelector(".logo-text");
-let isEnhancedMode = localStorage.getItem("medhub_accent_mode") === "true";
+let isAiMode = localStorage.getItem("medhub_ai_mode") === "true";
 
-function updateLogoAccent() {
-  if (logoTextEl) {
-    if (isEnhancedMode) {
-      logoTextEl.classList.add("enhanced");
-      if (fileInput) fileInput.setAttribute("accept", "*/*");
-    } else {
-      logoTextEl.classList.remove("enhanced");
-      if (fileInput) fileInput.setAttribute("accept", "image/*,.pdf");
-    }
+function updateAiMode() {
+  document.body.classList.toggle("ai-mode", isAiMode);
+  if (fileInput) {
+    fileInput.setAttribute("accept", isAiMode ? "*/*" : "image/*,.pdf");
   }
 }
-updateLogoAccent();
+updateAiMode();
 
 if (logoEl) {
   let clickCount = 0;
@@ -127,9 +159,9 @@ if (logoEl) {
     clickCount++;
     if (clickTimer) clearTimeout(clickTimer);
     if (clickCount >= 3) {
-      isEnhancedMode = !isEnhancedMode;
-      localStorage.setItem("medhub_accent_mode", isEnhancedMode ? "true" : "false");
-      updateLogoAccent();
+      isAiMode = !isAiMode;
+      localStorage.setItem("medhub_ai_mode", isAiMode ? "true" : "false");
+      updateAiMode();
       clickCount = 0;
     } else {
       clickTimer = setTimeout(() => {
@@ -140,13 +172,586 @@ if (logoEl) {
 }
 
 // ---------------------------------------------------------------------------
+// 1.1 APP-WIDE MULTILINGUAL LOCALIZATION (6 LANGUAGES)
+// English (en), Tamil (ta), Malayalam (ml), Telugu (te), Kannada (kn), Hindi (hi)
+// ---------------------------------------------------------------------------
+const APP_I18N = {
+  en: {
+    logoBadge: "CLINICAL COCKPIT",
+    newChat: "New Session",
+    cockpitToggle: "Cockpit",
+    cockpitShow: "Show Cockpit",
+    logout: "Logout",
+    guestBadge: "Guest Clinician",
+    signInBtn: "Sign In",
+    signUpBtn: "Sign Up",
+    heroTitle: "MedHub Clinical AI",
+    inputPlaceholder: "Describe symptoms, enter medications for DDI screening, or ask medical questions...",
+    stopBtn: "Stop",
+    disclaimer: "🛡️ MedHub Clinical AI provides algorithmic decision support. Clinical judgment and physician verification required.",
+    dashTitle: "Clinical Telemetry & Safety",
+    dashSub: "Real-Time Algorithmic Decision Support",
+    triageTitle: "Emergency Triage (ESI)",
+    triageRoutineBadge: "ROUTINE CARE",
+    triageUrgentBadge: "URGENT CARE",
+    triageEmergencyBadge: "EMERGENCY ER",
+    meterRoutine: "Routine",
+    meterUrgent: "Urgent (24-48h)",
+    meterER: "Emergency ER",
+    triageDefaultHeadline: "Standard Supportive Home Care & Monitoring",
+    triageDefaultRec: "Maintain adequate rest, hydration, and monitor symptoms. Consult primary doctor if symptoms persist beyond 5-7 days.",
+    ddiTitle: "DDI Safety Radar",
+    ddiSafeBadge: "RADAR CLEAR",
+    ddiWarningBadge: "WARNING",
+    ddiDangerBadge: "CRITICAL CONFLICT",
+    activeDrugsLabel: "Active Pharmacotherapy Identified:",
+    emptyTray: "No active medications detected",
+    ddiSafeTitle: "No Critical Contraindications Detected",
+    ddiSafeDesc: "Active medications evaluated against the hospital interaction knowledge base with no high-risk pharmaceutical conflicts.",
+    actionTitle: "Clinical Actions & Export",
+    auditBadge: "AUDIT READY",
+    soapLangLabel: "Report Language",
+    downloadSoapBtn: "Download S.O.A.P. Summary (PDF)",
+    downloadSoapLoading: "Synthesizing Audit PDF...",
+    downloadSoapSuccess: "Downloaded SOAP Note!",
+    soapS: "Subjective",
+    soapO: "Objective",
+    soapA: "Assessment",
+    soapP: "Plan",
+    soapDefaultS: "Awaiting patient complaint...",
+    soapDefaultO: "Triage classification & drug screening",
+    soapDefaultA: "Clinical impression & interaction risk",
+    soapDefaultP: "Action protocol & physician follow-up",
+    playAdvice: "Play Advice",
+    stopAdvice: "Stop",
+    audioReadyBadge: "READY",
+    audioPlayingBadge: "PLAYING",
+    fdaHeader: "OpenFDA Regulatory Grounding",
+    fdaDrugTitle: "Clinical Matrix Grounding",
+    fdaPrescribingTitle: "FDA Prescribing & Administration:",
+    fdaDosageSnippet: "Verified against local clinical pharmacological database and openFDA regulatory label guidelines.",
+    fdaWarningsTitle: "Safety Warnings & Precautions:",
+    fdaWarningsSnippet: "Standard clinical precautions apply. Monitor patient tolerance and renal clearance parameters.",
+    authLangLabel: "Preferred Language / மொழி / भाषा",
+    authUsernameLabel: "Clinician / Patient ID",
+    authUsernamePlaceholder: "e.g. siva",
+    authPasswordLabel: "Vault Password",
+    authPasswordPlaceholder: "Enter password",
+    authSignInTitle: "Clinical Sign In",
+    authSignInSub: "Enter your credentials to access your private consultation vault",
+    authSignInBtn: "Sign In to Cockpit",
+    authSignUpTitle: "Create Medical Vault",
+    authSignUpSub: "Register a secure username and password to store consultation records",
+    authSignUpBtn: "Create Account & Sign In",
+    authTabSignIn: "Sign In",
+    authTabSignUp: "Sign Up",
+    authNoAccount: "Don't have an account?",
+    authHasAccount: "Already have an account?",
+    authSigningIn: "Signing in...",
+    authCreatingVault: "Creating vault...",
+    guestDivider: "OR",
+    guestLoginBtn: "Continue as Guest Clinician"
+  },
+  ta: {
+    logoBadge: "மருத்துவ கட்டுப்பாட்டகம்",
+    newChat: "புதிய அமர்வு",
+    cockpitToggle: "கட்டுப்பாட்டகம்",
+    cockpitShow: "கட்டுப்பாட்டகத்தைக் காட்டு",
+    logout: "வெளியேறு",
+    guestBadge: "விருந்தினர் மருத்துவர்",
+    signInBtn: "உள்நுழைக",
+    signUpBtn: "பதிவு செய்க",
+    heroTitle: "MedHub மருத்துவ AI",
+    inputPlaceholder: "அறிகுறிகளை விவரிக்கவும், மருந்து இடைவினையைச் சரிபார்க்கவும் அல்லது மருத்துவக் கேள்விகளைக் கேட்கவும்...",
+    stopBtn: "நிறுத்து",
+    disclaimer: "🛡️ MedHub மருத்துவ AI முடிவெடுக்கும் ஆதரவை வழங்குகிறது. மருத்துவரின் சரிபார்ப்பு கட்டாயமாகும்.",
+    dashTitle: "மருத்துவ தொலைநிலைக் கண்காணிப்பு & பாதுகாப்பு",
+    dashSub: "நிகழ்நேர நெறிமுறை முடிவெடுக்கும் ஆதரவு",
+    triageTitle: "அவசர சிகிச்சை முன்னுரிமை (ESI)",
+    triageRoutineBadge: "வழக்கமான பராமரிப்பு",
+    triageUrgentBadge: "அவசரப் பராமரிப்பு",
+    triageEmergencyBadge: "அவசர சிகிச்சை ER",
+    meterRoutine: "வழக்கமான",
+    meterUrgent: "அவசரம் (24-48 மணி)",
+    meterER: "அவசரப் பிரிவு (ER)",
+    triageDefaultHeadline: "நிலையான வீட்டு பராமரிப்பு & கண்காணிப்பு",
+    triageDefaultRec: "போதுமான ஓய்வு, நீரேற்றம் எடுத்துக்கொள்ளுங்கள். 5-7 நாட்களுக்கு மேல் அறிகுறிகள் நீடித்தால் மருத்துவரை அணுகவும்.",
+    ddiTitle: "மருந்து இடைவினை பாதுகாப்பு ரேடார்",
+    ddiSafeBadge: "ரேடார் தெளிவு",
+    ddiWarningBadge: "எச்சரிக்கை",
+    ddiDangerBadge: "முரண்பாடு கண்டறியப்பட்டது",
+    activeDrugsLabel: "கண்டறியப்பட்ட மருந்துகள்:",
+    emptyTray: "மருந்துகள் எதுவும் கண்டறியப்படவில்லை",
+    ddiSafeTitle: "முரண்பாடுகள் எதுவும் கண்டறியப்படவில்லை",
+    ddiSafeDesc: "மருத்துவமனை தரவுத்தளத்தில் மருந்துகள் சரிபார்க்கப்பட்டு ஆபத்தான முரண்பாடுகள் இல்லை என உறுதிசெய்யப்பட்டது.",
+    actionTitle: "மருத்துவ நடவடிக்கைகள் & ஏற்றுமதி",
+    auditBadge: "ஆய்வுக்குத் தயார்",
+    soapLangLabel: "அறிக்கை மொழி",
+    downloadSoapBtn: "S.O.A.P. பதிவிறக்கு (தமிழ் PDF)",
+    downloadSoapLoading: "தமிழ் அறிக்கை தயாராகிறது...",
+    downloadSoapSuccess: "பதிவிறக்கம் முடிந்தது!",
+    soapS: "அகநிலை",
+    soapO: "புறநிலை",
+    soapA: "மதிப்பீடு",
+    soapP: "திட்டம்",
+    soapDefaultS: "நோயாளி விவரம் காத்திருக்கிறது...",
+    soapDefaultO: "முன்னுரிமை வகைப்பாடு மற்றும் மருந்து சோதனை",
+    soapDefaultA: "மருத்துவ மதிப்பீடு & தொடர்பு ஆபத்து",
+    soapDefaultP: "சிகிச்சை நெறிமுறை மற்றும் மருத்துவர் பின்தொடர்தல்",
+    playAdvice: "ஆலோசனையைக் கேள்",
+    stopAdvice: "நிறுத்து",
+    audioReadyBadge: "தயார்",
+    audioPlayingBadge: "ஒலிக்கிறது",
+    fdaHeader: "OpenFDA ஒழுங்குமுறை ஆதாரம்",
+    fdaDrugTitle: "மருத்துவ தரவுத்தள ஆதாரம்",
+    fdaPrescribingTitle: "FDA மருந்து பரிந்துரை & பயன்பாடு:",
+    fdaDosageSnippet: "உள்ளூர் மருத்துவ மருந்தியல் தரவுத்தளம் மற்றும் openFDA வழிகாட்டுதல்களின்படி சரிபார்க்கப்பட்டது.",
+    fdaWarningsTitle: "பாதுகாப்பு எச்சரிக்கைகள் & முன்னெச்சரிக்கைகள்:",
+    fdaWarningsSnippet: "நிலையான மருத்துவ முன்னெச்சரிக்கைகள் பொருந்தும். நோயாளியின் சகிப்புத்தன்மை மற்றும் சிறுநீரக செயல்பாட்டைக் கண்காணிக்கவும்.",
+    authLangLabel: "விருப்ப மொழி / Preferred Language",
+    authUsernameLabel: "மருத்துவர் / நோயாளி அடையாள எண்",
+    authUsernamePlaceholder: "எ.கா. siva",
+    authPasswordLabel: "கடவுச்சொல்",
+    authPasswordPlaceholder: "கடவுச்சொல்லை உள்ளிடவும்",
+    authSignInTitle: "மருத்துவ உள்நுழைவு",
+    authSignInSub: "உங்கள் ஆலோசனைக் காப்பகத்தை அணுக உங்கள் விவரங்களை உள்ளிடவும்",
+    authSignInBtn: "கட்டுப்பாட்டகத்தில் உள்நுழைக",
+    authSignUpTitle: "மருத்துவக் காப்பகத்தை உருவாக்கவும்",
+    authSignUpSub: "பதிவுகளைச் சேமிக்க பாதுகாப்பான பயனர் பெயர் மற்றும் கடவுச்சொல்லைப் பதிவு செய்க",
+    authSignUpBtn: "கணக்கை உருவாக்கி உள்நுழைக",
+    authTabSignIn: "உள்நுழைக",
+    authTabSignUp: "பதிவு செய்க",
+    authNoAccount: "கணக்கு இல்லையா?",
+    authHasAccount: "ஏற்கனவே கணக்கு உள்ளதா?",
+    authSigningIn: "உள்நுழைகிறது...",
+    authCreatingVault: "காப்பகம் உருவாக்கப்படுகிறது...",
+    guestDivider: "அல்லது",
+    guestLoginBtn: "விருந்தினர் மருத்துவராகத் தொடரவும்"
+  },
+  ml: {
+    logoBadge: "ക്ലിനിക്കൽ കോക്ക്പിറ്റ്",
+    newChat: "പുതിയ സെഷൻ",
+    cockpitToggle: "കോക്ക്പിറ്റ്",
+    cockpitShow: "കോക്ക്പിറ്റ് കാണിക്കുക",
+    logout: "ലോഗ്ഔട്ട്",
+    guestBadge: "അതിഥി ക്ലിനീഷ്യൻ",
+    signInBtn: "സൈൻ ഇൻ",
+    signUpBtn: "സൈൻ അപ്പ്",
+    heroTitle: "MedHub ക്ലിനിക്കൽ AI",
+    inputPlaceholder: "ലക്ഷണങ്ങൾ വിവരിക്കുക, മരുന്നുകളുടെ പ്രതിപ്രവർത്തനം പരിശോധിക്കുക, അല്ലെങ്കിൽ ചോദ്യങ്ങൾ ചോദിക്കുക...",
+    stopBtn: "നിർത്തുക",
+    disclaimer: "🛡️ MedHub ക്ലിനിക്കൽ AI തീരുമാന പിന്തുണ നൽകുന്നു. ഡോക്ടറുടെ പരിശോധന അത്യന്താപേക്ഷിതമാണ്.",
+    dashTitle: "ക്ലിനിക്കൽ ടെലിമെട്രി & സുരക്ഷ",
+    dashSub: "തത്സമയ അൽഗോരിതമിക് തീരുമാന പിന്തുണ",
+    triageTitle: "അടിയന്തര ട്രയേജ് (ESI)",
+    triageRoutineBadge: "സാധാരണ പരിചരണം",
+    triageUrgentBadge: "അടിയന്തിര പരിചരണം",
+    triageEmergencyBadge: "എമർജൻസി ER",
+    meterRoutine: "സാധാരണ",
+    meterUrgent: "അടിയന്തിരം (24-48 മ)",
+    meterER: "എമർജൻസി ER",
+    triageDefaultHeadline: "സാധാരണ ഭവന പരിചരണവും നിരീക്ഷണവും",
+    triageDefaultRec: "ആവശ്യത്തിന് വിശ്രമം, വെള്ളം കുടിക്കൽ ഉറപ്പാക്കുക. 5-7 ദിവസത്തിൽ കൂടുതൽ ലക്ഷണങ്ങൾ തുടർന്നാൽ ഡോക്ടറെ കാണുക.",
+    ddiTitle: "മരുന്ന് പ്രതിപ്രവർത്തന സുരക്ഷാ റഡാർ",
+    ddiSafeBadge: "റഡാർ ക്ലിയർ",
+    ddiWarningBadge: "മുന്നറിയിപ്പ്",
+    ddiDangerBadge: "ഗുരുതര പ്രതിസന്ധി",
+    activeDrugsLabel: "കണ്ടെത്തിയ സജീവ മരുന്നുകൾ:",
+    emptyTray: "സജീവ മരുന്നുകളൊന്നും കണ്ടെത്തിയില്ല",
+    ddiSafeTitle: "ഗുരുതരമായ പ്രതിപ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല",
+    ddiSafeDesc: "ആശുപത്രി ഡാറ്റാബേസ് പരിശോധിച്ചതിൽ ഉയർന്ന അപകടസാധ്യതയുള്ള പ്രതിപ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.",
+    actionTitle: "ക്ലിനിക്കൽ നടപടികളും കയറ്റുമതിയും",
+    auditBadge: "ഓഡിറ്റ് തയ്യാർ",
+    soapLangLabel: "റിപ്പോർട്ട് ഭാഷ",
+    downloadSoapBtn: "S.O.A.P. ഡൗൺലോഡ് (മലയാളം PDF)",
+    downloadSoapLoading: "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
+    downloadSoapSuccess: "ഡൗൺലോഡ് ചെയ്തു!",
+    soapS: "സബ്ജക്റ്റീവ്",
+    soapO: "ഒബ്ജക്റ്റീവ്",
+    soapA: "അസസ്സ്മെന്റ്",
+    soapP: "ചികിത്സാ പദ്ധതി",
+    soapDefaultS: "രോഗിയുടെ വിവരങ്ങൾക്കായി കാത്തിരിക്കുന്നു...",
+    soapDefaultO: "ട്രയേജ് തരംതിരിക്കലും മരുന്ന് പരിശോധനയും",
+    soapDefaultA: "ക്ലിനിക്കൽ നിഗമനവും പ്രതിപ്രവർത്തന സാധ്യതയും",
+    soapDefaultP: "ചികിത്സാ പ്രോട്ടോക്കോളും ഡോക്ടറുടെ ഫോളോ-അപ്പും",
+    playAdvice: "ഉപദേശം കേൾക്കുക",
+    stopAdvice: "നിർത്തുക",
+    audioReadyBadge: "തയ്യാർ",
+    audioPlayingBadge: "പ്ലേ ചെയ്യുന്നു",
+    fdaHeader: "OpenFDA റെഗുലേറ്ററി ആധാരം",
+    fdaDrugTitle: "ക്ലിനിക്കൽ മാട്രിക്സ് ആധാരം",
+    fdaPrescribingTitle: "FDA നിർദ്ദേശവും ഉപയോഗവും:",
+    fdaDosageSnippet: "പ്രാദേശിക ക്ലിനിക്കൽ ഫാർമക്കോളജിക്കൽ ഡാറ്റാബേസും openFDA മാർഗ്ഗനിർദ്ദേശങ്ങളും അനുസരിച്ച് പരിശോധിച്ചു.",
+    fdaWarningsTitle: "സുരക്ഷാ മുന്നറിയിപ്പുകളും മുൻകരുതലുകളും:",
+    fdaWarningsSnippet: "സാധാരണ ക്ലിനിക്കൽ മുൻകരുതലുകൾ ബാധകമാണ്. രോഗിയുടെ സഹിഷ്ണുതയും വൃക്കകളുടെ പ്രവർത്തനവും നിരീക്ഷിക്കുക.",
+    authLangLabel: "തിരഞ്ഞെടുത്ത ഭാഷ / Preferred Language",
+    authUsernameLabel: "ക്ലിനീഷ്യൻ / രോഗി ഐഡി",
+    authUsernamePlaceholder: "ഉദാ. siva",
+    authPasswordLabel: "രഹസ്യവാക്ക്",
+    authPasswordPlaceholder: "രഹസ്യവാക്ക് നൽകുക",
+    authSignInTitle: "ക്ലിനിക്കൽ സൈൻ ഇൻ",
+    authSignInSub: "നിങ്ങളുടെ സ്വകാര്യ കൺസൾട്ടേഷൻ നിലവറയിലേക്ക് പ്രവേശിക്കാൻ ക്രെഡൻഷ്യലുകൾ നൽകുക",
+    authSignInBtn: "കോക്ക്പിറ്റിലേക്ക് സൈൻ ഇൻ ചെയ്യുക",
+    authSignUpTitle: "മെഡിക്കൽ വോൾട്ട് ഉണ്ടാക്കുക",
+    authSignUpSub: "കൺസൾട്ടേഷൻ രേഖകൾ സൂക്ഷിക്കാൻ സുരക്ഷിത ഉപയോക്തൃനാമവും പാസ്‌വേഡും രജിസ്റ്റർ ചെയ്യുക",
+    authSignUpBtn: "അക്കൗണ്ട് ഉണ്ടാക്കി സൈൻ ഇൻ ചെയ്യുക",
+    authTabSignIn: "സൈൻ ഇൻ",
+    authTabSignUp: "സൈൻ അപ്പ്",
+    authNoAccount: "അക്കൗണ്ട് ഇല്ലേ?",
+    authHasAccount: "ഇതിനകം അക്കൗണ്ട് ഉണ്ടോ?",
+    authSigningIn: "സൈൻ ഇൻ ചെയ്യുന്നു...",
+    authCreatingVault: "നിലവറ ഉണ്ടാക്കുന്നു...",
+    guestDivider: "അല്ലെങ്കിൽ",
+    guestLoginBtn: "അതിഥി ക്ലിനീഷ്യനായി തുടരുക"
+  },
+  te: {
+    logoBadge: "క్లినికల్ కాక్‌పిట్",
+    newChat: "కొత్త సెషన్",
+    cockpitToggle: "కాక్‌పిట్",
+    cockpitShow: "కాక్‌పిట్‌ను చూపు",
+    logout: "లాగౌట్",
+    guestBadge: "అతిథి వైద్యుడు",
+    signInBtn: "సైన్ ఇన్",
+    signUpBtn: "సైన్ అప్",
+    heroTitle: "MedHub క్లినికల్ AI",
+    inputPlaceholder: "లక్షణాలను వివరించండి, ఔషధ పరస్పర చర్యలను తనిఖీ చేయండి లేదా వైద్య ప్రశ్నలను అడగండి...",
+    stopBtn: "ఆపు",
+    disclaimer: "🛡️ MedHub క్లినికల్ AI నిర్ణయ మద్దతును అందిస్తుంది. వైద్యుల ధృవీకరణ తప్పనిసరి.",
+    dashTitle: "క్లినికల్ టెలిమెట్రీ & భద్రత",
+    dashSub: "నిజ-సమయ అల్గారిథమిక్ నిర్ణయ మద్దతు",
+    triageTitle: "అత్యవసర ట్రయేజ్ (ESI)",
+    triageRoutineBadge: "సాధారణ సంరక్షణ",
+    triageUrgentBadge: "అత్యవసర సంరక్షణ",
+    triageEmergencyBadge: "అత్యవసర ER",
+    meterRoutine: "సాధారణ",
+    meterUrgent: "అత్యవసరం (24-48 గం)",
+    meterER: "అత్యవసర విభాగం (ER)",
+    triageDefaultHeadline: "ప్రామాణిక గృహ సంరక్షణ & పర్యవేక్షణ",
+    triageDefaultRec: "తగినంత విశ్రాంతి, నీరు తీసుకోండి. 5-7 రోజుల కంటే ఎక్కువ లక్షణాలు కొనసాగితే వైద్యుడిని సంప్రదించండి.",
+    ddiTitle: "ఔషధ పరస్పర చర్య భద్రతా రాడార్",
+    ddiSafeBadge: "రాడార్ స్పష్టం",
+    ddiWarningBadge: "హెచ్చరిక",
+    ddiDangerBadge: "తీవ్ర విభేదం",
+    activeDrugsLabel: "గుర్తించిన ఔషధాలు:",
+    emptyTray: "ఔషధాలేవీ గుర్తించబడలేదు",
+    ddiSafeTitle: "ఎటువంటి తీవ్రమైన విరుద్ధతలు గుర్తించబడలేదు",
+    ddiSafeDesc: "ఆసుపత్రి డేటాబేస్‌తో పరిశీలించగా ఎటువంటి అధిక-ప్రమాదకర ఔషధ పరస్పర చర్యలు లేవని తేలింది.",
+    actionTitle: "క్లినికల్ చర్యలు & ఎగుమతి",
+    auditBadge: "ఆడిట్ సిద్ధం",
+    soapLangLabel: "నివేదిక భాష",
+    downloadSoapBtn: "S.O.A.P. డౌన్‌లోడ్ (తెలుగు PDF)",
+    downloadSoapLoading: "నివేదిక సిద్ధమవుతోంది...",
+    downloadSoapSuccess: "డౌన్‌లోడ్ పూర్తయింది!",
+    soapS: "సబ్జెక్టివ్",
+    soapO: "ఆబ్జెక్టివ్",
+    soapA: "అసెస్మెంట్",
+    soapP: "ప్రణాళిక",
+    soapDefaultS: "రోగి లక్షణాల కోసం వేచి చూస్తోంది...",
+    soapDefaultO: "ట్రయేజ్ వర్గీకరణ & ఔషధ స్క్రీనింగ్",
+    soapDefaultA: "క్లినికల్ అంచనా & పరస్పర చర్య ప్రమాదం",
+    soapDefaultP: "చర్య ప్రోటోకాల్ & వైద్యుల సంప్రదింపు",
+    playAdvice: "సలహా వినండి",
+    stopAdvice: "ఆపు",
+    audioReadyBadge: "సిద్ధం",
+    audioPlayingBadge: "ప్లే అవుతోంది",
+    fdaHeader: "OpenFDA నియంత్రణ ప్రమాణాలు",
+    fdaDrugTitle: "క్లినికల్ మ్యాట్రిక్స్ ప్రమాణం",
+    fdaPrescribingTitle: "FDA సూచనలు & నిర్వహణ:",
+    fdaDosageSnippet: "స్థానిక క్లినికల్ ఫార్మకాలజికల్ డేటాబేస్ మరియు openFDA మార్గదర్శకాల ప్రకారం ధృవీకరించబడింది.",
+    fdaWarningsTitle: "భద్రతా హెచ్చరికలు & జాగ్రత్తలు:",
+    fdaWarningsSnippet: "ప్రామాణిక క్లినికల్ జాగ్రత్తలు వర్తిస్తాయి. రోగి తట్టుకునే సామర్థ్యం మరియు మూత్రపిండాల పనితీరును పర్యవేక్షించండి.",
+    authLangLabel: "ప్రాధాన్య భాష / Preferred Language",
+    authUsernameLabel: "వైద్యుడు / రోగి ఐడి",
+    authUsernamePlaceholder: "ఉదా. siva",
+    authPasswordLabel: "పాస్‌వర్డ్",
+    authPasswordPlaceholder: "పాస్‌వర్డ్ నమోదు చేయండి",
+    authSignInTitle: "క్లినికల్ సైన్ ఇన్",
+    authSignInSub: "మీ ప్రైవేట్ సంప్రదింపుల సమాచారాన్ని యాక్సెస్ చేయడానికి వివరాలను నమోదు చేయండి",
+    authSignInBtn: "కాక్‌పిట్‌కు సైన్ ఇన్ చేయండి",
+    authSignUpTitle: "మెడికల్ వాల్ట్‌ను సృష్టించండి",
+    authSignUpSub: "సంప్రదింపుల రికార్డులను నిల్వ చేయడానికి యూజర్‌నేమ్ మరియు పాస్‌వర్డ్‌ను నమోదు చేయండి",
+    authSignUpBtn: "ఖాతాను సృష్టించి సైన్ ఇన్ చేయండి",
+    authTabSignIn: "సైన్ ఇన్",
+    authTabSignUp: "సైన్ అప్",
+    authNoAccount: "ఖాతా లేదా?",
+    authHasAccount: "ఇప్పటికే ఖాతా ఉందా?",
+    authSigningIn: "సైన్ ఇన్ అవుతోంది...",
+    authCreatingVault: "వాల్ట్ సృష్టించబడుతోంది...",
+    guestDivider: "లేదా",
+    guestLoginBtn: "అతిథి వైద్యుడిగా కొనసాగండి"
+  },
+  kn: {
+    logoBadge: "ಕ್ಲಿನಿಕಲ್ ಕಾಕ್‌ಪಿಟ್",
+    newChat: "ಹೊಸ ಸೆಷನ್",
+    cockpitToggle: "ಕಾಕ್‌ಪಿಟ್",
+    cockpitShow: "ಕಾಕ್‌ಪಿಟ್ ತೋರಿಸಿ",
+    logout: "ಲಾಗ್‌ಔಟ್",
+    guestBadge: "ಅತಿಥಿ ವೈದ್ಯರು",
+    signInBtn: "ಸೈನ್ ಇನ್",
+    signUpBtn: "ಸೈನ್ ಅಪ್",
+    heroTitle: "MedHub ಕ್ಲಿನಿಕಲ್ AI",
+    inputPlaceholder: "ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ, ಔಷಧಿ ಸಂವಹನ ಪರೀಕ್ಷಿಸಿ ಅಥವಾ ವೈದ್ಯಕೀಯ ಪ್ರಶ್ನೆಗಳನ್ನು ಕೇಳಿ...",
+    stopBtn: "ನಿಲ್ಲಿಸು",
+    disclaimer: "🛡️ MedHub ಕ್ಲಿನಿಕಲ್ AI ನಿರ್ಧಾರ ಬೆಂಬಲವನ್ನು ನೀಡುತ್ತದೆ. ವೈದ್ಯರ ಪರಿಶೀಲನೆ ಕಡ್ಡಾಯವಾಗಿದೆ.",
+    dashTitle: "ಕ್ಲಿನಿಕಲ್ ಟೆಲಿಮೆಟ್ರಿ ಮತ್ತು ಸುರಕ್ಷತೆ",
+    dashSub: "ನೈಜ-ಸಮಯದ ಕ್ರಮಾವಳಿ ನಿರ್ಧಾರ ಬೆಂಬಲ",
+    triageTitle: "ತುರ್ತು ಚಿಕಿತ್ಸಾ ಆದ್ಯತೆ (ESI)",
+    triageRoutineBadge: "ಸಾಮಾನ್ಯ ಆರೈಕೆ",
+    triageUrgentBadge: "ತುರ್ತು ಆರೈಕೆ",
+    triageEmergencyBadge: "ತುರ್ತು ER",
+    meterRoutine: "ಸಾಮಾನ್ಯ",
+    meterUrgent: "ತುರ್ತು (24-48 ಗಂ)",
+    meterER: "ತುರ್ತು ಕೊಠಡಿ (ER)",
+    triageDefaultHeadline: "ಪ್ರಮಾಣಿತ ಮನೆ ಆರೈಕೆ ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆ",
+    triageDefaultRec: "ಸಾಕಷ್ಟು ವಿಶ್ರಾಂತಿ, ನೀರು ಸೇವಿಸಿ. 5-7 ದಿನಗಳಿಗಿಂತ ಹೆಚ್ಚು ರೋಗಲಕ್ಷಣಗಳು ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡಿ.",
+    ddiTitle: "ಔಷಧ ಪರಸ್ಪರ ಕ್ರಿಯೆ ಸುರಕ್ಷತಾ ರಾಡಾರ್",
+    ddiSafeBadge: "ರಾಡಾರ್ ಸ್ಪಷ್ಟ",
+    ddiWarningBadge: "ಎಚ್ಚರಿಕೆ",
+    ddiDangerBadge: "ಗಂಭೀರ ಸಂಘರ್ಷ",
+    activeDrugsLabel: "ಗುರುತಿಸಲಾದ ಸಕ್ರಿಯ ಔಷಧಿಗಳು:",
+    emptyTray: "ಯಾವುದೇ ಔಷಧಿಗಳು ಪತ್ತೆಯಾಗಿಲ್ಲ",
+    ddiSafeTitle: "ಯಾವುದೇ ಗಂಭೀರ ಪ್ರತಿಕೂಲತೆ ಕಂಡುಬಂದಿಲ್ಲ",
+    ddiSafeDesc: "ಆಸ್ಪತ್ರೆ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಪರೀಕ್ಷಿಸಿದಾಗ ಯಾವುದೇ ಹೆಚ್ಚಿನ ಅಪಾಯದ ಔಷಧೀಯ ಸಂಘರ್ಷಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+    actionTitle: "ಕ್ಲಿನಿಕಲ್ ಕ್ರಮಗಳು ಮತ್ತು ರಫ್ತು",
+    auditBadge: "ಆಡಿಟ್‌ಗೆ ಸಿದ್ಧ",
+    soapLangLabel: "ವರದಿ ಭಾಷೆ",
+    downloadSoapBtn: "S.O.A.P. ಡೌನ್‌ಲೋಡ್ (ಕನ್ನಡ PDF)",
+    downloadSoapLoading: "ವರದಿ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...",
+    downloadSoapSuccess: "ಡೌನ್‌ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿದೆ!",
+    soapS: "ಸಬ್ಜೆಕ್ಟಿವ್",
+    soapO: "ಆಬ್ಜೆಕ್ಟಿವ್",
+    soapA: "ಮೌಲ್ಯಮಾಪನ",
+    soapP: "ಯೋಜನೆ",
+    soapDefaultS: "ರೋಗಿಯ ದೂರಿಗಾಗಿ ಕಾಯಲಾಗುತ್ತಿದೆ...",
+    soapDefaultO: "ಟ್ರಯಾಜ್ ವರ್ಗೀಕರಣ ಮತ್ತು ಔಷಧ ತಪಾಸಣೆ",
+    soapDefaultA: "ವೈದ್ಯಕೀಯ ಮೌಲ್ಯಮಾಪನ ಮತ್ತು ಅಪಾಯದ ಸಾಧ್ಯತೆ",
+    soapDefaultP: "ಕ್ರಿಯಾ ಪ್ರೋಟೋಕಾಲ್ ಮತ್ತು ವೈದ್ಯರ ಫಾಲೋ-ಅಪ್",
+    playAdvice: "ಸಲಹೆ ಆಲಿಸಿ",
+    stopAdvice: "ನಿಲ್ಲಿಸು",
+    audioReadyBadge: "ಸಿದ್ಧ",
+    audioPlayingBadge: "ಪ್ಲೇ ಆಗುತ್ತಿದೆ",
+    fdaHeader: "OpenFDA ನಿಯಂತ್ರಕ ಆಧಾರ",
+    fdaDrugTitle: "ಕ್ಲಿನಿಕಲ್ ಮ್ಯಾಟ್ರಿಕ್ಸ್ ಆಧಾರ",
+    fdaPrescribingTitle: "FDA ಶಿಫಾರಸು ಮತ್ತು ಬಳಕೆ:",
+    fdaDosageSnippet: "ಸ್ಥಳೀಯ ಕ್ಲಿನಿಕಲ್ ಫಾರ್ಮಾಕಾಲಾಜಿಕಲ್ ಡೇಟಾಬೇಸ್ ಮತ್ತು openFDA ನಿಯಮಾವಳಿಗಳ ಪ್ರಕಾರ ಪರಿಶೀಲಿಸಲಾಗಿದೆ.",
+    fdaWarningsTitle: "ಸುರಕ್ಷತಾ ಎಚ್ಚರಿಕೆಗಳು ಮತ್ತು ಮುನ್ನೆಚ್ಚರಿಕೆಗಳು:",
+    fdaWarningsSnippet: "ಪ್ರಮಾಣಿತ ವೈದ್ಯಕೀಯ ಮುನ್ನೆಚ್ಚರಿಕೆಗಳು ಅನ್ವಯಿಸುತ್ತವೆ. ರೋಗಿಯ ಸಹಿಷ್ಣುತೆ ಮತ್ತು ಮೂತ್ರಪಿಂಡದ ಕ್ರಿಯೆಯನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.",
+    authLangLabel: "ಆದ್ಯತೆಯ ಭಾಷೆ / Preferred Language",
+    authUsernameLabel: "ವೈದ್ಯರು / ರೋಗಿ ಐಡಿ",
+    authUsernamePlaceholder: "ಉದಾ. siva",
+    authPasswordLabel: "ಗುಪ್ತಪದ (ಪಾಸ್‌ವರ್ಡ್)",
+    authPasswordPlaceholder: "ಗುಪ್ತಪದ ನಮೂದಿಸಿ",
+    authSignInTitle: "ಕ್ಲಿನಿಕಲ್ ಸೈನ್ ಇನ್",
+    authSignInSub: "ನಿಮ್ಮ ಖಾಸಗಿ ಸಮಾಲೋಚನಾ ವಾಲ್ಟ್‌ಗೆ ಪ್ರವೇಶಿಸಲು ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ",
+    authSignInBtn: "ಕಾಕ್‌ಪಿಟ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    authSignUpTitle: "ವೈದ್ಯಕೀಯ ವಾಲ್ಟ್ ರಚಿಸಿ",
+    authSignUpSub: "ದಾಖಲೆಗಳನ್ನು ಸುರಕ್ಷಿತವಾಗಿಡಲು ಬಳಕೆದಾರಹೆಸರು ಮತ್ತು ಗುಪ್ತಪದ ನೋಂದಾಯಿಸಿ",
+    authSignUpBtn: "ಖಾತೆ ರಚಿಸಿ ಸೈನ್ ಇನ್ ಮಾಡಿ",
+    authTabSignIn: "ಸೈನ್ ಇನ್",
+    authTabSignUp: "ಸೈನ್ ಅಪ್",
+    authNoAccount: "ಖಾತೆ ಇಲ್ಲವೇ?",
+    authHasAccount: "ಈಗಾಗಲೇ ಖಾತೆ ಹೊಂದಿದ್ದೀರಾ?",
+    authSigningIn: "ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...",
+    authCreatingVault: "ವಾಲ್ಟ್ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
+    guestDivider: "ಅಥವಾ",
+    guestLoginBtn: "ಅತಿಥಿ ವೈದ್ಯರಾಗಿ ಮುಂದುವರಿಯಿರಿ"
+  },
+  hi: {
+    logoBadge: "क्लिनिकल कॉकपिट",
+    newChat: "नया सत्र",
+    cockpitToggle: "कॉकपिट",
+    cockpitShow: "कॉकपिट दिखाएं",
+    logout: "लॉगआउट",
+    guestBadge: "अतिथि चिकित्सक",
+    signInBtn: "साइन इन",
+    signUpBtn: "साइन अप",
+    heroTitle: "MedHub क्लिनिकल AI",
+    inputPlaceholder: "लक्षण बताएं, दवा के परस्पर प्रभाव की जांच करें या चिकित्सीय प्रश्न पूछें...",
+    stopBtn: "रोकें",
+    disclaimer: "🛡️ MedHub क्लिनिकल AI निर्णय समर्थन प्रदान करता है। चिकित्सक का सत्यापन अनिवार्य है।",
+    dashTitle: "क्लिनिकल टेलीमेट्री और सुरक्षा",
+    dashSub: "रीयल-टाइम एल्गोरिथम निर्णय समर्थन",
+    triageTitle: "आपातकालीन ट्राइएज (ESI)",
+    triageRoutineBadge: "सामान्य देखभाल",
+    triageUrgentBadge: "अति आवश्यक देखभाल",
+    triageEmergencyBadge: "आपातकालीन ER",
+    meterRoutine: "सामान्य",
+    meterUrgent: "अति आवश्यक (24-48 घंटे)",
+    meterER: "आपातकालीन कक्ष (ER)",
+    triageDefaultHeadline: "मानक गृह देखभाल और निगरानी",
+    triageDefaultRec: "पर्याप्त आराम और जलयोजन बनाए रखें। यदि लक्षण 5-7 दिनों से अधिक बने रहें तो चिकित्सक से परामर्श लें।",
+    ddiTitle: "दवा पारस्परिक क्रिया सुरक्षा रडार",
+    ddiSafeBadge: "रडार सुरक्षित",
+    ddiWarningBadge: "चेतावनी",
+    ddiDangerBadge: "गंभीर टकराव",
+    activeDrugsLabel: "पहचानी गई सक्रिय औषधियां:",
+    emptyTray: "कोई सक्रिय दवा नहीं मिली",
+    ddiSafeTitle: "कोई गंभीर विरोधाभास नहीं मिला",
+    ddiSafeDesc: "सक्रिय दवाओं का अस्पताल ज्ञानकोष से मिलान किया गया, कोई उच्च-जोखिम पारस्परिक टकराव नहीं मिला।",
+    actionTitle: "क्लिनिकल क्रियाएं और निर्यात",
+    auditBadge: "ऑडिट तैयार",
+    soapLangLabel: "रिपोर्ट भाषा",
+    downloadSoapBtn: "S.O.A.P. सारांश डाउनलोड (हिन्दी PDF)",
+    downloadSoapLoading: "हिन्दी रिपोर्ट तैयार हो रही है...",
+    downloadSoapSuccess: "डाउनलोड पूरा हुआ!",
+    soapS: "व्यक्तिपरक",
+    soapO: "वस्तुपरक",
+    soapA: "मूल्यांकन",
+    soapP: "उपचार योजना",
+    soapDefaultS: "रोगी की शिकायत की प्रतीक्षा है...",
+    soapDefaultO: "ट्राइएज वर्गीकरण और दवा जांच",
+    soapDefaultA: "क्लिनिकल मूल्यांकन और परस्पर प्रभाव जोखिम",
+    soapDefaultP: "कार्रवाई प्रोटोकॉल और डॉक्टर परामर्श",
+    playAdvice: "सलाह सुनें",
+    stopAdvice: "रोकें",
+    audioReadyBadge: "तैयार",
+    audioPlayingBadge: "चल रहा है",
+    fdaHeader: "OpenFDA विनियामक आधार",
+    fdaDrugTitle: "क्लिनिकल मैट्रिक्स आधार",
+    fdaPrescribingTitle: "FDA नुस्खा और व्यवस्थापन:",
+    fdaDosageSnippet: "स्थानीय क्लिनिकल औषधीय डेटाबेस और openFDA लेबल दिशानिर्देशों के तहत सत्यापित।",
+    fdaWarningsTitle: "सुरक्षा चेतावनियां और सावधानियां:",
+    fdaWarningsSnippet: "मानक चिकित्सीय सावधानियां लागू होती हैं। रोगी की सहनशीलता और गुर्दे की कार्यप्रणाली की निगरानी करें।",
+    authLangLabel: "पसंदीदा भाषा / Preferred Language",
+    authUsernameLabel: "चिकित्सक / रोगी आईडी",
+    authUsernamePlaceholder: "उदा. siva",
+    authPasswordLabel: "पासवर्ड",
+    authPasswordPlaceholder: "पासवर्ड दर्ज करें",
+    authSignInTitle: "क्लिनिकल साइन इन",
+    authSignInSub: "अपने निजी परामर्श वॉल्ट तक पहुँचने के लिए क्रेडेंशियल दर्ज करें",
+    authSignInBtn: "कॉकपिट में साइन इन करें",
+    authSignUpTitle: "मेडिकल वॉल्ट बनाएं",
+    authSignUpSub: "परामर्श रिकॉर्ड सहेजने के लिए सुरक्षित उपयोगकर्ता नाम और पासवर्ड पंजीकृत करें",
+    authSignUpBtn: "खाता बनाएं और साइन इन करें",
+    authTabSignIn: "साइन इन",
+    authTabSignUp: "साइन अप",
+    authNoAccount: "खाता नहीं है?",
+    authHasAccount: "पहले से खाता है?",
+    authSigningIn: "साइन इन हो रहा है...",
+    authCreatingVault: "वॉल्ट बनाया जा रहा है...",
+    guestDivider: "या",
+    guestLoginBtn: "अतिथि चिकित्सक के रूप में जारी रखें"
+  }
+};
+
+let currentAppLang = localStorage.getItem("medhub_app_lang") || "en";
+
+function applyAppLanguage(lang) {
+  if (!lang) lang = "en";
+  currentAppLang = lang.toLowerCase();
+  if (!APP_I18N[currentAppLang]) currentAppLang = "en";
+  localStorage.setItem("medhub_app_lang", currentAppLang);
+
+  if (currentUser && currentUser !== "guest") {
+    localStorage.setItem("medhub_user_lang_" + currentUser, currentAppLang);
+  }
+
+  const t = APP_I18N[currentAppLang];
+
+  // Synchronize both language dropdowns
+  if (authLangSelect && authLangSelect.value !== currentAppLang) {
+    authLangSelect.value = currentAppLang;
+  }
+  if (soapLangSelect && soapLangSelect.value !== currentAppLang) {
+    soapLangSelect.value = currentAppLang;
+  }
+
+  // 1. Topbar
+  if (logoBadgeText) logoBadgeText.textContent = t.logoBadge;
+  if (newChatBtnText) newChatBtnText.textContent = t.newChat;
+  if (toggleCockpitBtnText) {
+    const isCollapsed = cockpitContainer && cockpitContainer.classList.contains("collapsed");
+    toggleCockpitBtnText.textContent = isCollapsed ? t.cockpitShow : t.cockpitToggle;
+  }
+  if (logoutBtnText) logoutBtnText.textContent = t.logout;
+  if (guestIndicatorText) guestIndicatorText.textContent = t.guestBadge;
+  if (loginPromptBtnText) loginPromptBtnText.textContent = t.signInBtn;
+  if (signupPromptBtnText) signupPromptBtnText.textContent = t.signUpBtn;
+
+  // 2. Consultation Stream
+  if (heroTitleText) heroTitleText.textContent = t.heroTitle;
+  if (inputEl) inputEl.setAttribute("placeholder", t.inputPlaceholder);
+  if (stopGenBtnText) stopGenBtnText.textContent = t.stopBtn;
+  if (disclaimerNoticeText) disclaimerNoticeText.textContent = t.disclaimer;
+
+  // 3. Dashboard Header
+  if (dashboardTitleText) dashboardTitleText.textContent = t.dashTitle;
+  if (dashboardSubText) dashboardSubText.textContent = t.dashSub;
+
+  // 4. Emergency Triage (Card 1)
+  if (triageCardTitle) triageCardTitle.textContent = t.triageTitle;
+  if (meterLabelRoutine) meterLabelRoutine.textContent = t.meterRoutine;
+  if (meterLabelUrgent) meterLabelUrgent.textContent = t.meterUrgent;
+  if (meterLabelER) meterLabelER.textContent = t.meterER;
+  if (!latestBotAdvice && triageHeadline && triageRec) {
+    triageHeadline.textContent = t.triageDefaultHeadline;
+    triageRec.textContent = t.triageDefaultRec;
+    if (triageBadge) triageBadge.textContent = t.triageRoutineBadge;
+  }
+
+  // 5. DDI Radar (Card 2)
+  if (ddiCardTitle) ddiCardTitle.textContent = t.ddiTitle;
+  if (activeDrugsLabel) activeDrugsLabel.textContent = t.activeDrugsLabel;
+  if (!latestBotAdvice) {
+    if (ddiBadge) ddiBadge.textContent = t.ddiSafeBadge;
+    if (emptyTrayPill) emptyTrayPill.textContent = t.emptyTray;
+    if (ddiConflictTitle) ddiConflictTitle.textContent = t.ddiSafeTitle;
+    if (ddiConflictDesc) ddiConflictDesc.textContent = t.ddiSafeDesc;
+  }
+
+  // 6. Clinical Actions & SOAP (Card 3)
+  if (actionCardTitle) actionCardTitle.textContent = t.actionTitle;
+  if (auditReadyBadge) auditReadyBadge.textContent = t.auditBadge;
+  if (soapLangLabelText) soapLangLabelText.textContent = t.soapLangLabel;
+  if (downloadSoapBtnText && !downloadSoapBtn.disabled) {
+    downloadSoapBtnText.textContent = t.downloadSoapBtn;
+  }
+  if (!latestSoapData) {
+    if (soapSubjectivePreview) soapSubjectivePreview.textContent = t.soapDefaultS;
+    if (soapObjectivePreview) soapObjectivePreview.textContent = t.soapDefaultO;
+    if (soapAssessmentPreview) soapAssessmentPreview.textContent = t.soapDefaultA;
+    if (soapPlanPreview) soapPlanPreview.textContent = t.soapDefaultP;
+  }
+  if (playAdviceBtnText) playAdviceBtnText.textContent = t.playAdvice;
+  if (stopAdviceBtnText) stopAdviceBtnText.textContent = t.stopAdvice;
+  if (audioStateBadge && !isVoicePlaying) audioStateBadge.textContent = t.audioReadyBadge;
+
+  // OpenFDA Grounding Drawer
+  if (fdaHeaderTitle) fdaHeaderTitle.textContent = t.fdaHeader;
+  if (fdaDrugTitle) fdaDrugTitle.textContent = t.fdaDrugTitle;
+  if (fdaPrescribingTitle) fdaPrescribingTitle.textContent = t.fdaPrescribingTitle;
+  if (fdaDosageSnippet) fdaDosageSnippet.textContent = t.fdaDosageSnippet;
+  if (fdaWarningsTitle) fdaWarningsTitle.textContent = t.fdaWarningsTitle;
+  if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = t.fdaWarningsSnippet;
+
+  // 7. Auth Modal
+  if (authLangLabelText) authLangLabelText.textContent = t.authLangLabel;
+  if (authUsernameLabel) authUsernameLabel.textContent = t.authUsernameLabel;
+  if (authUsername) authUsername.setAttribute("placeholder", t.authUsernamePlaceholder);
+  if (authPasswordLabel) authPasswordLabel.textContent = t.authPasswordLabel;
+  if (authPassword) authPassword.setAttribute("placeholder", t.authPasswordPlaceholder);
+  if (tabSignIn) tabSignIn.textContent = t.authTabSignIn;
+  if (tabSignUp) tabSignUp.textContent = t.authTabSignUp;
+  if (guestDividerText) guestDividerText.textContent = t.guestDivider;
+  if (guestLoginBtnText) guestLoginBtnText.textContent = t.guestLoginBtn;
+
+  // Re-render auth mode texts
+  if (typeof setAuthMode === "function") {
+    setAuthMode(authMode);
+  }
+}
+
+// ---------------------------------------------------------------------------
 // 2. TOGGLE COCKPIT & MODAL HANDLERS
 // ---------------------------------------------------------------------------
 if (toggleCockpitBtn) {
   toggleCockpitBtn.addEventListener("click", () => {
     cockpitContainer.classList.toggle("collapsed");
     const isCollapsed = cockpitContainer.classList.contains("collapsed");
-    toggleCockpitBtn.querySelector(".toggle-text").textContent = isCollapsed ? "Show Cockpit" : "Cockpit";
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
+    if (toggleCockpitBtnText) {
+      toggleCockpitBtnText.textContent = isCollapsed ? t.cockpitShow : t.cockpitToggle;
+    }
   });
 }
 
@@ -206,7 +811,7 @@ if (newChatBtn) {
     latestUserQuery = "";
     latestSoapData = null;
     resetCockpitMetrics();
-    updateSoapLangUI(soapLangSelect ? soapLangSelect.value : "en");
+    applyAppLanguage(soapLangSelect ? soapLangSelect.value : "en");
     inputEl.value = "";
     autoResize();
     inputEl.focus();
@@ -214,15 +819,16 @@ if (newChatBtn) {
 }
 
 function resetCockpitMetrics() {
+  const t = APP_I18N[currentAppLang] || APP_I18N.en;
   if (triageBadge) {
     triageBadge.className = "status-badge routine";
-    triageBadge.textContent = "ROUTINE CARE";
+    triageBadge.textContent = t.triageRoutineBadge;
   }
   if (triageMeterMarker) {
     triageMeterMarker.className = "meter-marker routine";
   }
-  if (triageHeadline) triageHeadline.textContent = "Standard Supportive Home Care & Monitoring";
-  if (triageRec) triageRec.textContent = "Maintain adequate rest, hydration, and monitor symptoms. Consult primary doctor if symptoms persist beyond 5-7 days.";
+  if (triageHeadline) triageHeadline.textContent = t.triageDefaultHeadline;
+  if (triageRec) triageRec.textContent = t.triageDefaultRec;
   if (triageTriggers) {
     triageTriggers.innerHTML = "";
     triageTriggers.style.display = "none";
@@ -230,23 +836,23 @@ function resetCockpitMetrics() {
 
   if (ddiBadge) {
     ddiBadge.className = "status-badge safe";
-    ddiBadge.textContent = "RADAR CLEAR";
+    ddiBadge.textContent = t.ddiSafeBadge;
   }
   if (activeDrugsList) {
-    activeDrugsList.innerHTML = `<span class="empty-tray-pill">No active medications detected yet</span>`;
+    activeDrugsList.innerHTML = `<span class="empty-tray-pill" id="emptyTrayPill">${t.emptyTray}</span>`;
   }
   if (ddiConflictBox) {
     ddiConflictBox.className = "ddi-conflict-box safe";
     ddiStatusIcon.textContent = "✅";
-    ddiConflictTitle.textContent = "No Critical Contraindications Detected";
-    ddiConflictDesc.textContent = "Active medications evaluated against the hospital interaction knowledge base with no high-risk pharmaceutical conflicts.";
+    ddiConflictTitle.textContent = t.ddiSafeTitle;
+    ddiConflictDesc.textContent = t.ddiSafeDesc;
     if (ddiActionBox) ddiActionBox.style.display = "none";
   }
 
-  if (soapSubjectivePreview) soapSubjectivePreview.textContent = "Awaiting patient complaint...";
-  if (soapObjectivePreview) soapObjectivePreview.textContent = "Triage classification & drug screening";
-  if (soapAssessmentPreview) soapAssessmentPreview.textContent = "Clinical impression & interaction risk";
-  if (soapPlanPreview) soapPlanPreview.textContent = "Action protocol & physician follow-up";
+  if (soapSubjectivePreview) soapSubjectivePreview.textContent = t.soapDefaultS;
+  if (soapObjectivePreview) soapObjectivePreview.textContent = t.soapDefaultO;
+  if (soapAssessmentPreview) soapAssessmentPreview.textContent = t.soapDefaultA;
+  if (soapPlanPreview) soapPlanPreview.textContent = t.soapDefaultP;
 
   stopVoiceAudio();
 }
@@ -753,99 +1359,28 @@ inputEl.addEventListener("keydown", (e) => {
 
 // ---------------------------------------------------------------------------
 // 9. FEATURE 3: MULTILINGUAL S.O.A.P. / S.B.A.R. PDF EXPORT (6 LANGUAGES)
+// Synchronized with Auth Modal Language Selector and App-Wide Localization
 // ---------------------------------------------------------------------------
-const SOAP_UI_LOCALIZED = {
-  en: {
-    btn: "Download S.O.A.P. Summary (PDF)",
-    loading: "Synthesizing Audit PDF...",
-    success: "Downloaded SOAP Note!",
-    s: "Subjective",
-    o: "Objective",
-    a: "Assessment",
-    p: "Plan"
-  },
-  ta: {
-    btn: "S.O.A.P. பதிவிறக்கு (தமிழ் PDF)",
-    loading: "தமிழ் அறிக்கை தயாராகிறது...",
-    success: "பதிவிறக்கம் முடிந்தது!",
-    s: "அகநிலை",
-    o: "புறநிலை",
-    a: "மதிப்பீடு",
-    p: "திட்டம்"
-  },
-  ml: {
-    btn: "S.O.A.P. ഡൗൺലോഡ് (മലയാളം PDF)",
-    loading: "റിപ്പോർട്ട് തയ്യാറാക്കുന്നു...",
-    success: "ഡൗൺലോഡ് ചെയ്തു!",
-    s: "സബ്ജക്റ്റീവ്",
-    o: "ഒബ്ജക്റ്റീവ്",
-    a: "അസസ്സ്മെന്റ്",
-    p: "ചികിത്സാ പദ്ധതി"
-  },
-  te: {
-    btn: "S.O.A.P. డౌన్‌లోడ్ (తెలుగు PDF)",
-    loading: "నివేదిక సిద్ధమవుతోంది...",
-    success: "డౌన్‌లోడ్ పూర్తయింది!",
-    s: "సబ్జెక్టివ్",
-    o: "ఆబ్జెక్టివ్",
-    a: "అసెస్మెంట్",
-    p: "ప్రణాళిక"
-  },
-  kn: {
-    btn: "S.O.A.P. ಡೌನ್‌ಲೋಡ್ (ಕನ್ನಡ PDF)",
-    loading: "ವರದಿ ಸಿದ್ಧವಾಗುತ್ತಿದೆ...",
-    success: "ಡೌನ್‌ಲೋಡ್ ಯಶಸ್ವಿಯಾಗಿದೆ!",
-    s: "ಸಬ್ಜೆಕ್ಟಿವ್",
-    o: "ಆಬ್ಜೆಕ್ಟಿವ್",
-    a: "ಮೌಲ್ಯಮಾಪನ",
-    p: "ಯೋಜನೆ"
-  },
-  hi: {
-    btn: "S.O.A.P. सारांश डाउनलोड (हिन्दी PDF)",
-    loading: "हिन्दी रिपोर्ट तैयार हो रही है...",
-    success: "डाउनलोड पूरा हुआ!",
-    s: "व्यक्तिपरक",
-    o: "वस्तुपरक",
-    a: "मूल्यांकन",
-    p: "उपचार योजना"
-  }
-};
-
-function updateSoapLangUI(lang) {
-  const chosenLang = (lang || "en").toLowerCase();
-  const texts = SOAP_UI_LOCALIZED[chosenLang] || SOAP_UI_LOCALIZED.en;
-  if (downloadSoapBtnText) {
-    downloadSoapBtnText.textContent = texts.btn;
-  }
-  if (!latestSoapData) {
-    if (soapSubjectivePreview) soapSubjectivePreview.textContent = texts.s;
-    if (soapObjectivePreview) soapObjectivePreview.textContent = texts.o;
-    if (soapAssessmentPreview) soapAssessmentPreview.textContent = texts.a;
-    if (soapPlanPreview) soapPlanPreview.textContent = texts.p;
-  }
+if (soapLangSelect) {
+  soapLangSelect.addEventListener("change", (e) => {
+    applyAppLanguage(e.target.value);
+  });
 }
 
-// Initialize language from localStorage or default to English
-if (soapLangSelect) {
-  const savedLang = localStorage.getItem("medhub_soap_lang") || "en";
-  soapLangSelect.value = savedLang;
-  updateSoapLangUI(savedLang);
-
-  soapLangSelect.addEventListener("change", (e) => {
-    const selectedLang = e.target.value;
-    localStorage.setItem("medhub_soap_lang", selectedLang);
-    updateSoapLangUI(selectedLang);
+if (authLangSelect) {
+  authLangSelect.addEventListener("change", (e) => {
+    applyAppLanguage(e.target.value);
   });
 }
 
 if (downloadSoapBtn) {
   downloadSoapBtn.addEventListener("click", async () => {
-    const selectedLang = (soapLangSelect ? soapLangSelect.value : "en").toLowerCase();
-    const texts = SOAP_UI_LOCALIZED[selectedLang] || SOAP_UI_LOCALIZED.en;
+    const selectedLang = (soapLangSelect ? soapLangSelect.value : currentAppLang || "en").toLowerCase();
+    const t = APP_I18N[selectedLang] || APP_I18N.en;
 
     downloadSoapBtn.disabled = true;
     if (downloadSoapBtnText) {
-      downloadSoapBtnText.textContent = texts.loading;
+      downloadSoapBtnText.textContent = t.downloadSoapLoading;
     }
 
     try {
@@ -875,11 +1410,11 @@ if (downloadSoapBtn) {
       window.URL.revokeObjectURL(url);
 
       if (downloadSoapBtnText) {
-        downloadSoapBtnText.textContent = texts.success;
+        downloadSoapBtnText.textContent = t.downloadSoapSuccess;
       }
       setTimeout(() => {
         downloadSoapBtn.disabled = false;
-        updateSoapLangUI(selectedLang);
+        applyAppLanguage(selectedLang);
       }, 2800);
     } catch (err) {
       console.error("Error generating SOAP PDF:", err);
@@ -888,7 +1423,7 @@ if (downloadSoapBtn) {
       }
       setTimeout(() => {
         downloadSoapBtn.disabled = false;
-        updateSoapLangUI(selectedLang);
+        applyAppLanguage(selectedLang);
       }, 2500);
     }
   });
@@ -1029,23 +1564,24 @@ speedChips.forEach(chip => {
 // ---------------------------------------------------------------------------
 function setAuthMode(mode) {
   authMode = mode;
+  const t = APP_I18N[currentAppLang] || APP_I18N.en;
   authAlert.style.display = "none";
   if (mode === "signup") {
     tabSignUp.classList.add("active");
     tabSignIn.classList.remove("active");
-    authTitle.textContent = "Create Medical Vault";
-    authSubtitle.textContent = "Register a secure username and password to store consultation records";
-    authSubmitBtn.textContent = "Create Account & Sign In";
-    authSwitchText.textContent = "Already have an account?";
-    authSwitchBtn.textContent = "Sign In";
+    authTitle.textContent = t.authSignUpTitle;
+    authSubtitle.textContent = t.authSignUpSub;
+    authSubmitBtn.textContent = t.authSignUpBtn;
+    authSwitchText.textContent = t.authHasAccount;
+    authSwitchBtn.textContent = t.authSignInBtn;
   } else {
     tabSignIn.classList.add("active");
     tabSignUp.classList.remove("active");
-    authTitle.textContent = "Clinical Sign In";
-    authSubtitle.textContent = "Enter your credentials to access your private consultation vault";
-    authSubmitBtn.textContent = "Sign In to Cockpit";
-    authSwitchText.textContent = "Don't have an account?";
-    authSwitchBtn.textContent = "Sign Up";
+    authTitle.textContent = t.authSignInTitle;
+    authSubtitle.textContent = t.authSignInSub;
+    authSubmitBtn.textContent = t.authSignInBtn;
+    authSwitchText.textContent = t.authNoAccount;
+    authSwitchBtn.textContent = t.authSignUpBtn;
   }
   authPassword.value = "";
   authUsername.focus();
@@ -1058,6 +1594,7 @@ authSwitchBtn.addEventListener("click", () => setAuthMode(authMode === "signin" 
 function openAuthModal(defaultMode = "signin") {
   setAuthMode(defaultMode);
   authModal.style.display = "flex";
+  if (authLangSelect) authLangSelect.value = currentAppLang;
   authUsername.value = "";
   authPassword.value = "";
   authAlert.style.display = "none";
@@ -1135,15 +1672,21 @@ async function handleAuthSubmit(e) {
   if (e) e.preventDefault();
   const username = authUsername.value.trim();
   const password = authPassword.value;
+  const t = APP_I18N[currentAppLang] || APP_I18N.en;
 
   if (!username || !password) {
-    authAlert.textContent = "Please enter both username and password.";
+    authAlert.textContent = currentAppLang === "ta" ? "பயனர்பெயர் மற்றும் கடவுச்சொல் இரண்டையும் உள்ளிடவும்." :
+      currentAppLang === "ml" ? "ഉപയോക്തൃനാമവും പാസ്‌വേഡും നൽകുക." :
+      currentAppLang === "te" ? "దయచేసి యూజర్‌నేమ్ మరియు పాస్‌వర్డ్ రెండింటినీ నమోదు చేయండి." :
+      currentAppLang === "kn" ? "ದಯವಿಟ್ಟು ಬಳಕೆದಾರಹೆಸರು ಮತ್ತು ಗುಪ್ತಪದ ಎರಡನ್ನೂ ನಮೂದಿಸಿ." :
+      currentAppLang === "hi" ? "कृपया उपयोगकर्ता नाम और पासवर्ड दोनों दर्ज करें।" :
+      "Please enter both username and password.";
     authAlert.style.display = "block";
     return;
   }
 
   authSubmitBtn.disabled = true;
-  authSubmitBtn.textContent = authMode === "signup" ? "Creating vault..." : "Signing in...";
+  authSubmitBtn.textContent = authMode === "signup" ? t.authCreatingVault : t.authSigningIn;
 
   const endpoint = authMode === "signup" ? "/api/signup" : "/api/login";
   try {
@@ -1157,12 +1700,13 @@ async function handleAuthSubmit(e) {
       authAlert.textContent = data.error || "Authentication failed.";
       authAlert.style.display = "block";
       authSubmitBtn.disabled = false;
-      authSubmitBtn.textContent = authMode === "signup" ? "Create Account & Sign In" : "Sign In to Cockpit";
+      authSubmitBtn.textContent = authMode === "signup" ? t.authSignUpBtn : t.authSignInBtn;
       return;
     }
 
     currentUser = data.username;
     localStorage.setItem("medhub_user", currentUser);
+    localStorage.setItem("medhub_user_lang_" + currentUser, currentAppLang);
     updateAuthUI();
     closeAuthModal();
     loadHistory();
@@ -1172,7 +1716,7 @@ async function handleAuthSubmit(e) {
     authAlert.style.display = "block";
   } finally {
     authSubmitBtn.disabled = false;
-    authSubmitBtn.textContent = authMode === "signup" ? "Create Account & Sign In" : "Sign In to Cockpit";
+    authSubmitBtn.textContent = authMode === "signup" ? t.authSignUpBtn : t.authSignInBtn;
   }
 }
 
@@ -1219,8 +1763,10 @@ async function loadHistory() {
   }
 }
 
-// Initial setup on page load: Update UI and load history if logged in
+// Initial setup on page load: Update UI, apply language, and load history if logged in
 updateAuthUI();
+const savedLang = (currentUser && currentUser !== "guest" && localStorage.getItem("medhub_user_lang_" + currentUser)) || localStorage.getItem("medhub_app_lang") || "en";
+applyAppLanguage(savedLang);
 if (currentUser && currentUser !== "guest") {
   loadHistory();
 }

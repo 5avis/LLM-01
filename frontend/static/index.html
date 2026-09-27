@@ -22,15 +22,15 @@
       <div class="topbar-left">
         <div class="logo" title="MedHub Clinical Intelligence System">
           <div class="logo-icon-wrap">
-            <svg class="logo-svg" width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-              <path style="fill:#cddff0;" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
-              <path style="fill:#62b4e7;" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
-              <path style="fill:#357dc5;" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
+            <svg class="medhub-main-icon logo-svg" width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <path class="svg-tier-1" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
+              <path class="svg-tier-2" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
+              <path class="svg-tier-3" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
             </svg>
           </div>
           <div class="logo-text-group">
             <span class="logo-text">MedHub</span>
-            <span class="logo-badge">CLINICAL COCKPIT</span>
+            <span class="logo-badge" id="logoBadgeText">CLINICAL COCKPIT</span>
           </div>
         </div>
       </div>
@@ -39,28 +39,28 @@
       <div class="topbar-right">
         <button id="newChatBtn" class="cockpit-btn primary" type="button" title="Start a fresh clinical session">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-          <span>New Session</span>
+          <span id="newChatBtnText">New Session</span>
         </button>
 
         <button id="toggleCockpitBtn" class="cockpit-btn secondary" type="button" title="Toggle Clinical Cockpit Panel">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><line x1="15" y1="3" x2="15" y2="21"/></svg>
-          <span class="toggle-text">Cockpit</span>
+          <span class="toggle-text" id="toggleCockpitBtnText">Cockpit</span>
         </button>
 
         <div id="userProfile" class="user-pill-unified" style="display: none;">
           <div class="user-pill-meta">
             <span class="user-pill-avatar" title="Authenticated Clinician">
-              <svg class="user-pill-svg" width="17" height="17" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                <path style="fill:#ffffff;" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
-                <path style="fill:#bdf942;" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
-                <path style="fill:#22c55e;" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
+              <svg class="medhub-main-icon user-pill-svg" width="17" height="17" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                <path class="svg-tier-1" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
+                <path class="svg-tier-2" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
+                <path class="svg-tier-3" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
               </svg>
             </span>
             <span id="userNameDisplay" class="user-pill-name"></span>
           </div>
           <span class="user-pill-divider"></span>
           <button id="logoutBtn" class="user-pill-logout" type="button" title="Sign out of consultation vault">
-            <span>Logout</span>
+            <span id="logoutBtnText">Logout</span>
             <svg class="logout-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
               <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
               <polyline points="16 17 21 12 16 7"/>
@@ -72,10 +72,10 @@
         <div id="authButtonsGroup" class="auth-buttons-group">
           <div class="guest-indicator-pill" id="guestIndicatorPill" title="Active in Guest Mode • Full Decision Support Enabled">
             <span class="guest-dot"></span>
-            <span>Guest Clinician</span>
+            <span id="guestIndicatorText">Guest Clinician</span>
           </div>
-          <button id="loginPromptBtn" class="cockpit-btn secondary" type="button">Sign In</button>
-          <button id="signupPromptBtn" class="cockpit-btn primary" type="button">Sign Up</button>
+          <button id="loginPromptBtn" class="cockpit-btn secondary" type="button"><span id="loginPromptBtnText">Sign In</span></button>
+          <button id="signupPromptBtn" class="cockpit-btn primary" type="button"><span id="signupPromptBtnText">Sign Up</span></button>
         </div>
       </div>
     </header>
@@ -88,13 +88,13 @@
           <!-- Welcome Screen (Ultra-Clean & Simple) -->
           <div class="welcome" id="welcome">
             <div class="hero-icon-bubble">
-              <svg width="34" height="34" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-                <path style="fill:#cddff0;" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
-                <path style="fill:#62b4e7;" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
-                <path style="fill:#357dc5;" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
+              <svg class="medhub-main-icon hero-svg" width="34" height="34" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                <path class="svg-tier-1" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
+                <path class="svg-tier-2" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
+                <path class="svg-tier-3" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
               </svg>
             </div>
-            <h1 class="hero-title">MedHub Clinical AI</h1>
+            <h1 class="hero-title" id="heroTitleText">MedHub Clinical AI</h1>
           </div>
 
           <!-- Chat Stream Messages Container -->
@@ -114,7 +114,7 @@
 
               <button class="stop-btn-chat" id="stopGenBtn" title="Stop Generation" style="display: none;" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
-                <span>Stop</span>
+                <span id="stopGenBtnText">Stop</span>
               </button>
 
               <button class="send-btn" id="sendBtn" title="Send Consultation Message" type="button">
@@ -123,7 +123,7 @@
             </div>
           </div>
           <div class="disclaimer-bar">
-            <span>🛡️ MedHub Clinical AI provides algorithmic decision support. Clinical judgment and physician verification required.</span>
+            <span id="disclaimerNoticeText">🛡️ MedHub Clinical AI provides algorithmic decision support. Clinical judgment and physician verification required.</span>
           </div>
         </footer>
       </section>
@@ -137,8 +137,8 @@
               <span class="radar-ring"></span>
             </div>
             <div>
-              <h2 class="dashboard-title">Clinical Telemetry & Safety</h2>
-              <span class="dashboard-sub">Real-Time Algorithmic Decision Support</span>
+              <h2 class="dashboard-title" id="dashboardTitleText">Clinical Telemetry & Safety</h2>
+              <span class="dashboard-sub" id="dashboardSubText">Real-Time Algorithmic Decision Support</span>
             </div>
           </div>
         </div>
@@ -149,7 +149,7 @@
             <div class="card-head">
               <div class="card-title-wrap">
                 <span class="card-icon">🩺</span>
-                <span class="card-title">Emergency Triage (ESI)</span>
+                <span class="card-title" id="triageCardTitle">Emergency Triage (ESI)</span>
               </div>
               <span class="status-badge routine" id="triageBadge">ROUTINE CARE</span>
             </div>
@@ -162,9 +162,9 @@
                 <div class="meter-marker routine" id="triageMeterMarker"></div>
               </div>
               <div class="meter-labels">
-                <span>Routine</span>
-                <span>Urgent (24-48h)</span>
-                <span>Emergency ER</span>
+                <span id="meterLabelRoutine">Routine</span>
+                <span id="meterLabelUrgent">Urgent (24-48h)</span>
+                <span id="meterLabelER">Emergency ER</span>
               </div>
             </div>
 
@@ -180,16 +180,16 @@
             <div class="card-head">
               <div class="card-title-wrap">
                 <span class="card-icon">⚡</span>
-                <span class="card-title">DDI Safety Radar</span>
+                <span class="card-title" id="ddiCardTitle">DDI Safety Radar</span>
               </div>
               <span class="status-badge safe" id="ddiBadge">RADAR CLEAR</span>
             </div>
 
             <!-- Active Medications Pill Tray -->
             <div class="medications-tray">
-              <span class="tray-label">Active Pharmacotherapy Identified:</span>
+              <span class="tray-label" id="activeDrugsLabel">Active Pharmacotherapy Identified:</span>
               <div class="drug-pill-list" id="activeDrugsList">
-                <span class="empty-tray-pill">No active medications detected</span>
+                <span class="empty-tray-pill" id="emptyTrayPill">No active medications detected</span>
               </div>
             </div>
 
@@ -209,9 +209,9 @@
             <div class="card-head">
               <div class="card-title-wrap">
                 <span class="card-icon">⚡</span>
-                <span class="card-title">Clinical Actions & Export</span>
+                <span class="card-title" id="actionCardTitle">Clinical Actions & Export</span>
               </div>
-              <span class="status-badge verified">AUDIT READY</span>
+              <span class="status-badge verified" id="auditReadyBadge">AUDIT READY</span>
             </div>
 
             <!-- Multilingual Language Selection Pill Box -->
@@ -222,7 +222,7 @@
                   <line x1="2" y1="12" x2="22" y2="12"></line>
                   <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
                 </svg>
-                <span>Report Language</span>
+                <span id="soapLangLabelText">Report Language</span>
               </div>
               <div class="soap-lang-select-wrap">
                 <select id="soapLangSelect" class="soap-lang-select" aria-label="Select S.O.A.P. Report Language">
@@ -266,11 +266,11 @@
               <div class="audio-controls-row">
                 <button class="audio-btn play-btn" id="cockpitAudioPlayBtn" type="button">
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-                  <span>Play Advice</span>
+                  <span id="playAdviceBtnText">Play Advice</span>
                 </button>
                 <button class="audio-btn stop-btn" id="cockpitAudioStopBtn" type="button">
                   <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
-                  <span>Stop</span>
+                  <span id="stopAdviceBtnText">Stop</span>
                 </button>
                 <span class="status-badge voice" id="audioStateBadge">READY</span>
                 <div class="audio-speed-select">
@@ -285,7 +285,7 @@
               <div class="card-head collapsible" id="fdaHeaderToggle">
                 <div class="card-title-wrap">
                   <span class="card-icon">🏛️</span>
-                  <span class="card-title" style="font-size: 0.78rem;">OpenFDA Regulatory Grounding</span>
+                  <span class="card-title" id="fdaHeaderTitle" style="font-size: 0.78rem;">OpenFDA Regulatory Grounding</span>
                 </div>
                 <svg class="chevron-icon" id="fdaChevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
@@ -295,11 +295,11 @@
                   <span class="fda-drug-title" id="fdaDrugTitle">Clinical Matrix Grounding</span>
                 </div>
                 <div class="fda-snippet-block">
-                  <strong>FDA Prescribing & Administration:</strong>
+                  <strong id="fdaPrescribingTitle">FDA Prescribing & Administration:</strong>
                   <p id="fdaDosageSnippet">Verified against local clinical pharmacological database and openFDA regulatory label guidelines.</p>
                 </div>
                 <div class="fda-snippet-block">
-                  <strong>Safety Warnings & Precautions:</strong>
+                  <strong id="fdaWarningsTitle">Safety Warnings & Precautions:</strong>
                   <p id="fdaWarningsSnippet">Standard clinical precautions apply. Monitor patient tolerance and renal clearance parameters.</p>
                 </div>
               </div>
@@ -347,10 +347,10 @@
       <div class="auth-header">
         <div class="auth-logo">
           <div class="logo-icon-wrap">
-            <svg class="logo-svg" width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
-              <path style="fill:#cddff0;" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
-              <path style="fill:#62b4e7;" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
-              <path style="fill:#357dc5;" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
+            <svg class="medhub-main-icon auth-modal-svg" width="24" height="24" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <path class="svg-tier-1" d="m 15,9 c 0,3.865993 -3.608583,2.389831 -7.4745763,2.389831 C 3.6594305,11.389831 1,12.865993 1,9 1,5.1340068 4.1340068,2 8,2 c 3.865993,0 7,3.1340068 7,7 z"/>
+              <path class="svg-tier-2" d="M 12.661989,14.047291 C 8.8361887,16.256291 4.2825718,15.724952 2.0729718,11.898952 -0.13592816,8.072252 1.1750518,3.2087 5.0013718,1 c 4.5084,-0.020828 7.3712002,8.2346249 8.0000002,12.369325 z"/>
+              <path class="svg-tier-3" d="m 16,8 c 0,4.418 -3.582,8 -8,8 C 3.5817,16 0,12.418 0,8 0.89231262,6.4379741 2.9996492,6.0097826 5.457785,6 9.1604662,5.9852645 13.659086,7.0846094 16,8 Z"/>
             </svg>
           </div>
           <span class="logo-text">MedHub</span>
@@ -367,12 +367,34 @@
       <div id="authAlert" class="auth-alert" style="display: none;"></div>
 
       <form id="authForm" class="auth-form" onsubmit="return false;">
+        <div class="form-group auth-lang-group">
+          <label for="authLangSelect" id="authLangLabel">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span id="authLangLabelText">Preferred Language / மொழி / भाषा</span>
+          </label>
+          <div class="auth-lang-select-wrap">
+            <select id="authLangSelect" class="auth-lang-select" aria-label="Select System Language">
+              <option value="en">English (EN)</option>
+              <option value="ta">Tamil (தமிழ்)</option>
+              <option value="ml">Malayalam (മലയാളം)</option>
+              <option value="te">Telugu (తెలుగు)</option>
+              <option value="kn">Kannada (ಕನ್ನಡ)</option>
+              <option value="hi">Hindi (हिन्दी)</option>
+            </select>
+            <svg class="auth-select-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </div>
+        </div>
+
         <div class="form-group">
-          <label for="authUsername">Clinician / Patient ID</label>
+          <label for="authUsername" id="authUsernameLabel">Clinician / Patient ID</label>
           <input type="text" id="authUsername" placeholder="e.g. siva" autocomplete="username" required>
         </div>
         <div class="form-group">
-          <label for="authPassword">Vault Password</label>
+          <label for="authPassword" id="authPasswordLabel">Vault Password</label>
           <input type="password" id="authPassword" placeholder="Enter password" autocomplete="current-password" required>
         </div>
         <button type="submit" id="authSubmitBtn" class="auth-submit-btn">Sign In to Cockpit</button>
@@ -383,9 +405,9 @@
         <button id="authSwitchBtn" class="auth-switch-btn" type="button">Sign Up</button>
       </div>
 
-      <div class="guest-divider"><span>OR</span></div>
+      <div class="guest-divider"><span id="guestDividerText">OR</span></div>
       <button type="button" id="guestLoginBtn" class="guest-btn">
-        <span>Continue as Guest Clinician</span>
+        <span id="guestLoginBtnText">Continue as Guest Clinician</span>
       </button>
     </div>
   </div>
