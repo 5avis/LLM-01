@@ -391,99 +391,10 @@ body {
 }
 
 .hero-title {
-  font-size: 1.85rem;
+  font-size: 1.75rem;
   font-weight: 800;
-  letter-spacing: -0.03em;
+  letter-spacing: -0.02em;
   color: #ffffff;
-  margin-bottom: 8px;
-}
-
-.hero-subtitle {
-  font-size: 0.95rem;
-  color: var(--text-dim);
-  line-height: 1.5;
-  max-width: 580px;
-  margin-bottom: 28px;
-}
-
-/* Starter Chips Grid (1.png Parity with Circular Diagonal Arrow Buttons) */
-.starter-chips-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 14px;
-  width: 100%;
-}
-
-.starter-chip {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-radius: var(--radius-lg);
-  background: rgba(14, 26, 18, 0.72);
-  backdrop-filter: var(--glass-blur);
-  -webkit-backdrop-filter: var(--glass-blur);
-  border: 1px solid var(--glass-border);
-  border-top: 1.5px solid var(--glass-border-top);
-  color: var(--text-bright);
-  cursor: pointer;
-  transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-  text-align: left;
-  position: relative;
-  overflow: hidden;
-}
-
-.starter-chip:hover {
-  background: rgba(22, 44, 30, 0.85);
-  border-color: var(--lime-vibrant);
-  transform: translateY(-2px);
-  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35), 0 0 20px rgba(189, 249, 66, 0.2);
-}
-
-.chip-icon {
-  font-size: 1.35rem;
-  flex-shrink: 0;
-}
-
-.chip-text {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.chip-text strong {
-  font-size: 0.88rem;
-  font-weight: 800;
-  color: #ffffff;
-}
-
-.chip-text span {
-  font-size: 0.75rem;
-  color: var(--mint-bright);
-}
-
-/* Frosted Circular Arrow Badge (1.png Signature Element) */
-.chip-arrow {
-  width: 32px;
-  height: 32px;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: #ffffff;
-  transition: all 0.22s ease;
-  flex-shrink: 0;
-}
-
-.starter-chip:hover .chip-arrow {
-  background: var(--lime-electric);
-  color: var(--text-dark);
-  border-color: var(--lime-electric);
-  transform: scale(1.1) rotate(5deg);
-  box-shadow: 0 0 12px rgba(189, 249, 66, 0.6);
 }
 
 /* Messages Container */
