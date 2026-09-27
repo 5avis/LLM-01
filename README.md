@@ -1,4 +1,4 @@
-# 🩺 MedHub AI — Autonomous Clinical & Medical Assistant
+#  MedHub AI — Autonomous Clinical & Medical Assistant
 
 <div align="center">
 
