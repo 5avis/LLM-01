@@ -301,8 +301,14 @@ body {
 }
 
 .user-pill-avatar {
-  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   line-height: 1;
+}
+
+.user-pill-svg {
+  display: block;
   filter: drop-shadow(0 0 6px rgba(189, 249, 66, 0.5));
 }
 
