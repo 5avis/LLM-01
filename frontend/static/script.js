@@ -10,6 +10,11 @@ const welcomeEl = document.getElementById("welcome");
 const inputEl = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
 const stopGenBtn = document.getElementById("stopGenBtn");
+const micBtn = document.getElementById("micBtn");
+const micRecordingStatus = document.getElementById("micRecordingStatus");
+const micStatusLabel = document.getElementById("micStatusLabel");
+const micStopBtn = document.getElementById("micStopBtn");
+const micStopBtnText = document.getElementById("micStopBtnText");
 const chatArea = document.getElementById("chatArea");
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
@@ -17,6 +22,11 @@ const newChatBtn = document.getElementById("newChatBtn");
 const toggleCockpitBtn = document.getElementById("toggleCockpitBtn");
 const cockpitContainer = document.getElementById("cockpitContainer");
 const dashboardPane = document.getElementById("dashboardPane");
+
+// Audio Input (Speech Recognition) State
+let recognitionInstance = null;
+let isSpeechRecognizing = false;
+let speechBaseInputText = "";
 
 // Feature 6: Privacy Vault Modal
 const privacyVaultPill = document.getElementById("privacyVaultPill");
@@ -317,7 +327,11 @@ const APP_I18N = {
     authSigningIn: "Signing in...",
     authCreatingVault: "Creating vault...",
     guestDivider: "OR",
-    guestLoginBtn: "Continue as Guest Clinician"
+    guestLoginBtn: "Continue as Guest Clinician",
+    micBtnTitle: "Voice Input (Laptop mic, headphones, or headset)",
+    micListening: "Listening via microphone... Speak your symptoms",
+    micStop: "Done",
+    speakerWelcome: "Welcome to MedHub Clinical AI. Audio output is fully operational on your laptop speaker and connected headphones. Please describe your symptoms or ask a medical question."
   },
   ta: {
     logoBadge: "மருத்துவ கட்டுப்பாட்டகம்",
@@ -425,7 +439,11 @@ const APP_I18N = {
     authSigningIn: "உள்நுழைகிறது...",
     authCreatingVault: "காப்பகம் உருவாக்கப்படுகிறது...",
     guestDivider: "அல்லது",
-    guestLoginBtn: "விருந்தினர் மருத்துவராகத் தொடரவும்"
+    guestLoginBtn: "விருந்தினர் மருத்துவராகத் தொடரவும்",
+    micBtnTitle: "குரல் உள்ளீடு (மடிக்கணினி மைக் அல்லது ஹெட்போன்)",
+    micListening: "மைக்ரோஃபோன் கேட்கிறது... உங்கள் அறிகுறிகளைப் பேசுங்கள்",
+    micStop: "முடிந்தது",
+    speakerWelcome: "MedHub மருத்துவ AI ஆடியோ அமைப்பு தயாராக உள்ளது. உங்கள் மடிக்கணினி ஸ்பீக்கர் மற்றும் ஹெட்போன் சரியாக செயல்படுகிறது. ஆலோசனை பெற உங்கள் அறிகுறிகளை விவரிக்கவும்."
   },
   ml: {
     logoBadge: "ക്ലിനിക്കൽ കോക്ക്പിറ്റ്",
@@ -533,7 +551,11 @@ const APP_I18N = {
     authSigningIn: "സൈൻ ഇൻ ചെയ്യുന്നു...",
     authCreatingVault: "നിലവറ ഉണ്ടാക്കുന്നു...",
     guestDivider: "അല്ലെങ്കിൽ",
-    guestLoginBtn: "അതിഥി ക്ലിനീഷ്യനായി തുടരുക"
+    guestLoginBtn: "അതിഥി ക്ലിനീഷ്യനായി തുടരുക",
+    micBtnTitle: "ശബ്ദ ഇൻപുട്ട് (ലാപ്‌ടോപ്പ് മൈക്ക് അല്ലെങ്കിൽ ഹെഡ്‌ഫോൺ)",
+    micListening: "മൈക്രോഫോൺ കേൾക്കുന്നു... ലക്ഷണങ്ങൾ പറയുക",
+    micStop: "പൂർത്തിയായി",
+    speakerWelcome: "MedHub ക്ലിനിക്കൽ AI ഓഡിയോ സിസ്റ്റം സജീവമാണ്. നിങ്ങളുടെ ലാപ്‌ടോപ്പ് സ്പീക്കറും ഹെഡ്‌ഫോണും ശരിയായി പ്രവർത്തിക്കുന്നു. ദയവായി നിങ്ങളുടെ രോഗലക്ഷണങ്ങൾ വ്യക്തമാക്കുക."
   },
   te: {
     logoBadge: "క్లినికల్ కాక్‌పిట్",
@@ -641,7 +663,11 @@ const APP_I18N = {
     authSigningIn: "సైన్ ఇన్ అవుతోంది...",
     authCreatingVault: "వాల్ట్ సృష్టించబడుతోంది...",
     guestDivider: "లేదా",
-    guestLoginBtn: "అతిథి వైద్యుడిగా కొనసాగండి"
+    guestLoginBtn: "అతిథి వైద్యుడిగా కొనసాగండి",
+    micBtnTitle: "వాయిస్ ఇన్‌పుట్ (ల్యాప్‌టాప్ మైక్ లేదా హెడ్‌ఫోన్లు)",
+    micListening: "మైక్రోఫోన్ వింటోంది... మీ లక్షణాలను మాట్లాడండి",
+    micStop: "పూర్తయింది",
+    speakerWelcome: "MedHub క్లినికల్ AI ఆడియో సిస్టమ్ సిద్ధంగా ఉంది. మీ ల్యాప్‌టాప్ స్పీకర్ మరియు హెడ్‌ఫోన్లు సరిగ్గా పనిచేస్తున్నాయి. సలహా కోసం మీ లక్షణాలను వివరించండి."
   },
   kn: {
     logoBadge: "ಕ್ಲಿನಿಕಲ್ ಕಾಕ್‌ಪಿಟ್",
@@ -749,7 +775,11 @@ const APP_I18N = {
     authSigningIn: "ಸೈನ್ ಇನ್ ಆಗುತ್ತಿದೆ...",
     authCreatingVault: "ವಾಲ್ಟ್ ರಚಿಸಲಾಗುತ್ತಿದೆ...",
     guestDivider: "ಅಥವಾ",
-    guestLoginBtn: "ಅತಿಥಿ ವೈದ್ಯರಾಗಿ ಮುಂದುವರಿಯಿರಿ"
+    guestLoginBtn: "ಅತಿಥಿ ವೈದ್ಯರಾಗಿ ಮುಂದುವರಿಯಿರಿ",
+    micBtnTitle: "ಧ್ವನಿ ಇನ್‌ಪುಟ್ (ಲ್ಯಾಪ್‌ಟಾಪ್ ಮೈಕ್ ಅಥವಾ ಹೆಡ್‌ಫೋನ್‌ಗಳು)",
+    micListening: "ಮೈಕ್ರೋಫೋನ್ ಆಲಿಸುತ್ತಿದೆ... ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಮಾತನಾಡಿ",
+    micStop: "ಮುಗಿದಿದೆ",
+    speakerWelcome: "MedHub ಕ್ಲಿನಿಕಲ್ AI ಆಡಿಯೊ ಸಿಸ್ಟಮ್ ಸಕ್ರಿಯವಾಗಿದೆ. ನಿಮ್ಮ ಲ್ಯಾಪ್‌ಟಾಪ್ ಸ್ಪೀಕರ್ ಮತ್ತು ಹೆಡ್‌ಫೋನ್ ಸರಿಯಾಗಿ ಕಾರ್ಯನಿರ್ವಹಿಸುತ್ತಿವೆ. ಸಲಹೆ ಪಡೆಯಲು ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿವರಿಸಿ."
   },
   hi: {
     logoBadge: "क्लिनिकल कॉकपिट",
@@ -857,7 +887,11 @@ const APP_I18N = {
     authSigningIn: "साइन इन हो रहा है...",
     authCreatingVault: "वॉल्ट बनाया जा रहा है...",
     guestDivider: "या",
-    guestLoginBtn: "अतिथि चिकित्सक के रूप में जारी रखें"
+    guestLoginBtn: "अतिथि चिकित्सक के रूप में जारी रखें",
+    micBtnTitle: "वॉइस इनपुट (लैपटॉप माइक या हेडफ़ोन)",
+    micListening: "माइक सुन रहा है... अपने लक्षण बोलें",
+    micStop: "पूर्ण",
+    speakerWelcome: "MedHub क्लिनिकल AI ऑडियो सिस्टम सक्रिय है। आपका लैपटॉप स्पीकर और हेडफ़ोन ठीक से काम कर रहे हैं। परामर्श शुरू करने के लिए अपने लक्षण बताएं।"
   }
 };
 
@@ -1039,6 +1073,11 @@ function applyAppLanguage(lang) {
   if (stopAdviceBtnText) stopAdviceBtnText.textContent = t.stopAdvice;
   if (audioStateBadge && !isVoicePlaying) audioStateBadge.textContent = t.audioReadyBadge;
 
+  // Microphone Voice Input Localization
+  if (micBtn) micBtn.title = t.micBtnTitle || "Voice Input (Laptop mic, headphones, or headset)";
+  if (micStatusLabel) micStatusLabel.textContent = t.micListening || "Listening via microphone... Speak your symptoms";
+  if (micStopBtnText) micStopBtnText.textContent = t.micStop || "Done";
+
   // OpenFDA Grounding Drawer (Card 4)
   if (fdaHeaderTitle) fdaHeaderTitle.textContent = t.fdaHeader;
   if (fdaBadgeText) fdaBadgeText.textContent = t.fdaBadge;
@@ -1213,6 +1252,10 @@ document.querySelectorAll(".starter-chip").forEach(chip => {
 // ---------------------------------------------------------------------------
 if (newChatBtn) {
   newChatBtn.addEventListener("click", () => {
+    if (isSpeechRecognizing) {
+      stopSpeechRecognition();
+    }
+    stopVoiceAudio();
     messagesEl.innerHTML = "";
     welcomeEl.style.display = "flex";
     isFirstMessageInSession = true;
@@ -1754,6 +1797,9 @@ function updateCockpitDashboard(data) {
 // 8. SEND MESSAGE WITH ACTIVE STOP GENERATION BUTTON
 // ---------------------------------------------------------------------------
 async function sendMessage() {
+  if (isSpeechRecognizing) {
+    stopSpeechRecognition();
+  }
   if (currentAbortController) {
     return;
   }
@@ -1930,7 +1976,7 @@ if (downloadSoapBtn) {
 }
 
 // ---------------------------------------------------------------------------
-// 10. FEATURE 4: AUDIO PRESCRIPTION / VOICE READER (Web Speech API)
+// 10. FEATURE 4: AUDIO PRESCRIPTION / VOICE READER (Web Speech & Web Audio API)
 // ---------------------------------------------------------------------------
 function cleanTextForVoice(rawText) {
   if (!rawText) return "";
@@ -1946,16 +1992,18 @@ function resetAllVoiceButtons() {
   document.querySelectorAll(".bot-action-btn").forEach(btn => {
     if (btn.querySelector("span") && btn.querySelector("span").textContent.includes("Stop Audio")) {
       btn.classList.remove("active-audio");
+      const t = APP_I18N[currentAppLang] || APP_I18N.en;
       btn.innerHTML = `
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
-        <span>Listen Aloud</span>
+        <span>${t.listenAloud || "Listen Aloud"}</span>
       `;
     }
   });
   if (cockpitAudioPlayBtn) {
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
     cockpitAudioPlayBtn.innerHTML = `
       <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
-      <span>Play Advice</span>
+      <span id="playAdviceBtnText">${t.playAdvice || "Play Advice"}</span>
     `;
   }
 }
@@ -1968,70 +2016,267 @@ function toggleMessageVoice(button, textToSpeak) {
   playVoiceAudio(textToSpeak, button);
 }
 
+// Hardware Audio Prime & Unlock Tone (Web Audio API)
+// Physically activates the laptop speaker or connected headphones and routes audio stream to OS playback device
+let audioContextInstance = null;
+function primeAudioHardware() {
+  try {
+    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+    if (AudioContextClass) {
+      if (!audioContextInstance) {
+        audioContextInstance = new AudioContextClass();
+      }
+      if (audioContextInstance.state === "suspended") {
+        audioContextInstance.resume();
+      }
+      // Play a very subtle 50ms chime tone to physically activate laptop speaker / headphone output
+      const ctx = audioContextInstance;
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = "sine";
+      osc.frequency.setValueAtTime(523.25, ctx.currentTime);
+      osc.frequency.exponentialRampToValueAtTime(783.99, ctx.currentTime + 0.05);
+      gain.gain.setValueAtTime(0.04, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start();
+      osc.stop(ctx.currentTime + 0.09);
+    }
+  } catch (err) {
+    console.warn("Audio hardware prime note:", err);
+  }
+}
+
+// Speech Synthesis State & Keep-Alive Queue to prevent Chrome 15s freeze bug
+let speechQueue = [];
+let speechQueueIndex = 0;
+let speechKeepAliveInterval = null;
+let activeUtterancesRef = [];
+
+function clearSpeechKeepAlive() {
+  if (speechKeepAliveInterval) {
+    clearInterval(speechKeepAliveInterval);
+    speechKeepAliveInterval = null;
+  }
+}
+
+function startSpeechKeepAlive() {
+  clearSpeechKeepAlive();
+  speechKeepAliveInterval = setInterval(() => {
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
+      window.speechSynthesis.pause();
+      window.speechSynthesis.resume();
+    }
+  }, 9000);
+}
+
+// Split long text into friendly sentence chunks (< 160 characters)
+function chunkTextForSpeech(text) {
+  if (!text) return [];
+  const rawSentences = text.split(/(?<=[.!?;\n])\s+/);
+  const chunks = [];
+  let currentChunk = "";
+
+  for (const sentence of rawSentences) {
+    const cleanSentence = sentence.trim();
+    if (!cleanSentence) continue;
+    if ((currentChunk + " " + cleanSentence).trim().length <= 160) {
+      currentChunk = (currentChunk + " " + cleanSentence).trim();
+    } else {
+      if (currentChunk) chunks.push(currentChunk);
+      if (cleanSentence.length > 160) {
+        const subParts = cleanSentence.split(/(?<=[,])\s+/);
+        let subChunk = "";
+        for (const part of subParts) {
+          if ((subChunk + " " + part).trim().length <= 160) {
+            subChunk = (subChunk + " " + part).trim();
+          } else {
+            if (subChunk) chunks.push(subChunk);
+            subChunk = part.trim();
+          }
+        }
+        if (subChunk) chunks.push(subChunk);
+        currentChunk = "";
+      } else {
+        currentChunk = cleanSentence;
+      }
+    }
+  }
+  if (currentChunk) chunks.push(currentChunk);
+  return chunks.length > 0 ? chunks : [text];
+}
+
+// Find best matching voice for current application language
+function getBestVoiceForCurrentLang() {
+  if (!("speechSynthesis" in window)) return null;
+  const voices = window.speechSynthesis.getVoices() || [];
+  if (!voices.length) return null;
+
+  const langCode = (currentAppLang || "en").toLowerCase();
+
+  const langPatterns = {
+    ta: ["ta-in", "ta", "tamil"],
+    ml: ["ml-in", "ml", "malayalam"],
+    te: ["te-in", "te", "telugu"],
+    kn: ["kn-in", "kn", "kannada"],
+    hi: ["hi-in", "hi", "hindi"],
+    en: ["en-us", "en-gb", "en"]
+  };
+
+  const patterns = langPatterns[langCode] || ["en"];
+
+  for (const pattern of patterns) {
+    const matched = voices.find(v => {
+      const vLang = (v.lang || "").toLowerCase();
+      const vName = (v.name || "").toLowerCase();
+      return vLang.includes(pattern) || vName.includes(pattern);
+    });
+    if (matched) return matched;
+  }
+
+  return voices.find(v => v.default) || voices[0] || null;
+}
+
+if ("speechSynthesis" in window) {
+  window.speechSynthesis.onvoiceschanged = () => {
+    // Voices cached
+  };
+}
+
 function playVoiceAudio(textToSpeak, button = null) {
   if (!("speechSynthesis" in window)) {
-    alert("Speech Synthesis is not supported in this browser.");
+    alert("Speech Synthesis is not supported in this browser. Please use Chrome, Edge, or Safari.");
     return;
   }
 
-  // Cancel any existing playback
+  // Physically prime audio hardware (laptop speaker / headphone)
+  primeAudioHardware();
+
+  // Cancel any existing speech synthesis
   window.speechSynthesis.cancel();
+  clearSpeechKeepAlive();
+  activeUtterancesRef = [];
   resetAllVoiceButtons();
 
-  const text = cleanTextForVoice(textToSpeak || latestBotAdvice);
+  // Resolve text to speak
+  let text = cleanTextForVoice(textToSpeak || latestBotAdvice);
   if (!text) {
-    if (audioStateBadge) {
-      audioStateBadge.textContent = "NO ADVICE YET";
-      setTimeout(() => { audioStateBadge.textContent = "READY"; }, 2000);
+    const botMessages = document.querySelectorAll(".message.bot .msg-content");
+    if (botMessages.length > 0) {
+      text = cleanTextForVoice(botMessages[botMessages.length - 1].innerText);
+      latestBotAdvice = text;
     }
+  }
+
+  // If still empty (new fresh session), speak welcoming device confirmation prompt
+  if (!text) {
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
+    text = t.speakerWelcome || "Welcome to MedHub Clinical AI. Audio output is fully operational on your laptop speaker and connected headphones. Please describe your symptoms or ask a medical question.";
+  }
+
+  // Split into chunks
+  speechQueue = chunkTextForSpeech(text);
+  speechQueueIndex = 0;
+
+  if (speechQueue.length === 0) return;
+
+  // Update UI to playing state
+  isVoicePlaying = true;
+  activeSpeakingBtn = button;
+  if (soundwaveDisplay) soundwaveDisplay.classList.add("playing");
+  if (audioStateBadge) {
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
+    audioStateBadge.textContent = t.audioPlayingBadge || "PLAYING";
+    audioStateBadge.className = "status-badge emergency";
+  }
+
+  if (button) {
+    button.classList.add("active-audio");
+    button.innerHTML = `
+      <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+      <span>Stop Audio</span>
+    `;
+  }
+  if (cockpitAudioPlayBtn) {
+    cockpitAudioPlayBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+      <span id="playAdviceBtnText">Stop Reading</span>
+    `;
+  }
+
+  startSpeechKeepAlive();
+  speakNextChunk(button);
+}
+
+function speakNextChunk(button) {
+  if (!isVoicePlaying || speechQueueIndex >= speechQueue.length) {
+    stopVoiceAudio();
     return;
   }
 
-  const utterance = new SpeechSynthesisUtterance(text);
+  const chunk = speechQueue[speechQueueIndex];
+  const utterance = new SpeechSynthesisUtterance(chunk);
   utterance.rate = currentSpeechSpeed;
 
-  utterance.onstart = () => {
-    isVoicePlaying = true;
-    activeSpeakingBtn = button;
-    soundwaveDisplay.classList.add("playing");
-    audioStateBadge.textContent = "READING ALOUD";
-    audioStateBadge.className = "status-badge emergency";
-
-    if (button) {
-      button.classList.add("active-audio");
-      button.innerHTML = `
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
-        <span>Stop Audio</span>
-      `;
-    }
-    if (cockpitAudioPlayBtn) {
-      cockpitAudioPlayBtn.innerHTML = `
-        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
-        <span>Stop Reading</span>
-      `;
-    }
+  const langTagMap = {
+    en: "en-US",
+    ta: "ta-IN",
+    ml: "ml-IN",
+    te: "te-IN",
+    kn: "kn-IN",
+    hi: "hi-IN"
   };
+  utterance.lang = langTagMap[currentAppLang] || "en-US";
+
+  const matchedVoice = getBestVoiceForCurrentLang();
+  if (matchedVoice) {
+    utterance.voice = matchedVoice;
+  }
 
   utterance.onend = () => {
-    stopVoiceAudio();
+    speechQueueIndex++;
+    if (speechQueueIndex < speechQueue.length && isVoicePlaying) {
+      speakNextChunk(button);
+    } else {
+      stopVoiceAudio();
+    }
   };
 
-  utterance.onerror = () => {
-    stopVoiceAudio();
+  utterance.onerror = (e) => {
+    console.warn("Utterance error chunk:", e);
+    speechQueueIndex++;
+    if (speechQueueIndex < speechQueue.length && isVoicePlaying) {
+      speakNextChunk(button);
+    } else {
+      stopVoiceAudio();
+    }
   };
 
+  activeUtterancesRef.push(utterance);
+
+  if (window.speechSynthesis.paused) {
+    window.speechSynthesis.resume();
+  }
   window.speechSynthesis.speak(utterance);
 }
 
 function stopVoiceAudio() {
+  clearSpeechKeepAlive();
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }
+  speechQueue = [];
+  speechQueueIndex = 0;
+  activeUtterancesRef = [];
   isVoicePlaying = false;
   activeSpeakingBtn = null;
-  soundwaveDisplay.classList.remove("playing");
-  audioStateBadge.textContent = "READY";
-  audioStateBadge.className = "status-badge voice";
+  if (soundwaveDisplay) soundwaveDisplay.classList.remove("playing");
+  if (audioStateBadge) {
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
+    audioStateBadge.textContent = t.audioReadyBadge || "READY";
+    audioStateBadge.className = "status-badge voice";
+  }
   resetAllVoiceButtons();
 }
 
@@ -2053,11 +2298,154 @@ speedChips.forEach(chip => {
     speedChips.forEach(c => c.classList.remove("active"));
     chip.classList.add("active");
     currentSpeechSpeed = parseFloat(chip.getAttribute("data-speed")) || 1.0;
-    if (window.speechSynthesis.speaking) {
+    if (window.speechSynthesis && window.speechSynthesis.speaking) {
       playVoiceAudio(latestBotAdvice);
     }
   });
 });
+
+// ---------------------------------------------------------------------------
+// 10.1 AUDIO INPUT / VOICE DICTATION (Microphone & Headphone Support)
+// ---------------------------------------------------------------------------
+function initSpeechRecognition() {
+  const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognitionClass) {
+    return null;
+  }
+
+  const recognition = new SpeechRecognitionClass();
+  recognition.continuous = true;
+  recognition.interimResults = true;
+  recognition.maxAlternatives = 1;
+
+  recognition.onstart = () => {
+    isSpeechRecognizing = true;
+    if (micBtn) micBtn.classList.add("recording");
+    if (micRecordingStatus) micRecordingStatus.style.display = "flex";
+    const t = APP_I18N[currentAppLang] || APP_I18N.en;
+    if (micStatusLabel) micStatusLabel.textContent = t.micListening || "Listening via microphone... Speak your symptoms";
+    speechBaseInputText = inputEl.value ? inputEl.value.trim() + " " : "";
+  };
+
+  recognition.onresult = (event) => {
+    let interimText = "";
+    let finalText = "";
+
+    for (let i = event.resultIndex; i < event.results.length; i++) {
+      const transcript = event.results[i][0].transcript;
+      if (event.results[i].isFinal) {
+        finalText += transcript + " ";
+      } else {
+        interimText += transcript;
+      }
+    }
+
+    if (finalText) {
+      speechBaseInputText += finalText;
+    }
+
+    inputEl.value = (speechBaseInputText + interimText).trimStart();
+    autoResize();
+  };
+
+  recognition.onerror = (event) => {
+    console.warn("Speech recognition error:", event.error);
+    if (event.error === "not-allowed" || event.error === "permission-denied") {
+      alert("Microphone permission was not allowed. Please allow microphone access in your browser address bar to use your laptop mic or headphones.");
+    }
+    stopSpeechRecognition();
+  };
+
+  recognition.onend = () => {
+    stopSpeechRecognition();
+  };
+
+  return recognition;
+}
+
+function toggleSpeechRecognition() {
+  if (isSpeechRecognizing) {
+    stopSpeechRecognition();
+    return;
+  }
+  startSpeechRecognition();
+}
+
+async function startSpeechRecognition() {
+  const SpeechRecognitionClass = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SpeechRecognitionClass) {
+    alert("Voice speech recognition is not supported in this browser. Please use Google Chrome or Microsoft Edge to use your laptop mic or headphones.");
+    return;
+  }
+
+  // Request microphone device access to prompt browser permissions dialog if not yet granted
+  if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      stream.getTracks().forEach(track => track.stop());
+    } catch (err) {
+      console.warn("Microphone permission check:", err);
+      if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
+        alert("Microphone access was denied. Please allow microphone access in your browser URL bar to dictate symptoms.");
+        return;
+      }
+    }
+  }
+
+  // Wake up audio subsystem
+  primeAudioHardware();
+
+  if (!recognitionInstance) {
+    recognitionInstance = initSpeechRecognition();
+  }
+
+  if (!recognitionInstance) return;
+
+  const recLangMap = {
+    en: "en-US",
+    ta: "ta-IN",
+    ml: "ml-IN",
+    te: "te-IN",
+    kn: "kn-IN",
+    hi: "hi-IN"
+  };
+  recognitionInstance.lang = recLangMap[currentAppLang] || "en-US";
+
+  try {
+    recognitionInstance.start();
+  } catch (err) {
+    console.warn("Recognition start note:", err);
+    try {
+      recognitionInstance.stop();
+      setTimeout(() => recognitionInstance.start(), 200);
+    } catch (e) {
+      stopSpeechRecognition();
+    }
+  }
+}
+
+function stopSpeechRecognition() {
+  if (recognitionInstance) {
+    try {
+      recognitionInstance.stop();
+    } catch (e) {}
+  }
+  isSpeechRecognizing = false;
+  if (micBtn) micBtn.classList.remove("recording");
+  if (micRecordingStatus) micRecordingStatus.style.display = "none";
+  if (inputEl) {
+    inputEl.focus();
+    const len = inputEl.value.length;
+    inputEl.setSelectionRange(len, len);
+  }
+}
+
+if (micBtn) {
+  micBtn.addEventListener("click", toggleSpeechRecognition);
+}
+if (micStopBtn) {
+  micStopBtn.addEventListener("click", stopSpeechRecognition);
+}
 
 // ---------------------------------------------------------------------------
 // 11. AUTHENTICATION (SIGN IN & SIGN UP) MODAL LOGIC

@@ -151,6 +151,18 @@
 
         <!-- Chat Input Footer -->
         <footer class="input-area">
+          <!-- Voice Input Dictation Indicator -->
+          <div class="mic-recording-status" id="micRecordingStatus" style="display: none;">
+            <div class="mic-status-info">
+              <span class="mic-pulse-dot"></span>
+              <span class="mic-status-label" id="micStatusLabel">Listening via microphone... Speak your symptoms</span>
+            </div>
+            <button class="mic-stop-chip" id="micStopBtn" type="button" title="Stop voice recording">
+              <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+              <span id="micStopBtnText">Done</span>
+            </button>
+          </div>
+
           <div class="input-wrapper">
             <div class="input-bar">
               <button class="icon-btn" id="uploadBtn" title="Upload Medical Report, Prescription, or Lab Results (Image / PDF)">
@@ -159,6 +171,15 @@
               <input type="file" id="fileInput" accept="image/*,.pdf" hidden>
 
               <textarea id="userInput" placeholder="Describe symptoms, enter medications for DDI screening, or ask medical questions..." rows="1"></textarea>
+
+              <button class="mic-btn" id="micBtn" title="Voice Input (Laptop mic, headphones, or headset)" type="button">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+                  <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+                  <line x1="12" y1="19" x2="12" y2="23"/>
+                  <line x1="8" y1="23" x2="16" y2="23"/>
+                </svg>
+              </button>
 
               <button class="stop-btn-chat" id="stopGenBtn" title="Stop Generation" style="display: none;" type="button">
                 <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
