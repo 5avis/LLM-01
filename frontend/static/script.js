@@ -315,7 +315,22 @@ function addMessage(text, sender) {
   const div = document.createElement("div");
   div.className = `msg ${sender}`;
   if (sender.includes("typing")) {
-    div.innerHTML = `<span>${text}</span><div class="typing-dots"><span></span><span></span><span></span></div>`;
+    div.innerHTML = `
+      <span>${text}</span>
+      <div class="typing-dots"><span></span><span></span><span></span></div>
+      <button class="typing-cancel-btn" type="button" title="Stop Generation">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="5" width="14" height="14" rx="2"/></svg>
+        <span>Stop</span>
+      </button>
+    `;
+    const cancelBtn = div.querySelector(".typing-cancel-btn");
+    if (cancelBtn) {
+      cancelBtn.addEventListener("click", () => {
+        if (currentAbortController) {
+          currentAbortController.abort();
+        }
+      });
+    }
   } else {
     div.textContent = text;
   }
@@ -637,6 +652,9 @@ function updateCockpitDashboard(data) {
 // 8. SEND MESSAGE WITH ACTIVE STOP GENERATION BUTTON
 // ---------------------------------------------------------------------------
 async function sendMessage() {
+  if (currentAbortController) {
+    return;
+  }
   const text = inputEl.value.trim();
   const fileToSend = pendingFile;
   if (!text && !fileToSend) return;
@@ -964,6 +982,10 @@ authModal.addEventListener("click", (e) => {
 
 document.addEventListener("keydown", (e) => {
   if (e.key === "Escape") {
+    if (currentAbortController) {
+      currentAbortController.abort();
+      return;
+    }
     if (authModal && authModal.style.display !== "none") closeAuthModal();
     if (vaultModal && vaultModal.style.display !== "none") vaultModal.style.display = "none";
   }
@@ -990,7 +1012,7 @@ logoutBtn.addEventListener("click", handleLogout);
 function updateAuthUI() {
   if (currentUser && currentUser !== "guest") {
     userProfile.style.display = "flex";
-    userNameDisplay.textContent = currentUser;
+    userNameDisplay.textContent = `Dr. ${currentUser}`;
     if (authButtonsGroup) authButtonsGroup.style.display = "none";
   } else {
     // Guest or logged out
@@ -1007,7 +1029,6 @@ async function handleLogout() {
   messagesEl.innerHTML = "";
   welcomeEl.style.display = "flex";
   resetCockpitMetrics();
-  openAuthModal("signin");
 }
 
 async function handleAuthSubmit(e) {
@@ -1074,13 +1095,13 @@ async function loadHistory() {
         lastItem = item;
       });
       if (lastItem) {
-        fetch("/api/chat", {
+        fetch("/api/evaluate-telemetry", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: lastItem.patient,
-            username: currentUser,
-            is_first_message: false
+            query: lastItem.patient,
+            response: lastItem.doctor,
+            username: currentUser
           })
         }).then(r => r.json()).then(payload => {
           updateCockpitDashboard(payload);

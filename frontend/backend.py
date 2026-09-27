@@ -460,6 +460,15 @@ def login(req: AuthRequest):
 def history(username: str):
     return {"history": get_user_history(username)}
 
+class TelemetryRequest(BaseModel):
+    query: str
+    response: str
+    username: str = "guest"
+
+@app.post("/api/evaluate-telemetry")
+def evaluate_telemetry_endpoint(req: TelemetryRequest):
+    return package_clinical_data(req.query, req.response, req.username)
+
 def package_clinical_data(user_query: str, response: str, username: str = "guest") -> dict:
     triage = evaluate_triage(user_query, response)
     drugs = extract_all_drugs(user_query + " " + response)

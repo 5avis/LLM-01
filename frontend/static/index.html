@@ -37,10 +37,10 @@
       <div class="topbar-center">
         <div class="privacy-vault-pill" id="privacyVaultPill" title="Click to view air-gapped security details">
           <span class="vault-indicator-dot"></span>
-          <svg class="vault-shield-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round">
+          <svg class="vault-shield-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
-          <span class="vault-text">Local GPU Vault • 100% On-Premises • Zero Cloud Telemetry • HIPAA Compliant</span>
+          <span class="vault-text">On-Premises B200 • HIPAA Vault</span>
         </div>
       </div>
 
@@ -60,10 +60,14 @@
             <span class="user-avatar">🩺</span>
             <span id="userNameDisplay" class="user-name"></span>
           </div>
-          <button id="logoutBtn" class="logout-btn" type="button" title="Log out">Logout</button>
+          <button id="logoutBtn" class="logout-btn" type="button" title="Log out">Sign Out</button>
         </div>
 
         <div id="authButtonsGroup" class="auth-buttons-group">
+          <div class="guest-indicator-pill" id="guestIndicatorPill" title="Active in Guest Mode • Full Decision Support Enabled">
+            <span class="guest-dot"></span>
+            <span>Guest Clinician</span>
+          </div>
           <button id="loginPromptBtn" class="cockpit-btn secondary" type="button">Sign In</button>
           <button id="signupPromptBtn" class="cockpit-btn primary" type="button">Sign Up</button>
         </div>
@@ -95,6 +99,7 @@
                   <strong>Drug Interaction Check</strong>
                   <span>Aspirin 81mg & Ibuprofen 400mg</span>
                 </div>
+                <span class="chip-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
               </button>
 
               <button class="starter-chip" data-prompt="Patient presents with acute substernal chest tightness radiating to the left jaw with shortness of breath.">
@@ -103,6 +108,7 @@
                   <strong>Emergency Triage Check</strong>
                   <span>Chest pressure & dyspnea triage</span>
                 </div>
+                <span class="chip-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
               </button>
 
               <button class="starter-chip" data-prompt="Generate a structured daily medication schedule table for Amoxicillin 500mg (3 times daily) and Vitamin D.">
@@ -111,6 +117,7 @@
                   <strong>Medication Schedule Table</strong>
                   <span>Amoxicillin & Vitamin D routine</span>
                 </div>
+                <span class="chip-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
               </button>
 
               <button class="starter-chip" data-prompt="What are the standard FDA precautions and dosing guidelines for Metformin in type 2 diabetes?">
@@ -119,6 +126,7 @@
                   <strong>FDA Grounding Lookup</strong>
                   <span>Metformin FDA label & precautions</span>
                 </div>
+                <span class="chip-arrow"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="7 7 17 7 17 17"/></svg></span>
               </button>
             </div>
           </div>
@@ -163,8 +171,8 @@
               <span class="radar-ring"></span>
             </div>
             <div>
-              <h2 class="dashboard-title">Clinical Radar & Patient Cockpit</h2>
-              <span class="dashboard-sub">Live Telemetry & Safety Metrics</span>
+              <h2 class="dashboard-title">Clinical Telemetry & Safety</h2>
+              <span class="dashboard-sub">Real-Time Algorithmic Decision Support</span>
             </div>
           </div>
         </div>
@@ -175,7 +183,7 @@
             <div class="card-head">
               <div class="card-title-wrap">
                 <span class="card-icon">🩺</span>
-                <span class="card-title">Clinical Emergency Triage (ESI Protocol)</span>
+                <span class="card-title">Emergency Triage (ESI)</span>
               </div>
               <span class="status-badge routine" id="triageBadge">ROUTINE CARE</span>
             </div>
@@ -189,8 +197,8 @@
               </div>
               <div class="meter-labels">
                 <span>Routine</span>
-                <span>Urgent Care</span>
-                <span>Immediate ER</span>
+                <span>Urgent (24-48h)</span>
+                <span>Emergency ER</span>
               </div>
             </div>
 
@@ -206,7 +214,7 @@
             <div class="card-head">
               <div class="card-title-wrap">
                 <span class="card-icon">⚡</span>
-                <span class="card-title">Drug-Drug Interaction (DDI) Radar</span>
+                <span class="card-title">DDI Safety Radar</span>
               </div>
               <span class="status-badge safe" id="ddiBadge">RADAR CLEAR</span>
             </div>
@@ -215,7 +223,7 @@
             <div class="medications-tray">
               <span class="tray-label">Active Pharmacotherapy Identified:</span>
               <div class="drug-pill-list" id="activeDrugsList">
-                <span class="empty-tray-pill">No active medications detected yet</span>
+                <span class="empty-tray-pill">No active medications detected</span>
               </div>
             </div>
 
@@ -230,68 +238,31 @@
             </div>
           </div>
 
-          <!-- CARD 3: Feature 3 - One-Click S.O.A.P. / S.B.A.R. Doctor Summary Export -->
-          <div class="cockpit-card soap-card" id="cockpitSoapCard">
+          <!-- CARD 3: Clinical Action & Documentation Hub (SOAP + Audio + FDA) -->
+          <div class="cockpit-card action-hub-card" id="cockpitActionCard">
             <div class="card-head">
               <div class="card-title-wrap">
-                <span class="card-icon">📑</span>
-                <span class="card-title">Doctor Visit Summary (S.O.A.P. / S.B.A.R.)</span>
+                <span class="card-icon">⚡</span>
+                <span class="card-title">Clinical Actions & Export</span>
               </div>
-              <span class="status-badge verified">AUDIT-GRADE</span>
+              <span class="status-badge verified">AUDIT READY</span>
             </div>
 
-            <p class="card-description">
-              One-click structured medical summary ready for electronic health record (EHR) transfer or clinical physician consultation.
-            </p>
-
-            <button class="soap-export-btn" id="downloadSoapBtn" type="button">
+            <!-- Feature 3: One-Click S.O.A.P. Export Button -->
+            <button class="soap-export-btn" id="downloadSoapBtn" type="button" title="Generate Audit-Grade Medical Note">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
               <span>Download S.O.A.P. Summary (PDF)</span>
             </button>
 
-            <!-- SOAP Accordion Preview -->
-            <div class="soap-accordion">
-              <div class="soap-pill-item">
-                <span class="soap-letter s">S</span>
-                <div class="soap-item-content">
-                  <strong>Subjective</strong>
-                  <span id="soapSubjectivePreview">Awaiting patient complaint...</span>
-                </div>
-              </div>
-              <div class="soap-pill-item">
-                <span class="soap-letter o">O</span>
-                <div class="soap-item-content">
-                  <strong>Objective</strong>
-                  <span id="soapObjectivePreview">Triage classification & drug screening</span>
-                </div>
-              </div>
-              <div class="soap-pill-item">
-                <span class="soap-letter a">A</span>
-                <div class="soap-item-content">
-                  <strong>Assessment</strong>
-                  <span id="soapAssessmentPreview">Clinical impression & interaction risk</span>
-                </div>
-              </div>
-              <div class="soap-pill-item">
-                <span class="soap-letter p">P</span>
-                <div class="soap-item-content">
-                  <strong>Plan</strong>
-                  <span id="soapPlanPreview">Action protocol & physician follow-up</span>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- CARD 4: Feature 4 - Audio Prescription / Voice Reader -->
-          <div class="cockpit-card audio-card" id="cockpitAudioCard">
-            <div class="card-head">
-              <div class="card-title-wrap">
-                <span class="card-icon">🔊</span>
-                <span class="card-title">Audio Prescription & Voice Reader</span>
-              </div>
-              <span class="status-badge voice" id="audioStateBadge">READY</span>
+            <!-- Compact SOAP Preview Pills -->
+            <div class="soap-compact-row">
+              <div class="soap-tag-item"><span class="soap-tag s">S</span><span class="soap-tag-text" id="soapSubjectivePreview">Subjective</span></div>
+              <div class="soap-tag-item"><span class="soap-tag o">O</span><span class="soap-tag-text" id="soapObjectivePreview">Objective</span></div>
+              <div class="soap-tag-item"><span class="soap-tag a">A</span><span class="soap-tag-text" id="soapAssessmentPreview">Assessment</span></div>
+              <div class="soap-tag-item"><span class="soap-tag p">P</span><span class="soap-tag-text" id="soapPlanPreview">Plan</span></div>
             </div>
 
+            <!-- Feature 4: Audio Prescription Voice Controller -->
             <div class="audio-controller-wrap">
               <div class="soundwave-display" id="soundwaveDisplay">
                 <span class="wave-bar"></span>
@@ -303,86 +274,48 @@
                 <span class="wave-bar"></span>
                 <span class="wave-bar"></span>
               </div>
-
               <div class="audio-controls-row">
-                <button class="audio-btn play-btn" id="cockpitAudioPlayBtn" type="button" title="Read Latest Advice Aloud">
-                  <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                <button class="audio-btn play-btn" id="cockpitAudioPlayBtn" type="button">
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   <span>Play Advice</span>
                 </button>
-                <button class="audio-btn stop-btn" id="cockpitAudioStopBtn" type="button" title="Stop Reading">
-                  <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+                <button class="audio-btn stop-btn" id="cockpitAudioStopBtn" type="button">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
                   <span>Stop</span>
                 </button>
+                <span class="status-badge voice" id="audioStateBadge">READY</span>
                 <div class="audio-speed-select">
                   <button class="speed-chip active" data-speed="1.0">1.0x</button>
                   <button class="speed-chip" data-speed="1.2">1.2x</button>
                 </div>
               </div>
             </div>
-          </div>
 
-          <!-- CARD 5: Feature 5 - Verified OpenFDA Source Citation Drawer -->
-          <div class="cockpit-card fda-card" id="cockpitFdaCard">
-            <div class="card-head collapsible" id="fdaHeaderToggle">
-              <div class="card-title-wrap">
-                <span class="card-icon">🏛️</span>
-                <span class="card-title">Verified Source Grounding (OpenFDA)</span>
+            <!-- Feature 5: Verified Source Grounding (OpenFDA) Collapsible Drawer -->
+            <div class="fda-mini-drawer">
+              <div class="card-head collapsible" id="fdaHeaderToggle">
+                <div class="card-title-wrap">
+                  <span class="card-icon">🏛️</span>
+                  <span class="card-title" style="font-size: 0.78rem;">OpenFDA Regulatory Grounding</span>
+                </div>
+                <svg class="chevron-icon" id="fdaChevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
-              <svg class="chevron-icon" id="fdaChevron" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
-            </div>
-
-            <div class="fda-drawer-content" id="fdaDrawerContent">
-              <div class="fda-verified-row">
-                <span class="fda-badge">
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
-                  NDC Grounded
-                </span>
-                <span class="fda-drug-title" id="fdaDrugTitle">Clinical Matrix Grounding</span>
-              </div>
-              <div class="fda-snippet-block">
-                <strong>FDA Prescribing & Administration:</strong>
-                <p id="fdaDosageSnippet">Verified against local clinical pharmacological database and openFDA regulatory label guidelines.</p>
-              </div>
-              <div class="fda-snippet-block">
-                <strong>Safety Warnings & Precautions:</strong>
-                <p id="fdaWarningsSnippet">Standard clinical precautions apply. Monitor patient tolerance and renal clearance parameters.</p>
-              </div>
-              <div class="fda-link-badge">
-                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-                <span>Grounding: U.S. FDA Drug Label Database (api.fda.gov)</span>
+              <div class="fda-drawer-content" id="fdaDrawerContent" style="display: none;">
+                <div class="fda-verified-row">
+                  <span class="fda-badge">NDC Grounded</span>
+                  <span class="fda-drug-title" id="fdaDrugTitle">Clinical Matrix Grounding</span>
+                </div>
+                <div class="fda-snippet-block">
+                  <strong>FDA Prescribing & Administration:</strong>
+                  <p id="fdaDosageSnippet">Verified against local clinical pharmacological database and openFDA regulatory label guidelines.</p>
+                </div>
+                <div class="fda-snippet-block">
+                  <strong>Safety Warnings & Precautions:</strong>
+                  <p id="fdaWarningsSnippet">Standard clinical precautions apply. Monitor patient tolerance and renal clearance parameters.</p>
+                </div>
               </div>
             </div>
           </div>
-
-          <!-- CARD 6: Feature 6 Detail - Local GPU Telemetry & Audit Node -->
-          <div class="cockpit-card telemetry-card">
-            <div class="card-head">
-              <div class="card-title-wrap">
-                <span class="card-icon">⚡</span>
-                <span class="card-title">Air-Gapped Node Telemetry</span>
-              </div>
-              <span class="status-badge safe">PROTECTED</span>
-            </div>
-            <div class="telemetry-grid">
-              <div class="telemetry-item">
-                <span class="telemetry-label">Local Compute Node</span>
-                <span class="telemetry-val">NVIDIA B200 178GB</span>
-              </div>
-              <div class="telemetry-item">
-                <span class="telemetry-label">Memory Isolation</span>
-                <span class="telemetry-val">Air-Gapped (Zero WAN)</span>
-              </div>
-              <div class="telemetry-item">
-                <span class="telemetry-label">Compliance Grade</span>
-                <span class="telemetry-val">HIPAA & GDPR Ready</span>
-              </div>
-              <div class="telemetry-item">
-                <span class="telemetry-label">Avg Token Velocity</span>
-                <span class="telemetry-val">~42 tok/sec</span>
-              </div>
-            </div>
-          </div>
-
         </div>
       </aside>
     </main>
