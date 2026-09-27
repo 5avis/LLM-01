@@ -520,11 +520,14 @@ def package_clinical_data(user_query: str, response: str, username: str = "guest
     # FDA grounding check
     drug_name, drug_info = find_drug_in_text(user_query + " " + response)
     if drug_info:
+        dosage_full = drug_info.get("dosage", "Consult physician for standard dosing guidelines.")
+        warnings_full = drug_info.get("warnings", "See FDA prescribing information.")
+        usage_full = drug_info.get("usage", "Approved medical indication.")
         fda_data = {
             "drug_name": drug_name.title(),
-            "dosage": drug_info.get("dosage", "Consult physician for standard dosing guidelines.")[:400],
-            "warnings": drug_info.get("warnings", "See FDA prescribing information.")[:400],
-            "usage": drug_info.get("usage", "Approved medical indication.")[:300],
+            "dosage": dosage_full[:1500] if len(dosage_full) > 1500 else dosage_full,
+            "warnings": warnings_full[:1500] if len(warnings_full) > 1500 else warnings_full,
+            "usage": usage_full[:800] if len(usage_full) > 800 else usage_full,
             "verified": True
         }
     else:

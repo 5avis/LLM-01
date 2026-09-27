@@ -62,6 +62,7 @@ const audioStateBadge = document.getElementById("audioStateBadge");
 const speedChips = document.querySelectorAll(".speed-chip");
 
 // Feature 5: OpenFDA Citation Drawer Elements
+const fdaMiniDrawer = document.getElementById("fdaMiniDrawer");
 const fdaHeaderToggle = document.getElementById("fdaHeaderToggle");
 const fdaChevron = document.getElementById("fdaChevron");
 const fdaDrawerContent = document.getElementById("fdaDrawerContent");
@@ -1041,11 +1042,18 @@ function applyAppLanguage(lang) {
   // OpenFDA Grounding Drawer (Card 4)
   if (fdaHeaderTitle) fdaHeaderTitle.textContent = t.fdaHeader;
   if (fdaBadgeText) fdaBadgeText.textContent = t.fdaBadge;
-  if (fdaDrugTitle) fdaDrugTitle.textContent = t.fdaDrugTitle;
   if (fdaPrescribingTitle) fdaPrescribingTitle.textContent = t.fdaPrescribingTitle;
-  if (fdaDosageSnippet) fdaDosageSnippet.textContent = t.fdaDosageSnippet;
   if (fdaWarningsTitle) fdaWarningsTitle.textContent = t.fdaWarningsTitle;
-  if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = t.fdaWarningsSnippet;
+
+  if (latestTelemetryData && latestTelemetryData.fda_info && latestTelemetryData.fda_info.verified) {
+    if (fdaDrugTitle) fdaDrugTitle.textContent = latestTelemetryData.fda_info.drug_name;
+    if (fdaDosageSnippet) fdaDosageSnippet.textContent = latestTelemetryData.fda_info.dosage;
+    if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = latestTelemetryData.fda_info.warnings;
+  } else {
+    if (fdaDrugTitle) fdaDrugTitle.textContent = t.fdaDrugTitle;
+    if (fdaDosageSnippet) fdaDosageSnippet.textContent = t.fdaDosageSnippet;
+    if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = t.fdaWarningsSnippet;
+  }
 
   // Privacy Vault Modal
   if (vaultTitleText) vaultTitleText.textContent = t.vaultTitle;
@@ -1135,15 +1143,54 @@ if (vaultModal) {
   });
 }
 
-// OpenFDA Drawer Toggle
-if (fdaHeaderToggle && fdaDrawerContent) {
-  let isFdaOpen = true;
-  fdaHeaderToggle.addEventListener("click", () => {
-    isFdaOpen = !isFdaOpen;
-    fdaDrawerContent.style.display = isFdaOpen ? "flex" : "none";
-    if (fdaChevron) {
-      fdaChevron.style.transform = isFdaOpen ? "rotate(0deg)" : "rotate(-90deg)";
+// OpenFDA Drawer Toggle & Helper Functions
+function openFdaDrawer() {
+  if (!fdaDrawerContent) return;
+  fdaDrawerContent.style.display = "flex";
+  fdaDrawerContent.classList.add("open");
+  if (fdaChevron) fdaChevron.style.transform = "rotate(0deg)";
+  const drawerCard = fdaMiniDrawer || document.getElementById("fdaMiniDrawer") || document.querySelector(".fda-mini-drawer");
+  if (drawerCard) drawerCard.classList.add("open");
+}
+
+function closeFdaDrawer() {
+  if (!fdaDrawerContent) return;
+  fdaDrawerContent.style.display = "none";
+  fdaDrawerContent.classList.remove("open");
+  if (fdaChevron) fdaChevron.style.transform = "rotate(-90deg)";
+  const drawerCard = fdaMiniDrawer || document.getElementById("fdaMiniDrawer") || document.querySelector(".fda-mini-drawer");
+  if (drawerCard) drawerCard.classList.remove("open");
+}
+
+function toggleFdaDrawer(e) {
+  if (e) e.stopPropagation();
+  if (!fdaDrawerContent) return;
+  const isClosed = fdaDrawerContent.style.display === "none" || !fdaDrawerContent.classList.contains("open");
+  if (isClosed) {
+    openFdaDrawer();
+  } else {
+    closeFdaDrawer();
+  }
+}
+
+if (fdaHeaderToggle) {
+  fdaHeaderToggle.addEventListener("click", toggleFdaDrawer);
+}
+
+const fdaMiniDrawerCard = fdaMiniDrawer || document.getElementById("fdaMiniDrawer") || document.querySelector(".fda-mini-drawer");
+if (fdaMiniDrawerCard) {
+  fdaMiniDrawerCard.addEventListener("click", (e) => {
+    // If closed, clicking anywhere on the mini drawer opens it on the 1st click
+    if (fdaDrawerContent && (fdaDrawerContent.style.display === "none" || !fdaDrawerContent.classList.contains("open"))) {
+      toggleFdaDrawer(e);
     }
+  });
+}
+
+if (fdaDrawerContent) {
+  fdaDrawerContent.addEventListener("click", (e) => {
+    // Keep clicks inside the content block from bubbling and closing the drawer
+    e.stopPropagation();
   });
 }
 
@@ -1241,6 +1288,11 @@ function resetCockpitMetrics() {
       soapPlanPreview.parentElement.title = t.soapP_Full || "Plan";
     }
   }
+
+  if (fdaDrugTitle) fdaDrugTitle.textContent = t.fdaDrugTitle;
+  if (fdaDosageSnippet) fdaDosageSnippet.textContent = t.fdaDosageSnippet;
+  if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = t.fdaWarningsSnippet;
+  closeFdaDrawer();
 
   stopVoiceAudio();
 }
@@ -1691,9 +1743,10 @@ function updateCockpitDashboard(data) {
 
   // 4. Feature 5: OpenFDA Grounding Update
   if (data.fda_info && data.fda_info.verified) {
-    fdaDrugTitle.textContent = data.fda_info.drug_name;
-    fdaDosageSnippet.textContent = data.fda_info.dosage;
-    fdaWarningsSnippet.textContent = data.fda_info.warnings;
+    if (fdaDrugTitle) fdaDrugTitle.textContent = data.fda_info.drug_name;
+    if (fdaDosageSnippet) fdaDosageSnippet.textContent = data.fda_info.dosage;
+    if (fdaWarningsSnippet) fdaWarningsSnippet.textContent = data.fda_info.warnings;
+    openFdaDrawer();
   }
 }
 

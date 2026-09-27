@@ -1531,11 +1531,31 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   border-radius: var(--radius-md);
   background: rgba(14, 28, 20, 0.55);
   border: 1px solid rgba(255, 255, 255, 0.12);
+  cursor: pointer;
+  transition: border-color 0.22s ease, background 0.22s ease, box-shadow 0.22s ease;
+}
+
+.fda-mini-drawer:hover {
+  border-color: rgba(189, 249, 66, 0.4);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), 0 0 10px rgba(189, 249, 66, 0.08);
+}
+
+.fda-mini-drawer.open {
+  background: rgba(14, 28, 20, 0.75);
+  border-color: rgba(189, 249, 66, 0.3);
+}
+
+.card-head.collapsible {
+  cursor: pointer;
+  user-select: none;
+  margin-bottom: 0;
+  width: 100%;
 }
 
 .chevron-icon {
   color: var(--text-dim);
   transition: transform 0.25s ease;
+  pointer-events: none;
 }
 
 .fda-drawer-content {
@@ -1544,7 +1564,8 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
   border-top: 1px solid rgba(255, 255, 255, 0.08);
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 10px;
+  cursor: default;
 }
 
 .fda-verified-row {
@@ -1572,14 +1593,29 @@ body.ai-mode .medhub-main-icon .svg-tier-3 {
 .fda-snippet-block {
   font-size: 0.72rem;
   color: var(--text-dim);
-  line-height: 1.4;
+  line-height: 1.45;
+  cursor: default;
+  user-select: text;
 }
 
 .fda-snippet-block strong {
   display: block;
   color: var(--mint-bright);
-  font-size: 0.7rem;
-  margin-bottom: 2px;
+  font-size: 0.72rem;
+  font-weight: 700;
+  margin-bottom: 3px;
+  letter-spacing: 0.01em;
+}
+
+.fda-snippet-block p {
+  margin: 0;
+  color: rgba(220, 252, 231, 0.88);
+  font-size: 0.72rem;
+  line-height: 1.45;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  white-space: normal;
+  user-select: text;
 }
 
 /* --------------------------------------------------------------------------
