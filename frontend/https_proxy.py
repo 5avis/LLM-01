@@ -9,6 +9,12 @@ app = FastAPI(title="MedHub HTTPS Gateway")
 
 BACKEND_URL = "http://127.0.0.1:7860"
 
+client = httpx.AsyncClient(timeout=600.0)
+
+@app.on_event("shutdown")
+async def shutdown_event():
+    await client.aclose()
+
 @app.api_route("/{path:path}", methods=["GET", "POST", "PUT", "DELETE", "HEAD", "OPTIONS"])
 async def proxy_all(request: Request, path: str):
     url = f"{BACKEND_URL}/{path}"
@@ -20,27 +26,34 @@ async def proxy_all(request: Request, path: str):
     headers.pop("host", None)
     headers.pop("content-length", None)
     
-    # Forward client request to backend
-    async with httpx.AsyncClient(timeout=600.0) as client:
-        req = client.build_request(
-            method=request.method,
-            url=url,
-            headers=headers,
-            content=body
-        )
-        resp = await client.send(req, stream=True)
-        
-        excluded_headers = {"content-encoding", "content-length", "transfer-encoding", "connection"}
-        response_headers = [
-            (name, value) for name, value in resp.headers.items()
-            if name.lower() not in excluded_headers
-        ]
-        
-        return StreamingResponse(
-            resp.aiter_bytes(),
-            status_code=resp.status_code,
-            headers=dict(response_headers)
-        )
+    req = client.build_request(
+        method=request.method,
+        url=url,
+        headers=headers,
+        content=body
+    )
+    resp = await client.send(req, stream=True)
+    
+    excluded_headers = {"content-encoding", "content-length", "transfer-encoding", "connection"}
+    response_headers = [
+        (name, value) for name, value in resp.headers.items()
+        if name.lower() not in excluded_headers
+    ]
+    
+    async def body_stream():
+        try:
+            async for chunk in resp.aiter_bytes():
+                yield chunk
+        except Exception:
+            pass
+        finally:
+            await resp.aclose()
+    
+    return StreamingResponse(
+        body_stream(),
+        status_code=resp.status_code,
+        headers=dict(response_headers)
+    )
 
 if __name__ == "__main__":
     cert_path = os.path.join(os.path.dirname(__file__), "cert.pem")
