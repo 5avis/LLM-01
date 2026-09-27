@@ -412,6 +412,8 @@ def signup(req: AuthRequest):
         return {"success": False, "error": "Password must be at least 3 characters."}
 
     users = load_users()
+    if username.lower() == "guest":
+        return {"success": False, "error": "'guest' is reserved for guest mode. Please choose a personalized username."}
     if username.lower() in {u.lower(): u for u in users}:
         return {"success": False, "error": "Username already exists. Please choose another username or sign in."}
 
@@ -430,6 +432,9 @@ def login(req: AuthRequest):
     username = sanitize_username(req.username)
     if not username:
         return {"success": False, "error": "Please enter a valid username."}
+
+    if username.lower() == "guest":
+        return {"success": True, "username": "guest"}
 
     users = load_users()
     matched_user = None

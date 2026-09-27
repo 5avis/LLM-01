@@ -215,7 +215,13 @@ body {
 .topbar-right {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
+}
+
+.auth-buttons-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
 }
 
 .cockpit-btn {
@@ -280,16 +286,13 @@ body {
   color: #a7f3d0;
 }
 
-.logout-btn, .login-prompt-btn {
+.logout-btn {
   padding: 6px 14px;
   border-radius: var(--radius-full);
   font-size: 0.8rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s;
-}
-
-.logout-btn {
   background: rgba(239, 68, 68, 0.15);
   color: #fca5a5;
   border: 1px solid rgba(239, 68, 68, 0.3);
@@ -297,16 +300,6 @@ body {
 
 .logout-btn:hover {
   background: rgba(239, 68, 68, 0.25);
-}
-
-.login-prompt-btn {
-  background: var(--accent-emerald);
-  color: #fff;
-  border: none;
-}
-
-.login-prompt-btn:hover {
-  background: #059669;
 }
 
 /* --------------------------------------------------------------------------
@@ -558,7 +551,7 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 5px;
-  padding: 4px 10px;
+  padding: 5px 11px;
   border-radius: var(--radius-full);
   background: rgba(22, 44, 32, 0.6);
   border: 1px solid rgba(74, 222, 128, 0.18);
@@ -573,6 +566,12 @@ body {
   background: rgba(34, 197, 94, 0.18);
   border-color: rgba(74, 222, 128, 0.4);
   color: #fff;
+}
+
+.bot-action-btn.active-audio {
+  background: rgba(239, 68, 68, 0.2);
+  border-color: rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
 }
 
 /* Schedule Table Formatting inside Bot Message */
@@ -807,6 +806,36 @@ body {
 
 #userInput::placeholder {
   color: #6b7280;
+}
+
+/* Stop Generation Button in Chat Input */
+.stop-btn-chat {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 15px;
+  border-radius: var(--radius-full);
+  background: rgba(239, 68, 68, 0.2);
+  border: 1px solid rgba(239, 68, 68, 0.45);
+  color: #fca5a5;
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.25);
+  animation: pulseStop 1.8s infinite ease-in-out;
+  flex-shrink: 0;
+}
+
+.stop-btn-chat:hover {
+  background: rgba(239, 68, 68, 0.35);
+  border-color: #ef4444;
+  color: #fff;
+}
+
+@keyframes pulseStop {
+  0%, 100% { box-shadow: 0 0 10px rgba(239, 68, 68, 0.2); }
+  50% { box-shadow: 0 0 18px rgba(239, 68, 68, 0.5); }
 }
 
 .send-btn {
@@ -1495,11 +1524,39 @@ body {
   padding: 28px;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.8), var(--border-glow);
   animation: modalScale 0.25s ease;
+  position: relative;
 }
 
 @keyframes modalScale {
   from { opacity: 0; transform: scale(0.95); }
   to { opacity: 1; transform: scale(1); }
+}
+
+/* Modal Close Icon Button */
+.modal-close-icon {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-dim);
+  font-size: 0.9rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+  z-index: 5;
+}
+
+.modal-close-icon:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.4);
+  color: #fca5a5;
+  transform: rotate(90deg);
 }
 
 .auth-header {
@@ -1628,6 +1685,46 @@ body {
   font-weight: 700;
   cursor: pointer;
   margin-left: 4px;
+}
+
+/* Guest Divider and Button */
+.guest-divider {
+  display: flex;
+  align-items: center;
+  margin: 16px 0 12px;
+  color: #6b7280;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+}
+
+.guest-divider::before, .guest-divider::after {
+  content: "";
+  flex: 1;
+  border-bottom: 1px solid rgba(74, 222, 128, 0.14);
+}
+
+.guest-divider span {
+  padding: 0 10px;
+}
+
+.guest-btn {
+  width: 100%;
+  padding: 10px;
+  border-radius: 8px;
+  background: rgba(20, 42, 30, 0.55);
+  border: 1px solid var(--border-card);
+  color: #a7f3d0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.guest-btn:hover {
+  background: rgba(34, 197, 94, 0.18);
+  border-color: var(--accent-neon);
+  color: #fff;
 }
 
 /* Privacy Vault Modal Specifics */

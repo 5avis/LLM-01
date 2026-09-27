@@ -1,6 +1,7 @@
 /**
  * MedHub Clinical Intelligence System
  * Split-Pane Clinical Cockpit (Option 1) & 6 Core Features
+ * Fully polished: Robust Sign In/Up, Generation Stop, Audio Stop, and DDI/Triage Cockpit.
  */
 
 // DOM Elements
@@ -8,6 +9,7 @@ const messagesEl = document.getElementById("messages");
 const welcomeEl = document.getElementById("welcome");
 const inputEl = document.getElementById("userInput");
 const sendBtn = document.getElementById("sendBtn");
+const stopGenBtn = document.getElementById("stopGenBtn");
 const chatArea = document.getElementById("chatArea");
 const uploadBtn = document.getElementById("uploadBtn");
 const fileInput = document.getElementById("fileInput");
@@ -60,9 +62,12 @@ const fdaDosageSnippet = document.getElementById("fdaDosageSnippet");
 const fdaWarningsSnippet = document.getElementById("fdaWarningsSnippet");
 
 // Auth State & Elements
-let currentUser = localStorage.getItem("medhub_user") || "";
+let currentUser = localStorage.getItem("medhub_user") || "guest";
 let authMode = "signin";
+
 const authModal = document.getElementById("authModal");
+const closeAuthModalBtn = document.getElementById("closeAuthModalBtn");
+const guestLoginBtn = document.getElementById("guestLoginBtn");
 const authTitle = document.getElementById("authTitle");
 const authSubtitle = document.getElementById("authSubtitle");
 const tabSignIn = document.getElementById("tabSignIn");
@@ -78,7 +83,9 @@ const authSwitchBtn = document.getElementById("authSwitchBtn");
 const userProfile = document.getElementById("userProfile");
 const userNameDisplay = document.getElementById("userNameDisplay");
 const logoutBtn = document.getElementById("logoutBtn");
+const authButtonsGroup = document.getElementById("authButtonsGroup");
 const loginPromptBtn = document.getElementById("loginPromptBtn");
+const signupPromptBtn = document.getElementById("signupPromptBtn");
 
 // Session Clinical State
 let pendingFile = null;
@@ -86,9 +93,12 @@ let isFirstMessageInSession = true;
 let latestBotAdvice = "";
 let latestSoapData = null;
 let currentSpeechSpeed = 1.0;
+let currentAbortController = null;
+let activeSpeakingBtn = null;
+let isVoicePlaying = false;
 
 // ---------------------------------------------------------------------------
-// 1. STEALTH MODE TOGGLE (Triple click on logo)
+// 1. STEALTH MODE TOGGLE (Triple-click on MedHub logo)
 // ---------------------------------------------------------------------------
 const logoEl = document.querySelector(".logo");
 const logoTextEl = document.querySelector(".logo-text");
@@ -199,7 +209,6 @@ if (newChatBtn) {
 }
 
 function resetCockpitMetrics() {
-  // Reset Triage
   if (triageBadge) {
     triageBadge.className = "status-badge routine";
     triageBadge.textContent = "ROUTINE CARE";
@@ -214,7 +223,6 @@ function resetCockpitMetrics() {
     triageTriggers.style.display = "none";
   }
 
-  // Reset DDI
   if (ddiBadge) {
     ddiBadge.className = "status-badge safe";
     ddiBadge.textContent = "RADAR CLEAR";
@@ -230,13 +238,11 @@ function resetCockpitMetrics() {
     if (ddiActionBox) ddiActionBox.style.display = "none";
   }
 
-  // Reset SOAP previews
   if (soapSubjectivePreview) soapSubjectivePreview.textContent = "Awaiting patient complaint...";
   if (soapObjectivePreview) soapObjectivePreview.textContent = "Triage classification & drug screening";
   if (soapAssessmentPreview) soapAssessmentPreview.textContent = "Clinical impression & interaction risk";
   if (soapPlanPreview) soapPlanPreview.textContent = "Action protocol & physician follow-up";
 
-  // Stop Audio
   stopVoiceAudio();
 }
 
@@ -302,7 +308,7 @@ function showFilePreview(file) {
 }
 
 // ---------------------------------------------------------------------------
-// 6. MESSAGE RENDERING & CLINICAL COCKPIT UPDATER
+// 6. MESSAGE RENDERING & ACTION BAR
 // ---------------------------------------------------------------------------
 function addMessage(text, sender) {
   welcomeEl.style.display = "none";
@@ -533,7 +539,7 @@ function renderBotMessage(container, rawText) {
     <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
     <span>Listen Aloud</span>
   `;
-  speakBtn.addEventListener("click", () => playVoiceAudio(rawText));
+  speakBtn.addEventListener("click", () => toggleMessageVoice(speakBtn, rawText));
 
   const copyBtn = document.createElement("button");
   copyBtn.className = "bot-action-btn";
@@ -628,14 +634,9 @@ function updateCockpitDashboard(data) {
 }
 
 // ---------------------------------------------------------------------------
-// 8. SEND MESSAGE
+// 8. SEND MESSAGE WITH ACTIVE STOP GENERATION BUTTON
 // ---------------------------------------------------------------------------
 async function sendMessage() {
-  if (!currentUser) {
-    openAuthModal("signin");
-    return;
-  }
-
   const text = inputEl.value.trim();
   const fileToSend = pendingFile;
   if (!text && !fileToSend) return;
@@ -648,7 +649,10 @@ async function sendMessage() {
 
   inputEl.value = "";
   autoResize();
-  sendBtn.disabled = true;
+
+  // Toggle buttons: Hide Send, Show Stop Generation
+  sendBtn.style.display = "none";
+  if (stopGenBtn) stopGenBtn.style.display = "flex";
 
   // Post user message
   addUserMessage(text, fileToSend);
@@ -659,11 +663,14 @@ async function sendMessage() {
     : "MedHub is computing clinical decision support...";
   const typingDiv = addMessage(typingStatus, "bot typing");
 
+  // Setup AbortController for Stopping Generation
+  currentAbortController = new AbortController();
+
   try {
     const formData = new FormData();
     const promptMessage = text || (fileToSend ? `Please analyze this clinical document (${fileToSend.name}) and evaluate health insights.` : "");
     formData.append("message", promptMessage);
-    formData.append("username", currentUser);
+    formData.append("username", currentUser || "guest");
     formData.append("enhance", isEnhancedMode ? "true" : "false");
     formData.append("is_first_message", isFirstMessageInSession ? "true" : "false");
     isFirstMessageInSession = false;
@@ -673,7 +680,8 @@ async function sendMessage() {
 
     const res = await fetch("/api/chat-with-file", {
       method: "POST",
-      body: formData
+      body: formData,
+      signal: currentAbortController.signal
     });
     if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
     const data = await res.json();
@@ -685,13 +693,29 @@ async function sendMessage() {
     updateCockpitDashboard(data);
 
   } catch (err) {
-    console.error("Error sending message:", err);
     typingDiv.classList.remove("typing");
-    typingDiv.innerHTML = `<p style="color:#fca5a5; margin:0;">⚠️ Something went wrong while connecting to the local inference vault. Please try again.</p>`;
+    if (err.name === "AbortError") {
+      typingDiv.innerHTML = `<p style="color:#fcd34d; margin:0; font-style:italic;">⏹ Consultation generation stopped by user.</p>`;
+    } else {
+      console.error("Error sending message:", err);
+      typingDiv.innerHTML = `<p style="color:#fca5a5; margin:0;">⚠️ Something went wrong while connecting to the local inference vault. Please try again.</p>`;
+    }
   } finally {
+    currentAbortController = null;
+    if (stopGenBtn) stopGenBtn.style.display = "none";
+    sendBtn.style.display = "flex";
     sendBtn.disabled = false;
     chatArea.scrollTop = chatArea.scrollHeight;
   }
+}
+
+// Stop Generation Button Click Handler
+if (stopGenBtn) {
+  stopGenBtn.addEventListener("click", () => {
+    if (currentAbortController) {
+      currentAbortController.abort();
+    }
+  });
 }
 
 sendBtn.addEventListener("click", sendMessage);
@@ -765,35 +789,82 @@ function cleanTextForVoice(rawText) {
     .trim();
 }
 
-function playVoiceAudio(textToSpeak) {
+function resetAllVoiceButtons() {
+  document.querySelectorAll(".bot-action-btn").forEach(btn => {
+    if (btn.querySelector("span") && btn.querySelector("span").textContent.includes("Stop Audio")) {
+      btn.classList.remove("active-audio");
+      btn.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14"/></svg>
+        <span>Listen Aloud</span>
+      `;
+    }
+  });
+  if (cockpitAudioPlayBtn) {
+    cockpitAudioPlayBtn.innerHTML = `
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+      <span>Play Advice</span>
+    `;
+  }
+}
+
+function toggleMessageVoice(button, textToSpeak) {
+  if (isVoicePlaying && activeSpeakingBtn === button) {
+    stopVoiceAudio();
+    return;
+  }
+  playVoiceAudio(textToSpeak, button);
+}
+
+function playVoiceAudio(textToSpeak, button = null) {
   if (!("speechSynthesis" in window)) {
     alert("Speech Synthesis is not supported in this browser.");
     return;
   }
 
+  // Cancel any existing playback
   window.speechSynthesis.cancel();
+  resetAllVoiceButtons();
+
   const text = cleanTextForVoice(textToSpeak || latestBotAdvice);
-  if (!text) return;
+  if (!text) {
+    if (audioStateBadge) {
+      audioStateBadge.textContent = "NO ADVICE YET";
+      setTimeout(() => { audioStateBadge.textContent = "READY"; }, 2000);
+    }
+    return;
+  }
 
   const utterance = new SpeechSynthesisUtterance(text);
   utterance.rate = currentSpeechSpeed;
 
   utterance.onstart = () => {
+    isVoicePlaying = true;
+    activeSpeakingBtn = button;
     soundwaveDisplay.classList.add("playing");
     audioStateBadge.textContent = "READING ALOUD";
     audioStateBadge.className = "status-badge emergency";
+
+    if (button) {
+      button.classList.add("active-audio");
+      button.innerHTML = `
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+        <span>Stop Audio</span>
+      `;
+    }
+    if (cockpitAudioPlayBtn) {
+      cockpitAudioPlayBtn.innerHTML = `
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="6" width="12" height="12"/></svg>
+        <span>Stop Reading</span>
+      `;
+    }
   };
 
   utterance.onend = () => {
-    soundwaveDisplay.classList.remove("playing");
-    audioStateBadge.textContent = "READY";
-    audioStateBadge.className = "status-badge voice";
+    stopVoiceAudio();
   };
 
   utterance.onerror = () => {
-    soundwaveDisplay.classList.remove("playing");
-    audioStateBadge.textContent = "READY";
-    audioStateBadge.className = "status-badge voice";
+    stopVoiceAudio();
   };
 
   window.speechSynthesis.speak(utterance);
@@ -803,13 +874,22 @@ function stopVoiceAudio() {
   if ("speechSynthesis" in window) {
     window.speechSynthesis.cancel();
   }
+  isVoicePlaying = false;
+  activeSpeakingBtn = null;
   soundwaveDisplay.classList.remove("playing");
   audioStateBadge.textContent = "READY";
   audioStateBadge.className = "status-badge voice";
+  resetAllVoiceButtons();
 }
 
 if (cockpitAudioPlayBtn) {
-  cockpitAudioPlayBtn.addEventListener("click", () => playVoiceAudio(latestBotAdvice));
+  cockpitAudioPlayBtn.addEventListener("click", () => {
+    if (isVoicePlaying) {
+      stopVoiceAudio();
+    } else {
+      playVoiceAudio(latestBotAdvice, null);
+    }
+  });
 }
 if (cockpitAudioStopBtn) {
   cockpitAudioStopBtn.addEventListener("click", stopVoiceAudio);
@@ -827,7 +907,7 @@ speedChips.forEach(chip => {
 });
 
 // ---------------------------------------------------------------------------
-// 11. AUTHENTICATION & SESSION PERSISTENCE
+// 11. AUTHENTICATION (SIGN IN & SIGN UP) MODAL LOGIC
 // ---------------------------------------------------------------------------
 function setAuthMode(mode) {
   authMode = mode;
@@ -836,8 +916,8 @@ function setAuthMode(mode) {
     tabSignUp.classList.add("active");
     tabSignIn.classList.remove("active");
     authTitle.textContent = "Create Medical Vault";
-    authSubtitle.textContent = "Register a sovereign credentials pair for local consultations";
-    authSubmitBtn.textContent = "Sign Up";
+    authSubtitle.textContent = "Register a secure username and password to store consultation records";
+    authSubmitBtn.textContent = "Create Account & Sign In";
     authSwitchText.textContent = "Already have an account?";
     authSwitchBtn.textContent = "Sign In";
   } else {
@@ -849,6 +929,8 @@ function setAuthMode(mode) {
     authSwitchText.textContent = "Don't have an account?";
     authSwitchBtn.textContent = "Sign Up";
   }
+  authPassword.value = "";
+  authUsername.focus();
 }
 
 tabSignIn.addEventListener("click", () => setAuthMode("signin"));
@@ -861,30 +943,65 @@ function openAuthModal(defaultMode = "signin") {
   authUsername.value = "";
   authPassword.value = "";
   authAlert.style.display = "none";
-  setTimeout(() => authUsername.focus(), 120);
+  setTimeout(() => authUsername.focus(), 100);
 }
 
 function closeAuthModal() {
   authModal.style.display = "none";
+  authAlert.style.display = "none";
 }
 
-loginPromptBtn.addEventListener("click", () => openAuthModal("signin"));
+// Close Modal Triggers (✕ button, backdrop click, Escape key)
+if (closeAuthModalBtn) {
+  closeAuthModalBtn.addEventListener("click", closeAuthModal);
+}
+
+authModal.addEventListener("click", (e) => {
+  if (e.target === authModal) {
+    closeAuthModal();
+  }
+});
+
+document.addEventListener("keydown", (e) => {
+  if (e.key === "Escape") {
+    if (authModal && authModal.style.display !== "none") closeAuthModal();
+    if (vaultModal && vaultModal.style.display !== "none") vaultModal.style.display = "none";
+  }
+});
+
+// Continue as Guest Option
+if (guestLoginBtn) {
+  guestLoginBtn.addEventListener("click", () => {
+    currentUser = "guest";
+    localStorage.setItem("medhub_user", "guest");
+    updateAuthUI();
+    closeAuthModal();
+  });
+}
+
+if (loginPromptBtn) {
+  loginPromptBtn.addEventListener("click", () => openAuthModal("signin"));
+}
+if (signupPromptBtn) {
+  signupPromptBtn.addEventListener("click", () => openAuthModal("signup"));
+}
 logoutBtn.addEventListener("click", handleLogout);
 
 function updateAuthUI() {
-  if (currentUser) {
+  if (currentUser && currentUser !== "guest") {
     userProfile.style.display = "flex";
     userNameDisplay.textContent = currentUser;
-    loginPromptBtn.style.display = "none";
+    if (authButtonsGroup) authButtonsGroup.style.display = "none";
   } else {
+    // Guest or logged out
     userProfile.style.display = "none";
     userNameDisplay.textContent = "";
-    loginPromptBtn.style.display = "block";
+    if (authButtonsGroup) authButtonsGroup.style.display = "flex";
   }
 }
 
 async function handleLogout() {
-  currentUser = "";
+  currentUser = "guest";
   localStorage.removeItem("medhub_user");
   updateAuthUI();
   messagesEl.innerHTML = "";
@@ -919,7 +1036,7 @@ async function handleAuthSubmit(e) {
       authAlert.textContent = data.error || "Authentication failed.";
       authAlert.style.display = "block";
       authSubmitBtn.disabled = false;
-      authSubmitBtn.textContent = authMode === "signup" ? "Sign Up" : "Sign In to Cockpit";
+      authSubmitBtn.textContent = authMode === "signup" ? "Create Account & Sign In" : "Sign In to Cockpit";
       return;
     }
 
@@ -934,14 +1051,14 @@ async function handleAuthSubmit(e) {
     authAlert.style.display = "block";
   } finally {
     authSubmitBtn.disabled = false;
-    authSubmitBtn.textContent = authMode === "signup" ? "Sign Up" : "Sign In to Cockpit";
+    authSubmitBtn.textContent = authMode === "signup" ? "Create Account & Sign In" : "Sign In to Cockpit";
   }
 }
 
 authForm.addEventListener("submit", handleAuthSubmit);
 
 async function loadHistory() {
-  if (!currentUser) return;
+  if (!currentUser || currentUser === "guest") return;
   messagesEl.innerHTML = "";
   try {
     const res = await fetch(`/api/history?username=${encodeURIComponent(currentUser)}`);
@@ -957,7 +1074,6 @@ async function loadHistory() {
         lastItem = item;
       });
       if (lastItem) {
-        // Run light telemetry update on last item
         fetch("/api/chat", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -982,10 +1098,8 @@ async function loadHistory() {
   }
 }
 
-// Initial authentication setup on load
+// Initial setup on page load: Update UI and load history if logged in
 updateAuthUI();
-if (currentUser) {
+if (currentUser && currentUser !== "guest") {
   loadHistory();
-} else {
-  openAuthModal("signin");
 }
