@@ -272,43 +272,85 @@ body {
   transform: translateY(-1px);
 }
 
-.user-profile {
-  display: flex;
+/* Unified Clinician Profile Capsule (Single Luxury Frosted Glass Pill) */
+.user-pill-unified {
+  display: inline-flex;
   align-items: center;
-  gap: 8px;
-}
-
-.user-badge {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 7px 14px;
+  gap: 0;
+  padding: 3px 5px 3px 14px;
   border-radius: var(--radius-pill);
-  background: rgba(255, 255, 255, 0.12);
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0.05) 50%, rgba(14, 38, 24, 0.55) 100%);
   backdrop-filter: var(--glass-blur);
+  -webkit-backdrop-filter: var(--glass-blur);
   border: 1px solid var(--glass-border);
   border-top: 1.5px solid var(--glass-border-top);
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--lime-electric);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25), inset 0 1px 1px rgba(255, 255, 255, 0.3);
+  transition: all 0.25s ease;
 }
 
-.logout-btn {
-  padding: 7px 14px;
+.user-pill-unified:hover {
+  border-color: rgba(189, 249, 66, 0.45);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35), 0 0 14px rgba(189, 249, 66, 0.18);
+}
+
+.user-pill-meta {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding-right: 10px;
+}
+
+.user-pill-avatar {
+  font-size: 0.95rem;
+  line-height: 1;
+  filter: drop-shadow(0 0 6px rgba(189, 249, 66, 0.5));
+}
+
+.user-pill-name {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--lime-electric);
+  letter-spacing: 0.01em;
+  white-space: nowrap;
+}
+
+.user-pill-divider {
+  width: 1px;
+  height: 16px;
+  background: rgba(255, 255, 255, 0.22);
+  margin-right: 5px;
+}
+
+.user-pill-logout {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  padding: 5px 12px;
   border-radius: var(--radius-pill);
-  font-size: 0.8rem;
-  font-weight: 700;
-  background: rgba(239, 68, 68, 0.2);
+  background: rgba(239, 68, 68, 0.18);
   border: 1px solid rgba(239, 68, 68, 0.4);
   color: #fca5a5;
+  font-size: 0.74rem;
+  font-weight: 700;
   cursor: pointer;
   transition: all 0.2s ease;
+  font-family: inherit;
 }
 
-.logout-btn:hover {
+.user-pill-logout:hover {
   background: rgba(239, 68, 68, 0.35);
-  color: #fff;
   border-color: #ef4444;
+  color: #ffffff;
+  box-shadow: 0 0 12px rgba(239, 68, 68, 0.45);
+  transform: translateY(-0.5px);
+}
+
+.logout-icon {
+  transition: transform 0.2s ease;
+}
+
+.user-pill-logout:hover .logout-icon {
+  transform: translateX(2px);
 }
 
 /* --------------------------------------------------------------------------

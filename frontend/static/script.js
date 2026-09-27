@@ -1011,8 +1011,8 @@ logoutBtn.addEventListener("click", handleLogout);
 
 function updateAuthUI() {
   if (currentUser && currentUser !== "guest") {
-    userProfile.style.display = "flex";
-    userNameDisplay.textContent = `Dr. ${currentUser}`;
+    userProfile.style.display = "inline-flex";
+    userNameDisplay.textContent = currentUser;
     if (authButtonsGroup) authButtonsGroup.style.display = "none";
   } else {
     // Guest or logged out

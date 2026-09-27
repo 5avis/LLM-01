@@ -45,12 +45,20 @@
           <span class="toggle-text">Cockpit</span>
         </button>
 
-        <div id="userProfile" class="user-profile" style="display: none;">
-          <div class="user-badge">
-            <span class="user-avatar">🩺</span>
-            <span id="userNameDisplay" class="user-name"></span>
+        <div id="userProfile" class="user-pill-unified" style="display: none;">
+          <div class="user-pill-meta">
+            <span class="user-pill-avatar">🩺</span>
+            <span id="userNameDisplay" class="user-pill-name"></span>
           </div>
-          <button id="logoutBtn" class="logout-btn" type="button" title="Log out">Sign Out</button>
+          <span class="user-pill-divider"></span>
+          <button id="logoutBtn" class="user-pill-logout" type="button" title="Sign out of consultation vault">
+            <span>Logout</span>
+            <svg class="logout-icon" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+              <polyline points="16 17 21 12 16 7"/>
+              <line x1="21" y1="12" x2="9" y2="12"/>
+            </svg>
+          </button>
         </div>
 
         <div id="authButtonsGroup" class="auth-buttons-group">
