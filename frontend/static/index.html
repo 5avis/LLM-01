@@ -42,13 +42,45 @@
           <span id="newChatBtnText">New Session</span>
         </button>
 
-        <div class="topbar-lang-wrap" title="Select Interface & Clinical Language">
-          <svg class="topbar-lang-globe" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-            <circle cx="12" cy="12" r="10"></circle>
-            <line x1="2" y1="12" x2="22" y2="12"></line>
-            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-          </svg>
-          <select id="appLangSelect" class="topbar-lang-select" aria-label="Select System Language">
+        <!-- Custom Green Glassmorphic Language Dropdown (Opens downwards, not to the right) -->
+        <div class="topbar-lang-dropdown" id="topbarLangDropdown">
+          <button class="topbar-lang-trigger" id="topbarLangTrigger" type="button" aria-haspopup="listbox" aria-expanded="false" title="Change Language / மொழி">
+            <svg class="topbar-lang-globe" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="2" y1="12" x2="22" y2="12"></line>
+              <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
+            </svg>
+            <span class="topbar-lang-current" id="topbarLangCurrent">English (EN)</span>
+            <svg class="topbar-lang-chevron" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="topbar-lang-menu" id="topbarLangMenu" role="listbox" style="display: none;">
+            <button class="lang-option active" data-lang="en" type="button" role="option">
+              <span class="lang-opt-name">English</span>
+              <span class="lang-opt-code">EN</span>
+            </button>
+            <button class="lang-option" data-lang="ta" type="button" role="option">
+              <span class="lang-opt-name">தமிழ்</span>
+              <span class="lang-opt-code">TA</span>
+            </button>
+            <button class="lang-option" data-lang="ml" type="button" role="option">
+              <span class="lang-opt-name">മലയാളം</span>
+              <span class="lang-opt-code">ML</span>
+            </button>
+            <button class="lang-option" data-lang="te" type="button" role="option">
+              <span class="lang-opt-name">తెలుగు</span>
+              <span class="lang-opt-code">TE</span>
+            </button>
+            <button class="lang-option" data-lang="kn" type="button" role="option">
+              <span class="lang-opt-name">ಕನ್ನಡ</span>
+              <span class="lang-opt-code">KN</span>
+            </button>
+            <button class="lang-option" data-lang="hi" type="button" role="option">
+              <span class="lang-opt-name">हिन्दी</span>
+              <span class="lang-opt-code">HI</span>
+            </button>
+          </div>
+          <!-- Hidden fallback select ensuring zero breaking changes with existing DOM queries -->
+          <select id="appLangSelect" style="display: none;" aria-hidden="true">
             <option value="en">English (EN)</option>
             <option value="ta">Tamil (தமிழ்)</option>
             <option value="ml">Malayalam (മലയാളം)</option>
@@ -56,7 +88,6 @@
             <option value="kn">Kannada (ಕನ್ನಡ)</option>
             <option value="hi">Hindi (हिन्दी)</option>
           </select>
-          <svg class="topbar-lang-arrow" width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="6 9 12 15 18 9"/></svg>
         </div>
 
         <button id="toggleCockpitBtn" class="cockpit-btn secondary" type="button" title="Toggle Clinical Cockpit Panel">
@@ -140,7 +171,10 @@
             </div>
           </div>
           <div class="disclaimer-bar">
-            <span id="disclaimerNoticeText">🛡️ MedHub Clinical AI provides algorithmic decision support. Clinical judgment and physician verification required.</span>
+            <svg class="disclaimer-icon" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+              <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+            </svg>
+            <span id="disclaimerNoticeText">MedHub Clinical AI provides algorithmic decision support. Clinical judgment and physician verification required.</span>
           </div>
         </footer>
       </section>
@@ -165,7 +199,11 @@
           <div class="cockpit-card triage-card" id="cockpitTriageCard">
             <div class="card-head">
               <div class="card-title-wrap">
-                <span class="card-icon">🩺</span>
+                <span class="card-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M22 12h-4l-3 9L9 3l-3 9H2"/>
+                  </svg>
+                </span>
                 <span class="card-title" id="triageCardTitle">Emergency Triage (ESI)</span>
               </div>
               <span class="status-badge routine" id="triageBadge">ROUTINE CARE</span>
@@ -196,7 +234,11 @@
           <div class="cockpit-card ddi-card" id="cockpitDdiCard">
             <div class="card-head">
               <div class="card-title-wrap">
-                <span class="card-icon">⚡</span>
+                <span class="card-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                  </svg>
+                </span>
                 <span class="card-title" id="ddiCardTitle">DDI Safety Radar</span>
               </div>
               <span class="status-badge safe" id="ddiBadge">RADAR CLEAR</span>
@@ -213,7 +255,9 @@
             <!-- DDI Clinical Conflict Alert Box -->
             <div class="ddi-conflict-box safe" id="ddiConflictBox">
               <div class="conflict-title-wrap">
-                <span class="conflict-status-icon" id="ddiStatusIcon">✅</span>
+                <span class="conflict-status-icon" id="ddiStatusIcon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                </span>
                 <strong id="ddiConflictTitle">No Critical Contraindications Detected</strong>
               </div>
               <p id="ddiConflictDesc">Active medications evaluated against the hospital interaction knowledge base with no high-risk pharmaceutical conflicts.</p>
@@ -225,7 +269,11 @@
           <div class="cockpit-card action-hub-card" id="cockpitActionCard">
             <div class="card-head">
               <div class="card-title-wrap">
-                <span class="card-icon">⚡</span>
+                <span class="card-icon">
+                  <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/>
+                  </svg>
+                </span>
                 <span class="card-title" id="actionCardTitle">Clinical Actions & Export</span>
               </div>
               <span class="status-badge verified" id="auditReadyBadge">AUDIT READY</span>
@@ -277,14 +325,18 @@
             <div class="fda-mini-drawer">
               <div class="card-head collapsible" id="fdaHeaderToggle">
                 <div class="card-title-wrap">
-                  <span class="card-icon">🏛️</span>
+                  <span class="card-icon">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
+                      <rect x="2" y="7" width="20" height="14" rx="2" ry="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+                    </svg>
+                  </span>
                   <span class="card-title" id="fdaHeaderTitle" style="font-size: 0.78rem;">OpenFDA Regulatory Grounding</span>
                 </div>
                 <svg class="chevron-icon" id="fdaChevron" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="6 9 12 15 18 9"/></svg>
               </div>
               <div class="fda-drawer-content" id="fdaDrawerContent" style="display: none;">
                 <div class="fda-verified-row">
-                  <span class="fda-badge">NDC Grounded</span>
+                  <span class="fda-badge" id="fdaBadgeText">NDC Grounded</span>
                   <span class="fda-drug-title" id="fdaDrugTitle">Clinical Matrix Grounding</span>
                 </div>
                 <div class="fda-snippet-block">
@@ -312,24 +364,26 @@
             <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
           </svg>
         </div>
-        <h2>100% On-Premise HIPAA Privacy Vault</h2>
-        <p>Zero Cloud Data Transmission • Air-Gapped Medical Confidentiality</p>
+        <h2 id="vaultTitleText">100% On-Premise HIPAA Privacy Vault</h2>
+        <p id="vaultSubText">Zero Cloud Data Transmission • Air-Gapped Medical Confidentiality</p>
       </div>
       <div class="vault-modal-body">
         <div class="vault-feature-item">
-          <strong>🔒 100% Local GPU Execution</strong>
-          <p>Every diagnostic query, uploaded prescription, and patient symptom is computed locally on dedicated on-premises hardware (NVIDIA B200 178GB). No data is ever sent to third-party commercial clouds.</p>
+          <strong id="vaultFeat1Text">100% Local GPU Execution</strong>
+          <p id="vaultFeat1Desc">Every diagnostic query, uploaded prescription, and patient symptom is computed locally on dedicated on-premises hardware (NVIDIA B200 178GB). No data is ever sent to third-party commercial clouds.</p>
         </div>
         <div class="vault-feature-item">
-          <strong>🛡️ HIPAA & HITECH Architecture</strong>
-          <p>Complies with strict Protected Health Information (PHI) air-gap requirements. Memory caches are isolated per user session with instant zero-retention wiping capabilities.</p>
+          <strong id="vaultFeat2Text">HIPAA & HITECH Architecture</strong>
+          <p id="vaultFeat2Desc">Complies with strict Protected Health Information (PHI) air-gap requirements. Memory caches are isolated per user session with instant zero-retention wiping capabilities.</p>
         </div>
         <div class="vault-feature-item">
-          <strong>🚫 No Third-Party Telemetry</strong>
-          <p>Diagnostic consultations and medical histories remain strictly sovereign within the hospital's private intranet perimeter.</p>
+          <strong id="vaultFeat3Text">No Third-Party Telemetry</strong>
+          <p id="vaultFeat3Desc">Diagnostic consultations and medical histories remain strictly sovereign within the hospital's private intranet perimeter.</p>
         </div>
       </div>
-      <button class="cockpit-btn primary full-width" id="closeVaultModalBtn" type="button">Close Privacy Audit</button>
+      <button class="cockpit-btn primary full-width" id="closeVaultModalBtn" type="button">
+        <span id="closeVaultModalBtnText">Close Privacy Audit</span>
+      </button>
     </div>
   </div>
 

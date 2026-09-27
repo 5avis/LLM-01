@@ -279,18 +279,191 @@ def extract_all_drugs(text: str) -> list:
 
     return list(found_drugs.values())
 
-def check_drug_interactions(drugs_list: list) -> dict:
+# ---------------------------------------------------------------------------
+# LOCALIZED CLINICAL DICTIONARIES (EN, TA, ML, TE, KN, HI)
+# ---------------------------------------------------------------------------
+
+TRIAGE_LOCALIZED = {
+    "emergency": {
+        "badge": {
+            "en": "CRITICAL EMERGENCY",
+            "ta": "தீவிர அவசரநிலை (உடனடி உதவி)",
+            "ml": "ഗുരുതരമായ അടിയന്തരാവസ്ഥ",
+            "te": "తీవ్ర అత్యవసర పరిస్థితి",
+            "kn": "ತೀವ್ರ ತುರ್ತುಸ್ಥಿತಿ",
+            "hi": "गंभीर आपातकाल"
+        },
+        "title": {
+            "en": "Immediate Emergency Medical Attention Required",
+            "ta": "உடனடி அவசர மருத்துவ சிகிச்சை தேவை",
+            "ml": "ഉടനടി അടിയന്തിര വൈദ്യസഹായം ആവശ്യമാണ്",
+            "te": "వెంటనే అత్యవసర వైద్య సంరక్షణ అవసరం",
+            "kn": "ತಕ್ಷಣದ ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು ಅಗತ್ಯವಿದೆ",
+            "hi": "तत्काल आपातकालीन चिकित्सा सहायता आवश्यक"
+        },
+        "rec": {
+            "en": "Call 911 (or local emergency 108) immediately. Do not attempt to drive yourself.",
+            "ta": "உடனடியாக 108 அவசர ஆம்புலன்ஸ் சேவையை அழைக்கவும். நீங்களாக வாகனம் ஓட்ட வேண்டாம்.",
+            "ml": "ഉടൻ തന്നെ 108/ആംബുലൻസ് വിളിക്കുക. സ്വയം വാഹനം ഓടിച്ച് പോകരുത്.",
+            "te": "వెంటనే 108/అత్యవసర సేవలకు కాల్ చేయండి. మీరే స్వయంగా డ్రైవ్ చేయవద్దు.",
+            "kn": "ತಕ್ಷಣವೇ 108 ತುರ್ತು ಸೇವೆಗೆ ಕರೆ ಮಾಡಿ. ನೀವೇ ವಾಹನ ಚಾಲನೆ ಮಾಡಬೇಡಿ.",
+            "hi": "तुरंत आपातकालीन एम्बुलेंस (108) को कॉल करें। स्वयं वाहन न चलाएं।"
+        }
+    },
+    "urgent": {
+        "badge": {
+            "en": "URGENT CLINIC VISIT",
+            "ta": "அவசர மருத்துவ சந்திப்பு (24-48 மணி நேரம்)",
+            "ml": "അടിയന്തിര ക്ലിനിക് സന്ദർശനം",
+            "te": "అత్యవసర క్లినిక్ సందర్శన",
+            "kn": "ತುರ್ತು ಕ್ಲಿನಿಕ್ ಭೇಟಿ",
+            "hi": "त्वरित क्लिनिक परामर्श"
+        },
+        "title": {
+            "en": "Prompt Clinical Evaluation Recommended",
+            "ta": "விரைவான மருத்துவ பரிசோதனை பரிந்துரைக்கப்படுகிறது",
+            "ml": "ഉടൻ തന്നെ ഡോക്ടറെ കണ്ട് പരിശോധന നടത്തുക",
+            "te": "త్వరిత క్లినికಲ್ మూల್ಯಾంకనం సిఫార్సు చేయబడింది",
+            "kn": "ಶೀಘ್ರ ವೈದ್ಯಕೀಯ ತಪಾಸಣೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
+            "hi": "शीघ्र चिकित्सकीय परामर्श की सिफारिश की जाती है"
+        },
+        "rec": {
+            "en": "Schedule an urgent outpatient clinic appointment within 24 to 48 hours.",
+            "ta": "24 முதல் 48 மணி நேரத்திற்குள் மருத்துவரை அல்லது மருத்துவமனையை அணுகவும்.",
+            "ml": "24 മുതൽ 48 മണിക്കൂറിനുള്ളിൽ ക്ലിനിക്കിലോ ആശുപത്രിയിലോ പരിശോധന നടത്തുക.",
+            "te": "24 నుండి 48 గంటల్లో క్లినిక్ లేదా ఆసుపత్రిని సందర్శించండి.",
+            "kn": "24 ರಿಂದ 48 ಗಂಟೆಗಳ ಒಳಗೆ ಕ್ಲಿನಿಕ್ ಅಥವಾ ಆಸ್ಪತ್ರೆಗೆ ಭೇಟಿ ನೀಡಿ.",
+            "hi": "24 से 48 घंटों के भीतर किसी क्लिनिक या डॉक्टर से परामर्श अवश्य लें।"
+        }
+    },
+    "routine": {
+        "badge": {
+            "en": "ROUTINE CARE",
+            "ta": "வழக்கமான பராமரிப்பு (வீட்டு பராமரிப்பு)",
+            "ml": "സാധാരണ പരിചരണം",
+            "te": "സാధారణ సంరక్షణ",
+            "kn": "ವಾಡಿಕೆಯ ಆರೈಕೆ",
+            "hi": "नियमित देखभाल"
+        },
+        "title": {
+            "en": "Standard Supportive Home Care & Monitoring",
+            "ta": "வழக்கமான வீட்டுப் பராமரிப்பு மற்றும் கண்காணிப்பு",
+            "ml": "സാധാരണ വീട്ടിലെ പരിചരണവും നിരീക്ഷണവും",
+            "te": "സാధారణ గృಹ సంరక్షణ మరియు పర్యవేక్షణ",
+            "kn": "ವಾಡಿಕೆಯ ಮನೆ ಆರೈಕೆ ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆ",
+            "hi": "सामान्य घरेलू देखभाल एवं निगरानी"
+        },
+        "rec": {
+            "en": "Maintain adequate rest, hydration, and monitor symptoms. Consult doctor if symptoms persist.",
+            "ta": "போதுமான ஓய்வு, நீர்ச்சத்து எடுத்துக்கொண்டு அறிகுறிகளைக் கண்காணிக்கவும். தொடர்ந்தால் மருத்துவரை அணுகவும்.",
+            "ml": "വിശ്രമം, വെള്ളം എന്നിവ ഉറപ്പാക്കി ലക്ഷണങ്ങൾ നിരീക്ഷിക്കുക. തുടർന്നാൽ ഡോക്ടറെ കാണുക.",
+            "te": "తగినంత విశ్రాంతి, ద్రవ పదార్థాలు తీసుకుంటూ లక్షణాలను గమనించండి. కొనసాగితే వైద్యుడిని సంప్రదించండి.",
+            "kn": "ಸಾಕಷ್ಟು ವಿಶ್ರಾಂತಿ, ನೀರು ಸೇವಿಸಿ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಗಮನಿಸಿ. ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡಿ.",
+            "hi": "उचित विश्राम, पर्याप्त जलपान लें और लक्षणों पर नजर रखें। जारी रहने पर डॉक्टर से परामर्श लें।"
+        }
+    }
+}
+
+DDI_BADGE_LOCALIZED = {
+    "safe": {
+        "en": "Radar Clear (Safe)",
+        "ta": "பாதுகாப்பானது (முரண்பாடுகள் இல்லை)",
+        "ml": "സുരക്ഷിതം (പ്രതികൂല ഇടപെടലുകളില്ല)",
+        "te": "సురక్షితం (సంఘర్షణలు లేవు)",
+        "kn": "ಸುರಕ್ಷಿತ (ಯಾವುದೇ ಸಂಘರ್ಷವಿಲ್ಲ)",
+        "hi": "सुरक्षित (कोई अंतर्क्रिया नहीं)"
+    },
+    "warning": {
+        "en": "Clinical Caution (Moderate)",
+        "ta": "மருத்துவ எச்சரிக்கை (மிதமானது)",
+        "ml": "ശ്രദ്ധിക്കുക (മിതമായ പ്രതിപ്രവർത്തനം)",
+        "te": "క్లినికల్ జాగ్రత్త (మితమైనది)",
+        "kn": "ಕ್ಲಿನಿಕಲ್ ಎಚ್ಚರಿಕೆ (ಮಧ್ಯಮ)",
+        "hi": "नैदानिक सावधानी (मध्यम)"
+    },
+    "danger": {
+        "en": "HIGH DANGER ALERT (Severe)",
+        "ta": "ஆபத்து எச்சரிக்கை (கடுமையானது)",
+        "ml": "ഗുരുതരമായ മുന്നറിയിപ്പ് (അപകടകരം)",
+        "te": "తీవ్ర హెచ్చరిక (ప్రమాదకరం)",
+        "kn": "ತೀವ್ರ ಎಚ್ಚರಿಕೆ (ಅಪಾಯಕಾರಿ)",
+        "hi": "गंभीर चेतावनी (घातक)"
+    }
+}
+
+DDI_TITLE_LOCALIZED = {
+    "safe": {
+        "en": "No Critical Contraindications Detected",
+        "ta": "ஆபத்தான மருந்து முரண்பாடுகள் எதுவும் கண்டறியப்படவில்லை",
+        "ml": "ഗുരുതരമായ പ്രതിപ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല",
+        "te": "ఎటువంటి తీవ్రమైన వ్యతిరేకతలు కనుగొనబడలేదు",
+        "kn": "ಯಾವುದೇ ಗಂಭೀರ ಪ್ರತಿಕೂಲತೆ ಕಂಡುಬಂದಿಲ್ಲ",
+        "hi": "कोई गंभीर विरोधाभास नहीं मिला"
+    },
+    "warning": {
+        "en": "Interaction Precaution Advised",
+        "ta": "மருந்து பயன்பாட்டில் எச்சரிக்கை தேவை",
+        "ml": "മരുന്ന് ഉപയോഗത്തിൽ ജാഗ്രത ആവശ്യമാണ്",
+        "te": "పరస్పర చర్య జాగ్రత్త సిఫార్సు చేయబడింది",
+        "kn": "ಔಷಧ ಪರಸ್ಪರ ಕ್ರಿಯೆಯ ಎಚ್ಚರಿಕೆ ಅಗತ್ಯವಿದೆ",
+        "hi": "औषधि परस्पर प्रभाव सावधानी अनुशंसित"
+    },
+    "danger": {
+        "en": "Severe Pharmacological Conflict Detected",
+        "ta": "கடுமையான மருந்து முரண்பாடு கண்டறியப்பட்டுள்ளது",
+        "ml": "ഗുരുതരമായ മരുന്ന് പ്രതിപ്രവർത്തനം കണ്ടെത്തി",
+        "te": "తీవ్రమైన ఔషధ సంఘర్షణ గుర్తించబడింది",
+        "kn": "ತೀವ್ರವಾದ ಔಷಧೀಯ ಸಂಘರ್ಷ ಪತ್ತೆಯಾಗಿದೆ",
+        "hi": "गंभीर औषधीय टकराव का पता चला"
+    }
+}
+
+DDI_DESC_LOCALIZED = {
+    "safe": {
+        "en": "Active medications evaluated against the hospital knowledge base with no high-risk pharmaceutical conflicts.",
+        "ta": "மருத்துவமனை தரவுத்தளத்தில் மருந்துகள் சரிபார்க்கப்பட்டு ஆபத்தான முரண்பாடுகள் இல்லை என உறுதிசெய்யப்பட்டது.",
+        "ml": "ആശുപത്രി ഡാറ്റാബേസ് പരിശോധിച്ചതിൽ ഉയർന്ന അപകടസാധ്യതയുള്ള പ്രതിപ്രവർത്തനങ്ങളൊന്നും കണ്ടെത്തിയില്ല.",
+        "te": "ఆసుపత్రి నాలెడ్జ్ బేస్‌తో పోల్చినప్పుడు ఎటువంటి అధిక-ప్రమాదకర ఔషధ సంఘర్షణలు లేవు.",
+        "kn": "ಆಸ್ಪತ್ರೆ ಡೇಟಾಬೇಸ್‌ನಲ್ಲಿ ಪರೀಕ್ಷಿಸಿದಾಗ ಯಾವುದೇ ಹೆಚ್ಚಿನ ಅಪಾಯದ ಔಷಧೀಯ ಸಂಘರ್ಷಗಳು ಕಂಡುಬಂದಿಲ್ಲ.",
+        "hi": "सक्रिय दवाओं का अस्पताल ज्ञानकोष से मिलान किया गया, कोई उच्च-जोखिम पारस्परिक टकराव नहीं मिला।"
+    },
+    "warning": {
+        "en": "Potential cross-reactivity or altered bioavailability identified. Monitor patient symptoms or dosage spacing.",
+        "ta": "மருந்துகளிடையே மிதமான எதிர்வினை சாத்தியம் உள்ளது. அறிகுறிகள் மற்றும் நேர இடைவெளியைக் கண்காணிக்கவும்.",
+        "ml": "മിതമായ പ്രതിപ്രവർത്തന സാധ്യതയുണ്ട്. ലക്ഷണങ്ങളും സമയക്രമവും നിരീക്ഷിക്കുക.",
+        "te": "మితమైన ప్రతిచర్య అవకాశం ఉంది. లక్షణాలు మరియు మోతాదు విరామాలను గమనించండి.",
+        "kn": "ಮಧ್ಯಮ ಪ್ರತಿಕ್ರಿಯೆಯ ಸಾಧ್ಯತೆಯಿದೆ. ರೋಗಲಕ್ಷಣಗಳು ಮತ್ತು ಸಮಯದ ಅಂತರವನ್ನು ಮೇಲ್ವಿಚಾರಣೆ ಮಾಡಿ.",
+        "hi": "संभावित परस्पर क्रिया पाई गई है। रोगी के लक्षणों या खुराक के अंतराल की निगरानी करें।"
+    },
+    "danger": {
+        "en": "Critical drug-drug interaction flagged. Immediate clinical review is required before co-administration.",
+        "ta": "உயிருக்கு ஆபத்தான மருந்து முரண்பாடு. ஒன்றாக உட்கொள்வதற்கு முன் உடனடியாக மருத்துவரை அணுகவும்.",
+        "ml": "ഗുരുതരമായ മരുന്ന് പ്രതിപ്രവർത്തനം. ഒരുമിച്ച് കഴിക്കുന്നതിന് മുൻപ് ഉടൻ ഡോക്ടറെ കാണുക.",
+        "te": "తీవ్రమైన ఔషధ పరస్పర చర్య. కలిపి తీసుకోవడానికి ముందు వెంటనే వైద్యుడిని సంప్రదించండి.",
+        "kn": "ಅಪಾಯಕಾರಿ ಔಷಧೀಯ ಸಂಘರ್ಷ. ಒಟ್ಟಿಗೆ ಸೇವಿಸುವ ಮೊದಲು ತಕ್ಷಣ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+        "hi": "गंभीर दवा अंतर्क्रिया पाई गई। साथ में लेने से पहले तत्काल डॉक्टर से संपर्क करें।"
+    }
+}
+
+def check_drug_interactions(drugs_list: list, lang: str = "en") -> dict:
     """
     Evaluates drug interaction safety across all extracted drugs.
     Returns structured DDI status: { status, level, interactions, active_drugs }
     """
+    lang = (lang or "en").lower().strip()
+    if lang not in ("en", "ta", "ml", "te", "kn", "hi"):
+        lang = "en"
+
     if not drugs_list or len(drugs_list) == 0:
+        safe_badge = DDI_BADGE_LOCALIZED.get("safe", {}).get(lang, "Radar Clear (Safe)")
+        safe_title = DDI_TITLE_LOCALIZED.get("safe", {}).get(lang, "No Critical Contraindications Detected")
+        safe_desc = DDI_DESC_LOCALIZED.get("safe", {}).get(lang, "No active pharmaceutical conflicts identified in current consultation context.")
         return {
             "status": "clear",
             "level": "safe",
-            "badge": "No Active Medications Detected",
-            "title": "DDI Radar Clear",
-            "description": "No active pharmaceutical conflicts identified in current consultation context.",
+            "badge": safe_badge,
+            "title": safe_title,
+            "description": safe_desc,
             "interactions": [],
             "active_drugs": []
         }
@@ -316,24 +489,24 @@ def check_drug_interactions(drugs_list: list) -> dict:
 
     if has_danger:
         overall_level = "danger"
-        badge = "High Danger Alert"
-        title = "Severe Pharmacological Conflict Detected"
-        desc = "Critical drug-drug interaction flagged. Immediate clinical review is required before co-administration."
+        badge = DDI_BADGE_LOCALIZED.get("danger", {}).get(lang, "High Danger Alert")
+        title = DDI_TITLE_LOCALIZED.get("danger", {}).get(lang, "Severe Pharmacological Conflict Detected")
+        desc = DDI_DESC_LOCALIZED.get("danger", {}).get(lang, "Critical drug-drug interaction flagged. Immediate clinical review is required before co-administration.")
     elif has_warning:
         overall_level = "warning"
-        badge = "Moderate Caution"
-        title = "Interaction Precaution Advised"
-        desc = "Potential cross-reactivity or altered bioavailability identified. Monitor patient symptoms or dosage spacing."
+        badge = DDI_BADGE_LOCALIZED.get("warning", {}).get(lang, "Moderate Caution")
+        title = DDI_TITLE_LOCALIZED.get("warning", {}).get(lang, "Interaction Precaution Advised")
+        desc = DDI_DESC_LOCALIZED.get("warning", {}).get(lang, "Potential cross-reactivity or altered bioavailability identified. Monitor patient symptoms or dosage spacing.")
     elif len(drugs_list) >= 2:
         overall_level = "safe"
-        badge = "Verified Safe"
-        title = "No Major Negative Interactions Found"
-        desc = f"Active agents ({', '.join(generic_names)}) evaluated against the clinical conflict matrix with no critical contradictions."
+        badge = DDI_BADGE_LOCALIZED.get("safe", {}).get(lang, "Verified Safe")
+        title = DDI_TITLE_LOCALIZED.get("safe", {}).get(lang, "No Critical Contraindications Detected")
+        desc = DDI_DESC_LOCALIZED.get("safe", {}).get(lang, "Active medications evaluated against the clinical conflict matrix with no critical contradictions.")
     else:
         overall_level = "safe"
-        badge = "Monitored"
-        title = "Single Agent Under Evaluation"
-        desc = f"Evaluating {list(generic_names)[0]}. Add concurrent medications to perform multi-drug cross-reactivity screening."
+        badge = DDI_BADGE_LOCALIZED.get("safe", {}).get(lang, "Verified Safe")
+        title = DDI_TITLE_LOCALIZED.get("safe", {}).get(lang, "No Critical Contraindications Detected")
+        desc = DDI_DESC_LOCALIZED.get("safe", {}).get(lang, "Active medications evaluated against the hospital knowledge base with no high-risk pharmaceutical conflicts.")
 
     return {
         "status": overall_level,
@@ -367,47 +540,54 @@ URGENT_SIGNS = [
     "ear infection", "kidney pain", "flank pain", "stiff neck with fever"
 ]
 
-def evaluate_triage(user_query: str, ai_response: str = "") -> dict:
+def evaluate_triage(user_query: str, ai_response: str = "", lang: str = "en") -> dict:
     """
     Evaluates clinical urgency according to the Emergency Severity Index (ESI) framework.
     Returns: { score, level, esi_label, color, title, recommendation, urgent_keywords }
     """
+    lang = (lang or "en").lower().strip()
+    if lang not in ("en", "ta", "ml", "te", "kn", "hi"):
+        lang = "en"
+
     combined_text = (user_query + " " + ai_response).lower()
 
     found_emergency = [k for k in EMERGENCY_SIGNS if k in combined_text]
     if found_emergency:
+        t_loc = TRIAGE_LOCALIZED.get("emergency", {})
         return {
             "score": 1,
             "level": "emergency",
             "esi_label": "ESI Level 1 • Immediate Resuscitation / ER Alert",
-            "badge": "CRITICAL EMERGENCY",
+            "badge": t_loc.get("badge", {}).get(lang, "CRITICAL EMERGENCY"),
             "color": "#ef4444",
-            "title": "Immediate Emergency Medical Attention Required",
-            "recommendation": "Call 911 (or local emergency services) immediately. Do not attempt to drive yourself to the emergency department.",
+            "title": t_loc.get("title", {}).get(lang, "Immediate Emergency Medical Attention Required"),
+            "recommendation": t_loc.get("rec", {}).get(lang, "Call 911 (or local emergency services) immediately. Do not attempt to drive yourself to the emergency department."),
             "triggers": found_emergency[:3]
         }
 
     found_urgent = [k for k in URGENT_SIGNS if k in combined_text]
     if found_urgent:
+        t_loc = TRIAGE_LOCALIZED.get("urgent", {})
         return {
             "score": 2,
             "level": "urgent",
             "esi_label": "ESI Level 2-3 • Urgent Care (Within 24-48 Hours)",
-            "badge": "URGENT CLINIC VISIT",
+            "badge": t_loc.get("badge", {}).get(lang, "URGENT CLINIC VISIT"),
             "color": "#f59e0b",
-            "title": "Prompt Clinical Evaluation Recommended",
-            "recommendation": "Schedule an urgent outpatient clinic appointment or visit a walk-in urgent care center within 24 to 48 hours.",
+            "title": t_loc.get("title", {}).get(lang, "Prompt Clinical Evaluation Recommended"),
+            "recommendation": t_loc.get("rec", {}).get(lang, "Schedule an urgent outpatient clinic appointment or visit a walk-in urgent care center within 24 to 48 hours."),
             "triggers": found_urgent[:3]
         }
 
+    t_loc = TRIAGE_LOCALIZED.get("routine", {})
     return {
         "score": 3,
         "level": "routine",
         "esi_label": "ESI Level 4-5 • Non-Urgent / Routine Home Care",
-        "badge": "ROUTINE CARE",
+        "badge": t_loc.get("badge", {}).get(lang, "ROUTINE CARE"),
         "color": "#10b981",
-        "title": "Standard Supportive Home Care & Monitoring",
-        "recommendation": "Maintain adequate rest, hydration, and monitor symptoms. Consult your healthcare provider if symptoms persist beyond 5-7 days.",
+        "title": t_loc.get("title", {}).get(lang, "Standard Supportive Home Care & Monitoring"),
+        "recommendation": t_loc.get("rec", {}).get(lang, "Maintain adequate rest, hydration, and monitor symptoms. Consult your healthcare provider if symptoms persist beyond 5-7 days."),
         "triggers": []
     }
 
@@ -693,114 +873,6 @@ SOAP_TRANSLATIONS = {
         "sign_hash": "इलेक्ट्रॉनिक हस्ताक्षर कोड:",
         "sign_license": "चिकित्सा पंजीकरण क्रमांक (NPI): ___________________________",
         "disclaimer": "गोपनीय चिकित्सा रिकॉर्ड: यह दस्तावेज़ मेडहब क्लीनिकल इंटेलिजेंस सिस्टम द्वारा तैयार किया गया है। यह किसी अधिकृत चिकित्सक के प्रत्यक्ष परामर्श का विकल्प नहीं है। आपात स्थिति में तत्काल 108 पर कॉल करें या आपातकालीन चिकित्सा विभाग से संपर्क करें।"
-    }
-}
-
-TRIAGE_LOCALIZED = {
-    "emergency": {
-        "badge": {
-            "en": "CRITICAL EMERGENCY",
-            "ta": "தீவிர அவசரநிலை (உடனடி உதவி)",
-            "ml": "ഗുരുതരമായ അടിയന്തരാവസ്ഥ",
-            "te": "తీవ్ర అత్యవసర పరిస్థితి",
-            "kn": "ತೀವ್ರ ತುರ್ತುಸ್ಥಿತಿ",
-            "hi": "गंभीर आपातकाल"
-        },
-        "title": {
-            "en": "Immediate Emergency Medical Attention Required",
-            "ta": "உடனடி அவசர மருத்துவ சிகிச்சை தேவை",
-            "ml": "ഉടനടി അടിയന്തിര വൈദ്യസഹായം ആവശ്യമാണ്",
-            "te": "వెంటనే అత్యవసర వైద్య సంరక్షణ అవసరం",
-            "kn": "ತಕ್ಷಣದ ತುರ್ತು ವೈದ್ಯಕೀಯ ನೆರವು ಅಗತ್ಯವಿದೆ",
-            "hi": "तत्काल आपातकालीन चिकित्सा सहायता आवश्यक"
-        },
-        "rec": {
-            "en": "Call 911 (or local emergency 108) immediately. Do not attempt to drive yourself.",
-            "ta": "உடனடியாக 108 அவசர ஆம்புலன்ஸ் சேவையை அழைக்கவும். நீங்களாக வாகனம் ஓட்ட வேண்டாம்.",
-            "ml": "ഉടൻ തന്നെ 108/ആംബുലൻസ് വിളിക്കുക. സ്വയം വാഹനം ഓടിച്ച് പോകരുത്.",
-            "te": "వెంటనే 108/అత్యవసర సేవలకు కాల్ చేయండి. మీరే స్వయంగా డ్రైవ్ చేయవద్దు.",
-            "kn": "ತಕ್ಷಣವೇ 108 ತುರ್ತು ಸೇವೆಗೆ ಕರೆ ಮಾಡಿ. ನೀವೇ ವಾಹನ ಚಾಲನೆ ಮಾಡಬೇಡಿ.",
-            "hi": "तुरंत आपातकालीन एम्बुलेंस (108) को कॉल करें। स्वयं वाहन न चलाएं।"
-        }
-    },
-    "urgent": {
-        "badge": {
-            "en": "URGENT CLINIC VISIT",
-            "ta": "அவசர மருத்துவ சந்திப்பு (24-48 மணி நேரம்)",
-            "ml": "അടിയന്തിര ക്ലിനിക് സന്ദർശനം",
-            "te": "అత్యవసర క్లినిక్ సందర్శన",
-            "kn": "ತುರ್ತು ಕ್ಲಿನಿಕ್ ಭೇಟಿ",
-            "hi": "त्वरित क्लिनिक परामर्श"
-        },
-        "title": {
-            "en": "Prompt Clinical Evaluation Recommended",
-            "ta": "விரைவான மருத்துவ பரிசோதனை பரிந்துரைக்கப்படுகிறது",
-            "ml": "ഉടൻ തന്നെ ഡോക്ടറെ കണ്ട് പരിശോധന നടത്തുക",
-            "te": "త్వరిత క్లినికల్ మూల్యాంకనం సిఫార్సు చేయబడింది",
-            "kn": "ಶೀಘ್ರ ವೈದ್ಯಕೀಯ ತಪಾಸಣೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
-            "hi": "शीघ्र चिकित्सकीय परामर्श की सिफारिश की जाती है"
-        },
-        "rec": {
-            "en": "Schedule an urgent outpatient clinic appointment within 24 to 48 hours.",
-            "ta": "24 முதல் 48 மணி நேரத்திற்குள் மருத்துவரை அல்லது மருத்துவமனையை அணுகவும்.",
-            "ml": "24 മുതൽ 48 മണിക്കൂറിനുള്ളിൽ ക്ലിനിക്കിലോ ആശുപത്രിയിലോ പരിശോധന നടത്തുക.",
-            "te": "24 నుండి 48 గంటల్లో క్లినిక్ లేదా ఆసుపత్రిని సందర్శించండి.",
-            "kn": "24 ರಿಂದ 48 ಗಂಟೆಗಳ ಒಳಗೆ ಕ್ಲಿನಿಕ್ ಅಥವಾ ಆಸ್ಪತ್ರೆಗೆ ಭೇಟಿ ನೀಡಿ.",
-            "hi": "24 से 48 घंटों के भीतर किसी क्लिनिक या डॉक्टर से परामर्श अवश्य लें।"
-        }
-    },
-    "routine": {
-        "badge": {
-            "en": "ROUTINE CARE",
-            "ta": "வழக்கமான பராமரிப்பு (வீட்டு பராமரிப்பு)",
-            "ml": "സാധാരണ പരിചരണം",
-            "te": "సాధారణ సంరక్షణ",
-            "kn": "ವಾಡಿಕೆಯ ಆರೈಕೆ",
-            "hi": "नियमित देखभाल"
-        },
-        "title": {
-            "en": "Standard Supportive Home Care & Monitoring",
-            "ta": "வழக்கமான வீட்டுப் பராமரிப்பு மற்றும் கண்காணிப்பு",
-            "ml": "സാധാരണ വീട്ടിലെ പരിചരണവും നിരീക്ഷണവും",
-            "te": "సాధారణ గృహ సంరక్షణ మరియు పర్యవేక్షణ",
-            "kn": "ವಾಡಿಕೆಯ ಮನೆ ಆರೈಕೆ ಮತ್ತು ಮೇಲ್ವಿಚಾರಣೆ",
-            "hi": "सामान्य घरेलू देखभाल एवं निगरानी"
-        },
-        "rec": {
-            "en": "Maintain adequate rest, hydration, and monitor symptoms. Consult doctor if symptoms persist.",
-            "ta": "போதுமான ஓய்வு, நீர்ச்சத்து எடுத்துக்கொண்டு அறிகுறிகளைக் கண்காணிக்கவும். தொடர்ந்தால் மருத்துவரை அணுகவும்.",
-            "ml": "വിശ്രമം, വെള്ളം എന്നിവ ഉറപ്പാക്കി ലക്ഷണങ്ങൾ നിരീക്ഷിക്കുക. തുടർന്നാൽ ഡോക്ടറെ കാണുക.",
-            "te": "తగినంత విశ్రాంతి, ద్రవ పదార్థాలు తీసుకుంటూ లక్షణాలను గమనించండి. కొనసాగితే వైద్యుడిని సంప్రదించండి.",
-            "kn": "ಸಾಕಷ್ಟು ವಿಶ್ರಾಂತಿ, ನೀರು ಸೇವಿಸಿ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಗಮನಿಸಿ. ಮುಂದುವರಿದರೆ ವೈದ್ಯರನ್ನು ಭೇಟಿ ಮಾಡಿ.",
-            "hi": "उचित विश्राम, पर्याप्त जलपान लें और लक्षणों पर नजर रखें। जारी रहने पर डॉक्टर से परामर्श लें।"
-        }
-    }
-}
-
-DDI_BADGE_LOCALIZED = {
-    "safe": {
-        "en": "Radar Clear (Safe)",
-        "ta": "பாதுகாப்பானது (முரண்பாடுகள் இல்லை)",
-        "ml": "സുരക്ഷിതം (പ്രതികൂല ഇടപെടലുകളില്ല)",
-        "te": "సురక్షితం (సంఘర్షణలు లేవు)",
-        "kn": "ಸುರಕ್ಷಿತ (ಯಾವುದೇ ಸಂಘರ್ಷವಿಲ್ಲ)",
-        "hi": "सुरक्षित (कोई अंतर्क्रिया नहीं)"
-    },
-    "warning": {
-        "en": "Clinical Caution (Moderate)",
-        "ta": "மருத்துவ எச்சரிக்கை (மிதமானது)",
-        "ml": "ശ്രദ്ധിക്കുക (മിതമായ പ്രതിപ്രവർത്തനം)",
-        "te": "క్లినికల్ జాగ్రత్త (మితమైనది)",
-        "kn": "ಕ್ಲಿನಿಕಲ್ ಎಚ್ಚರಿಕೆ (ಮಧ್ಯಮ)",
-        "hi": "नैदानिक सावधानी (मध्यम)"
-    },
-    "danger": {
-        "en": "HIGH DANGER ALERT (Severe)",
-        "ta": "ஆபத்து எச்சரிக்கை (கடுமையானது)",
-        "ml": "ഗുരുതരമായ മുന്നറിയിപ്പ് (അപകടകരം)",
-        "te": "తీవ్ర హెచ్చరిక (ప్రమాదకరం)",
-        "kn": "ತೀವ್ರ ಎಚ್ಚರಿಕೆ (ಅಪಾಯಕಾರಿ)",
-        "hi": "गंभीर चेतावनी (घातक)"
     }
 }
 

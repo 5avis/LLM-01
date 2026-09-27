@@ -430,6 +430,7 @@ class ChatRequest(BaseModel):
     username: str = "guest"
     enhance: bool = False
     is_first_message: bool = True
+    lang: str = "en"
 
 @app.post("/api/signup")
 def signup(req: AuthRequest):
@@ -504,15 +505,17 @@ class TelemetryRequest(BaseModel):
     query: str
     response: str
     username: str = "guest"
+    lang: str = "en"
 
 @app.post("/api/evaluate-telemetry")
 def evaluate_telemetry_endpoint(req: TelemetryRequest):
-    return package_clinical_data(req.query, req.response, req.username)
+    return package_clinical_data(req.query, req.response, req.username, lang=req.lang)
 
-def package_clinical_data(user_query: str, response: str, username: str = "guest") -> dict:
-    triage = evaluate_triage(user_query, response)
+def package_clinical_data(user_query: str, response: str, username: str = "guest", lang: str = "en") -> dict:
+    lang = (lang or "en").lower().strip()
+    triage = evaluate_triage(user_query, response, lang=lang)
     drugs = extract_all_drugs(user_query + " " + response)
-    ddi = check_drug_interactions(drugs)
+    ddi = check_drug_interactions(drugs, lang=lang)
 
     # FDA grounding check
     drug_name, drug_info = find_drug_in_text(user_query + " " + response)
@@ -534,7 +537,7 @@ def package_clinical_data(user_query: str, response: str, username: str = "guest
             "verified": bool(ddi["active_drugs"])
         }
 
-    soap = build_soap_note(user_query, response, triage, ddi, fda_data)
+    soap = build_soap_note(user_query, response, triage, ddi, fda_data, lang=lang)
 
     return {
         "response": response,
@@ -553,8 +556,8 @@ def chat(req: ChatRequest):
         log_user_conversation(user, req.message, refusal_msg)
         return {
             "response": refusal_msg,
-            "triage": evaluate_triage("non-medical"),
-            "ddi": check_drug_interactions([]),
+            "triage": evaluate_triage("non-medical", lang=req.lang),
+            "ddi": check_drug_interactions([], lang=req.lang),
             "fda_info": {"drug_name": "N/A", "verified": False},
             "soap": None
         }
@@ -568,7 +571,7 @@ def chat(req: ChatRequest):
 
     log_conversation(req.message, response)
     log_user_conversation(user, req.message, response)
-    return package_clinical_data(req.message, response, user)
+    return package_clinical_data(req.message, response, user, lang=req.lang)
 
 def apply_file_polisher_if_available(file_bytes: bytes, filename: str, mime_type: str = "", user_query: str = "", is_first_message: bool = True) -> str:
     """
@@ -597,7 +600,8 @@ async def chat_with_file(
     username: str = Form("guest"),
     file: UploadFile = File(None),
     enhance: str = Form("false"),
-    is_first_message: str = Form("true")
+    is_first_message: str = Form("true"),
+    lang: str = Form("en")
 ):
     user = sanitize_username(username) or "guest"
     is_enhanced = str(enhance).strip().lower() in ("true", "1", "yes")
@@ -609,8 +613,8 @@ async def chat_with_file(
         log_user_conversation(user, message, refusal_msg)
         return {
             "response": refusal_msg,
-            "triage": evaluate_triage("non-medical"),
-            "ddi": check_drug_interactions([]),
+            "triage": evaluate_triage("non-medical", lang=lang),
+            "ddi": check_drug_interactions([], lang=lang),
             "fda_info": {"drug_name": "N/A", "verified": False},
             "soap": None
         }
@@ -626,7 +630,7 @@ async def chat_with_file(
             log_title = f"{message} [Uploaded file: {file.filename}]" if message else f"[Uploaded file: {file.filename}]"
             log_conversation(log_title, api_resp)
             log_user_conversation(user, log_title, api_resp)
-            return package_clinical_data(message, api_resp, user)
+            return package_clinical_data(message, api_resp, user, lang=lang)
 
     full_message = message
     if file and file_bytes:
@@ -636,8 +640,8 @@ async def chat_with_file(
             log_user_conversation(user, message, refusal_msg)
             return {
                 "response": refusal_msg,
-                "triage": evaluate_triage("non-medical"),
-                "ddi": check_drug_interactions([]),
+                "triage": evaluate_triage("non-medical", lang=lang),
+                "ddi": check_drug_interactions([], lang=lang),
                 "fda_info": {"drug_name": "N/A", "verified": False},
                 "soap": None
             }
@@ -656,7 +660,7 @@ async def chat_with_file(
 
     log_conversation(full_message, response)
     log_user_conversation(user, full_message, response)
-    return package_clinical_data(full_message, response, user)
+    return package_clinical_data(full_message, response, user, lang=lang)
 
 @app.post("/api/generate-schedule-pdf")
 async def generate_schedule_pdf_endpoint(message: str = Form(...), schedule_text: str = Form(None)):
