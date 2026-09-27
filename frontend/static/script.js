@@ -2351,7 +2351,7 @@ function initSpeechRecognition() {
   recognition.onerror = (event) => {
     console.warn("Speech recognition error:", event.error);
     if (event.error === "not-allowed" || event.error === "permission-denied") {
-      alert("Microphone permission was not allowed. Please allow microphone access in your browser address bar to use your laptop mic or headphones.");
+      showMicGuideModal();
     }
     stopSpeechRecognition();
   };
@@ -2378,6 +2378,13 @@ async function startSpeechRecognition() {
     return;
   }
 
+  // Check if browser context is insecure HTTP (Chrome blocks mic on remote HTTP IPs)
+  const isSecure = window.isSecureContext || window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1";
+  if (!isSecure) {
+    showMicGuideModal();
+    return;
+  }
+
   // Request microphone device access to prompt browser permissions dialog if not yet granted
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
     try {
@@ -2386,7 +2393,7 @@ async function startSpeechRecognition() {
     } catch (err) {
       console.warn("Microphone permission check:", err);
       if (err.name === "NotAllowedError" || err.name === "PermissionDeniedError") {
-        alert("Microphone access was denied. Please allow microphone access in your browser URL bar to dictate symptoms.");
+        showMicGuideModal();
         return;
       }
     }
@@ -2438,6 +2445,62 @@ function stopSpeechRecognition() {
     const len = inputEl.value.length;
     inputEl.setSelectionRange(len, len);
   }
+}
+
+// Microphone Permission Guide Modal Handlers
+const micGuideModal = document.getElementById("micGuideModal");
+const closeMicGuideBtn = document.getElementById("closeMicGuideBtn");
+const dismissMicGuideBtn = document.getElementById("dismissMicGuideBtn");
+const copyOriginUrlBtn = document.getElementById("copyOriginUrlBtn");
+const copyOriginBtnText = document.getElementById("copyOriginBtnText");
+const flagOriginCode = document.getElementById("flagOriginCode");
+const openHttpsLink = document.getElementById("openHttpsLink");
+
+function showMicGuideModal() {
+  if (!micGuideModal) return;
+  const currentHost = window.location.hostname || "192.168.4.99";
+  const originUrl = `${window.location.protocol}//${window.location.host}`;
+  const httpsUrl = `https://${currentHost}:7861/`;
+
+  if (flagOriginCode) {
+    flagOriginCode.textContent = originUrl;
+  }
+  if (openHttpsLink) {
+    openHttpsLink.href = httpsUrl;
+  }
+
+  micGuideModal.style.display = "flex";
+}
+
+function hideMicGuideModal() {
+  if (micGuideModal) {
+    micGuideModal.style.display = "none";
+  }
+}
+
+if (closeMicGuideBtn) {
+  closeMicGuideBtn.addEventListener("click", hideMicGuideModal);
+}
+if (dismissMicGuideBtn) {
+  dismissMicGuideBtn.addEventListener("click", hideMicGuideModal);
+}
+if (micGuideModal) {
+  micGuideModal.addEventListener("click", (e) => {
+    if (e.target === micGuideModal) hideMicGuideModal();
+  });
+}
+if (copyOriginUrlBtn) {
+  copyOriginUrlBtn.addEventListener("click", () => {
+    const originUrl = `${window.location.protocol}//${window.location.host}`;
+    navigator.clipboard.writeText(originUrl).then(() => {
+      if (copyOriginBtnText) copyOriginBtnText.textContent = "Copied URL!";
+      setTimeout(() => {
+        if (copyOriginBtnText) copyOriginBtnText.textContent = "Copy Origin URL";
+      }, 2500);
+    }).catch(() => {
+      if (copyOriginBtnText) copyOriginBtnText.textContent = originUrl;
+    });
+  });
 }
 
 if (micBtn) {
